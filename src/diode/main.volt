@@ -100,7 +100,6 @@ enum string part2 =
 
 enum string part3 =
 `
-
 `;
 
 enum string part4 =
