@@ -13,6 +13,9 @@ Token[] lex(string text)
 {
 	auto src = new Source(text);
 	auto tw = new TokenStream();
+
+	tw.pushToken(TokenKind.Begin, "BEGIN");
+
 	Status s;
 	while (s != Status.End) {
 		final switch (s) with (Status) {
@@ -27,6 +30,9 @@ Token[] lex(string text)
 			throw new Exception("lexer error");
 		}
 	}
+
+	tw.pushToken(TokenKind.End, "END");
+
 	return tw.mTokens;
 }
 
