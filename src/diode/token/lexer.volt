@@ -6,13 +6,13 @@ import watt.text.ascii : isAlpha, isDigit;
 import watt.io;
 import diode.token.token;
 import diode.token.source;
-import diode.token.stream;
+import diode.token.writer;
 
 
 Token[] lex(string text, string filename)
 {
 	auto src = new Source(text, filename);
-	auto tw = new TokenStream();
+	auto tw = new Writer();
 
 	tw.pushToken(ref src.loc, TokenKind.Begin, "BEGIN");
 
@@ -46,7 +46,7 @@ enum Status
 	Error = -1,
 }
 
-Status lexToken(Source src, TokenStream tw, Status status)
+Status lexToken(Source src, Writer tw, Status status)
 {
 	assert(status != Status.Text);
 
@@ -87,7 +87,7 @@ Status lexToken(Source src, TokenStream tw, Status status)
 	}
 }
 
-Status lexIdent(Source src, TokenStream tw, Status status)
+Status lexIdent(Source src, Writer tw, Status status)
 {
 	auto loc = src.loc;
 	auto mark = src.save();
@@ -103,7 +103,7 @@ Status lexIdent(Source src, TokenStream tw, Status status)
 	return status;
 }
 
-Status lexText(Source src, TokenStream tw)
+Status lexText(Source src, Writer tw)
 {
 	auto loc = src.loc;
 	size_t mark = src.save();
