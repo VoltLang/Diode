@@ -2,10 +2,15 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.main;
 
+import watt.io : writefln;
+
 
 int main(string[] args)
 {
-	test();
+	auto tokens = lex(text);
+	foreach (t; tokens) {
+		writefln("%s '%s'", t.kind, t.value);
+	}
 	return 0;
 }
 
@@ -16,6 +21,7 @@ int main(string[] args)
  *
  */
 
+import diode.token.lexer;
 import ir = diode.ir;
 import diode.ir.build;
 import diode.eval;
@@ -48,8 +54,8 @@ Set buildInbuilt()
 	return base;
 }
 
-/+
----
+
+enum string text = `---
 layout: default
 title: Test
 ---
@@ -63,7 +69,7 @@ Some text here
 
 ender
 {% endfor %}
-+/
+`;
 
 ir.File buildTest()
 {
