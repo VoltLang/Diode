@@ -55,7 +55,7 @@ Status lexToken(Source src, TokenStream tw, Status status)
 		if (src.lookahead() != '}') {
 			return Status.Error;
 		}
-		tw.pushToken(TokenKind.CloseStatement, "}}");
+		tw.pushToken(TokenKind.CloseExp, "}}");
 		src.popFront();
 		src.popFront();
 		return Status.Text;
@@ -63,7 +63,7 @@ Status lexToken(Source src, TokenStream tw, Status status)
 		if (src.lookahead() != '}') {
 			return Status.Error;
 		}
-		tw.pushToken(TokenKind.CloseExp, "%}");
+		tw.pushToken(TokenKind.CloseStatement, "%}");
 		src.popFront();
 		src.popFront();
 		return Status.Text;
