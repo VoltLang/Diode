@@ -3,10 +3,16 @@
 module diode.ir.base;
 
 
+/// Argument to all visitor functions.
+alias Sink = scope void delegate(const(char)[]);
+
+/**
+ * Base class for all nodes.
+ */
 abstract class Node
 {
 public:
-	abstract Status accept(Visitor v);
+	abstract Status accept(Visitor v, Sink sink);
 }
 
 
@@ -16,21 +22,21 @@ public:
 	Node[] nodes;
 
 public:
-	override Status accept(Visitor v)
+	override Status accept(Visitor v, Sink sink)
 	{
-		auto s1 = v.enter(this);
+		auto s1 = v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		foreach (n; nodes) {
-			auto s3 = n.accept(v);
+			auto s3 = n.accept(v, sink);
 			if (s3 == Status.Stop) {
 				return s3;
 			}
 		}
 
-		return filterParent(v.leave(this));
+		return filterParent(v.leave(this, sink));
 	}
 }
 
@@ -46,9 +52,9 @@ public:
 		this.text = text;
 	}
 
-	override Status accept(Visitor v)
+	override Status accept(Visitor v, Sink sink)
 	{
-		return filterParent(v.visit(this));
+		return filterParent(v.visit(this, sink));
 	}
 }
 
@@ -64,20 +70,20 @@ public:
 		this.exp = exp;
 	}
 
-	override Status accept(Visitor v)
+	override Status accept(Visitor v, Sink sink)
 	{
-		auto s1 = v.enter(this);
+		auto s1 = v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(exp !is null);
-		auto s2 = exp.accept(v);
+		auto s2 = exp.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
 
-		return filterParent(v.leave(this));
+		return filterParent(v.leave(this, sink));
 	}
 }
 
@@ -97,9 +103,9 @@ public:
 		this.ident = ident;
 	}
 
-	override Status accept(Visitor v)
+	override Status accept(Visitor v, Sink sink)
 	{
-		return filterParent(v.visit(this));
+		return filterParent(v.visit(this, sink));
 	}
 }
 
@@ -118,20 +124,20 @@ public:
 		this.ident = ident;
 	}
 
-	override Status accept(Visitor v)
+	override Status accept(Visitor v, Sink sink)
 	{
-		auto s1 = v.enter(this);
+		auto s1 = v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(child !is null);
-		auto s2 = child.accept(v);
+		auto s2 = child.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
 
-		return filterParent(v.leave(this));
+		return filterParent(v.leave(this, sink));
 	}
 }
 
@@ -147,33 +153,32 @@ public:
 	{
 		assert(var !is null);
 		assert(exp !is null);
-		assert(nodes !is null);
 		this.var = var;
 		this.exp = exp;
 		this.nodes = nodes;
 	}
 
-	override Status accept(Visitor v)
+	override Status accept(Visitor v, Sink sink)
 	{
-		auto s1 = v.enter(this);
+		auto s1 = v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(exp !is null);
-		auto s2 = exp.accept(v);
+		auto s2 = exp.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
 
 		foreach (n; nodes) {
-			auto s3 = n.accept(v);
+			auto s3 = n.accept(v, sink);
 			if (s3 == Status.Stop) {
 				return s3;
 			}
 		}
 
-		return filterParent(v.leave(this));
+		return filterParent(v.leave(this, sink));
 	}
 }
 
@@ -198,18 +203,18 @@ abstract class Visitor
 	alias Continue = Status.Continue;
 	alias ContinueParent = Status.ContinueParent;
 
-	abstract Status enter(File f);
-	abstract Status leave(File f);
+	abstract Status enter(File f, Sink sink);
+	abstract Status leave(File f, Sink sink);
 
-	abstract Status visit(Text t);
-	abstract Status enter(Print p);
-	abstract Status leave(Print p);
-	abstract Status enter(For f);
-	abstract Status leave(For f);
+	abstract Status visit(Text t, Sink sink);
+	abstract Status enter(Print p, Sink sink);
+	abstract Status leave(Print p, Sink sink);
+	abstract Status enter(For f, Sink sink);
+	abstract Status leave(For f, Sink sink);
 
-	abstract Status visit(Ident p);
-	abstract Status enter(Access a);
-	abstract Status leave(Access a);
+	abstract Status visit(Ident p, Sink sink);
+	abstract Status enter(Access a, Sink sink);
+	abstract Status leave(Access a, Sink sink);
 }
 
 Status filterParent(Status s)

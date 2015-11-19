@@ -2,8 +2,6 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diod.eval.engine;
 
-import watt.io;
-
 import ir = diode.ir;
 import diode.eval.value;
 
@@ -21,39 +19,25 @@ public:
 	}
 
 public:
-	void sink(const(char)[] str)
-	{
-		writef("%s", str);
-	}
-
-	void print(ir.Node n)
-	{
-		n.accept(this);
-		if (v !is null) {
-			v.toText(n, sink);
-			v = null;
-		}
-	}
-
-	override Status visit(ir.Text t)
+	override Status visit(ir.Text t, Sink sink)
 	{
 		sink(t.text);
 		return Continue;
 	}
 
-	override Status leave(ir.Print f)
+	override Status leave(ir.Print f, Sink sink)
 	{
 		v.toText(f, sink);
 		v = null;
 		return Continue;
 	}
 
-	override Status enter(ir.For f)
+	override Status enter(ir.For f, Sink sink)
 	{
 		// Eval expression
 		// for post in 'site.url'
 		v = null;
-		f.exp.accept(this);
+		f.exp.accept(this, sink);
 		assert(v !is null);
 
 		// Set new env with var in it.
@@ -68,7 +52,7 @@ public:
 		foreach(elm; arr) {
 			env.ctx[f.var] = elm;
 			foreach(n; f.nodes) {
-				n.accept(this);
+				n.accept(this, sink);
 			}
 		}
 		env = env.parent;
@@ -83,14 +67,14 @@ public:
 	 *
 	 */
 
-	override Status leave(ir.Access p)
+	override Status leave(ir.Access p, Sink sink)
 	{
 		assert(v !is null);
 		v = v.ident(p, p.ident);
 		return Continue;
 	}
 
-	override Status visit(ir.Ident p)
+	override Status visit(ir.Ident p, Sink sink)
 	{
 		v = env.ident(p, p.ident);
 		return Continue;
@@ -103,9 +87,9 @@ public:
 	 *
 	 */
 
-	override Status enter(ir.File) { return Continue; }
-	override Status leave(ir.File) { return Continue; }
-	override Status enter(ir.Access) { return Continue; }
-	override Status enter(ir.Print) { return Continue; }
-	override Status leave(ir.For) { assert(false); }
+	override Status enter(ir.File, Sink sink) { return Continue; }
+	override Status leave(ir.File, Sink sink) { return Continue; }
+	override Status enter(ir.Access, Sink sink) { return Continue; }
+	override Status enter(ir.Print, Sink sink) { return Continue; }
+	override Status leave(ir.For, Sink sink) { assert(false); }
 }

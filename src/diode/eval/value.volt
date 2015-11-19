@@ -5,8 +5,9 @@ module diode.eval.value;
 import ir = diode.ir;
 import diode.errors;
 
-alias Sink = scope void delegate(const(char)[]);
 
+/// Use the IR visitor Sink.
+alias Sink = ir.Sink;
 
 abstract class Value
 {

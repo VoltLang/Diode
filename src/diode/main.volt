@@ -21,13 +21,18 @@ int main(string[] args)
  */
 
 import diode.eval;
+import watt.io;
 
 void test(ir.File f)
 {
 	Set set = buildInbuilt();
 	auto e = new Engine(set);
 
-	f.accept(e);
+	void sink(const(char)[] str) {
+		write(str);
+	}
+
+	f.accept(e, sink);
 }
 
 Set buildInbuilt()
