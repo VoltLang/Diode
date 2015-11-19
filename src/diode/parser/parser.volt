@@ -23,6 +23,10 @@ ir.File parse(string text, string filename)
 }
 
 private:
+
+/// Helper alias to make typing easier.
+alias tk = TokenKind;
+
 enum Status {
 	Ok,
 	Error = -1,
@@ -41,11 +45,34 @@ public:
 		mTokens = tokens;
 	}
 
-	@property Token front()
+	/**
+	 * Returns the current token.
+	 *
+	 * Side-effects:
+	 *   None.
+	 */
+	final @property Token front()
 	{
 		return mTokens[mIndex];
 	}
 
+	/**
+	 * Returns the following token.
+	 *
+	 * Side-effects:
+	 *   None.
+	 */
+	final @property Token following()
+	{
+		return lookahead(1);
+	}
+
+	/**
+	 * Advances the stream by one, will clamp to the last token.
+	 *
+	 * Side-effects:
+	 *   Icrements mIndex.
+	 */
 	void popFront()
 	{
 		mIndex++;
@@ -54,9 +81,15 @@ public:
 		}
 	}
 
-	Token lookahead()
+	/**
+	 * Returns the token n steps into the stream, will clamp to length.
+	 *
+	 * Side-effects:
+	 *   None.
+	 */
+	final Token lookahead(size_t n)
 	{
-		size_t i = mIndex + 1;
+		size_t i = mIndex + n;
 		if (i >= mTokens.length) {
 			return mTokens[$ - 1];
 		}
@@ -66,7 +99,7 @@ public:
 
 Status parseFile(Parser p, out ir.File file)
 {
-	if (p.front.kind != TokenKind.Begin) {
+	if (p.front != tk.Begin) {
 		return Status.Error;
 	}
 	p.popFront();
@@ -74,7 +107,7 @@ Status parseFile(Parser p, out ir.File file)
 	Status s;
 	ir.Node node;
 	ir.Node[] nodes;
-	while (p.front.kind != TokenKind.End &&
+	while (p.front != tk.End &&
 	       (s = parseNode(p, out node)) == Status.Ok) {
 		nodes ~= node;
 	}
@@ -101,7 +134,7 @@ Status parseNode(Parser p, out ir.Node node)
 
 Status parseText(Parser p, out ir.Node node)
 {
-	assert(p.front.kind == TokenKind.Text);
+	assert(p.front == tk.Text);
 	node = bText(p.front.value);
 	p.popFront();
 	return Status.Ok;
@@ -109,13 +142,13 @@ Status parseText(Parser p, out ir.Node node)
 
 Status parsePrint(Parser p, out ir.Node node)
 {
-	assert(p.front.kind == TokenKind.OpenPrint);
+	assert(p.front == tk.OpenPrint);
 	p.popFront();
 
 	ir.Exp exp;
 	auto s = parseExp(p, out exp);
 	if (s != Status.Ok ||
-	    p.front.kind != TokenKind.ClosePrint) {
+	    p.front != tk.ClosePrint) {
 		return Status.Error;
 	}
 
@@ -127,13 +160,19 @@ Status parsePrint(Parser p, out ir.Node node)
 
 Status parseStatement(Parser p, out ir.Node node)
 {
-	assert(p.front.kind == TokenKind.OpenStatement);
-	p.popFront();
+	assert(p.front == tk.OpenStatement);
 
 	// We only support for statements for now.
-	if (p.front.kind != TokenKind.For) {
+	if (p.following != tk.For) {
 		return Status.Error;
 	}
+	return parseFor(p, out node);
+}
+
+Status parseFor(Parser p, out ir.Node node)
+{
+	assert(p.front == tk.OpenStatement);
+	p.popFront();
 
 	// This is a for.
 	string ident;
@@ -141,18 +180,18 @@ Status parseStatement(Parser p, out ir.Node node)
 	ir.Node[] nodes;
 
 	// 'for' ident in something.exp
-	assert(p.front.kind == TokenKind.For);
+	assert(p.front == tk.For);
 	p.popFront();
 
 	// for 'ident' in something.exp
-	if (p.front.kind != TokenKind.Identifier) {
+	if (p.front != tk.Identifier) {
 		return Status.Error;
 	}
 	ident = p.front.value;
 	p.popFront();
 
 	// for ident 'in' something.exp
-	if (p.front.kind != TokenKind.In) {
+	if (p.front != tk.In) {
 		return Status.Error;
 	}
 	p.popFront();
@@ -163,14 +202,14 @@ Status parseStatement(Parser p, out ir.Node node)
 	}
 
 	// Check the end.
-	if (p.front.kind != TokenKind.CloseStatement) {
+	if (p.front != tk.CloseStatement) {
 		return Status.Error;
 	}
 	p.popFront();
 
-	while (p.front.kind != TokenKind.End) {
-		if (p.front.kind == TokenKind.OpenStatement ||
-		    p.lookahead().kind == TokenKind.EndFor) {
+	while (p.front != tk.End) {
+		if (p.front == tk.OpenStatement &&
+		    p.following == tk.EndFor) {
 			break;
 		}
 		ir.Node n;
@@ -182,7 +221,7 @@ Status parseStatement(Parser p, out ir.Node node)
 		nodes ~= n;
 	}
 
-	if (p.front.kind == TokenKind.End) {
+	if (p.front == tk.End) {
 		return Status.Error;
 	}
 
@@ -191,7 +230,7 @@ Status parseStatement(Parser p, out ir.Node node)
 	p.popFront();
 
 	// Check for %}
-	if (p.front.kind != TokenKind.CloseStatement) {
+	if (p.front != tk.CloseStatement) {
 		return Status.Error;
 	}
 
@@ -203,7 +242,7 @@ Status parseStatement(Parser p, out ir.Node node)
 
 Status parseExp(Parser p, out ir.Exp exp)
 {
-	if (p.front.kind != TokenKind.Identifier) {
+	if (p.front != tk.Identifier) {
 		return Status.Error;
 	}
 
@@ -214,7 +253,7 @@ Status parseExp(Parser p, out ir.Exp exp)
 		switch (p.front.kind) with (TokenKind) {
 		case Dot:
 			p.popFront();
-			if (p.front.kind != TokenKind.Identifier) {
+			if (p.front != tk.Identifier) {
 				return Status.Error;
 			}
 			exp = bAccess(exp, p.front.value);
