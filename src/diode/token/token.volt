@@ -19,8 +19,8 @@ enum TokenKind
 
 	// Control Tokens.
 	Text,
-	OpenExp,
-	CloseExp,
+	OpenPrint,
+	ClosePrint,
 	OpenStatement,
 	CloseStatement,
 
