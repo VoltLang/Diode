@@ -3,10 +3,20 @@
 module diode.token.token;
 
 
+/**
+ * Holds the kind, the actual string and location within the source file.
+ */
 final class Token
 {
+public:
 	TokenKind kind;
 	string value;
+
+public:
+	final bool opEquals(TokenKind kind)
+	{
+		return this.kind == kind;
+	}
 }
 
 enum TokenKind
