@@ -18,7 +18,7 @@ ir.File parse(string text, string filename)
 	auto s = parseFile(p, out file);
 
 	if (s != Status.Ok) {
-		throw new Exception("parser error");
+		throw p.makeException();
 	}
 
 	return file;
@@ -34,19 +34,43 @@ enum Status {
 	Error = -1,
 }
 
+class LexerError : Exception
+{
+public:
+	this(Token t, string msg)
+	{
+		msg = t.loc.toString() ~ " error: " ~ msg;
+		super(msg);
+	}
+}
+
 class Parser : Writer
 {
+protected:
+	Token mErrorToken;
+
 public:
 	this(Token[] tokens)
 	{
 		super(tokens);
+	}
+
+	Status error()
+	{
+		mErrorToken = front;
+		return Status.Error;
+	}
+
+	Exception makeException()
+	{
+		return new LexerError(mErrorToken, "syntax error");
 	}
 }
 
 Status parseFile(Parser p, out ir.File file)
 {
 	if (p.front != tk.Begin) {
-		return Status.Error;
+		return p.error();
 	}
 	p.popFront();
 
@@ -74,7 +98,7 @@ Status parseNode(Parser p, out ir.Node node)
 	case OpenStatement:
 		return parseStatement(p, out node);
 	default:
-		return Status.Error;
+		return p.error();
 	}
 }
 
@@ -95,7 +119,7 @@ Status parsePrint(Parser p, out ir.Node node)
 	auto s = parseExp(p, out exp);
 	if (s != Status.Ok ||
 	    p.front != tk.ClosePrint) {
-		return Status.Error;
+		return p.error();
 	}
 
 	p.popFront();
@@ -110,7 +134,7 @@ Status parseStatement(Parser p, out ir.Node node)
 
 	// We only support for statements for now.
 	if (p.following != tk.For) {
-		return Status.Error;
+		return p.error();
 	}
 	return parseFor(p, out node);
 }
@@ -131,14 +155,14 @@ Status parseFor(Parser p, out ir.Node node)
 
 	// for 'ident' in something.exp
 	if (p.front != tk.Identifier) {
-		return Status.Error;
+		return p.error();
 	}
 	ident = p.front.value;
 	p.popFront();
 
 	// for ident 'in' something.exp
 	if (p.front != tk.In) {
-		return Status.Error;
+		return p.error();
 	}
 	p.popFront();
 
@@ -149,7 +173,7 @@ Status parseFor(Parser p, out ir.Node node)
 
 	// Check the end.
 	if (p.front != tk.CloseStatement) {
-		return Status.Error;
+		return p.error();
 	}
 	p.popFront();
 
@@ -168,7 +192,7 @@ Status parseFor(Parser p, out ir.Node node)
 	}
 
 	if (p.front == tk.End) {
-		return Status.Error;
+		return p.error();
 	}
 
 	// Pop {% endfor
@@ -177,7 +201,7 @@ Status parseFor(Parser p, out ir.Node node)
 
 	// Check for %}
 	if (p.front != tk.CloseStatement) {
-		return Status.Error;
+		return p.error();
 	}
 
 	p.popFront();
@@ -189,7 +213,7 @@ Status parseFor(Parser p, out ir.Node node)
 Status parseExp(Parser p, out ir.Exp exp)
 {
 	if (p.front != tk.Identifier) {
-		return Status.Error;
+		return p.error();
 	}
 
 	exp = bIdent(p.front.value);
@@ -200,7 +224,7 @@ Status parseExp(Parser p, out ir.Exp exp)
 		case Dot:
 			p.popFront();
 			if (p.front != tk.Identifier) {
-				return Status.Error;
+				return p.error();
 			}
 			exp = bAccess(exp, p.front.value);
 			p.popFront();
