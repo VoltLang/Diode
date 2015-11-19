@@ -3,9 +3,11 @@
 module diode.parser.parser;
 
 import ir = diode.ir;
+import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent;
+
 import diode.token.lexer : lex;
 import diode.token.token : Token, TokenKind;
-import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent;
+import diode.parser.writer;
 
 
 ir.File parse(string text, string filename)
@@ -32,68 +34,12 @@ enum Status {
 	Error = -1,
 }
 
-class Parser
+class Parser : Writer
 {
-protected:
-	Token[] mTokens;
-	size_t mIndex;
-
 public:
 	this(Token[] tokens)
 	{
-		assert(tokens.length > 0);
-		mTokens = tokens;
-	}
-
-	/**
-	 * Returns the current token.
-	 *
-	 * Side-effects:
-	 *   None.
-	 */
-	final @property Token front()
-	{
-		return mTokens[mIndex];
-	}
-
-	/**
-	 * Returns the following token.
-	 *
-	 * Side-effects:
-	 *   None.
-	 */
-	final @property Token following()
-	{
-		return lookahead(1);
-	}
-
-	/**
-	 * Advances the stream by one, will clamp to the last token.
-	 *
-	 * Side-effects:
-	 *   Icrements mIndex.
-	 */
-	void popFront()
-	{
-		mIndex++;
-		if (mIndex >= mTokens.length) {
-			mIndex = mTokens.length - 1;
-		}
-	}
-
-	/**
-	 * Returns the token n steps into the stream, will clamp to length.
-	 *
-	 * Side-effects:
-	 *   None.
-	 */
-	final Token lookahead(size_t n)
-	{
-		size_t i = mIndex + n;
-		if (i >= mTokens.length) {
-			return mTokens[$ - 1];
-		}
-		return mTokens[i];
+		super(tokens);
 	}
 }
 
