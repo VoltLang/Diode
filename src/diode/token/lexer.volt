@@ -58,7 +58,7 @@ Status lexToken(Source src, TokenStream tw, Status status)
 
 	switch (src.front) {
 	case '}':
-		if (src.lookahead() != '}') {
+		if (src.following != '}') {
 			return Status.Error;
 		}
 		tw.pushToken(ref src.loc, TokenKind.ClosePrint, "}}");
@@ -66,7 +66,7 @@ Status lexToken(Source src, TokenStream tw, Status status)
 		src.popFront();
 		return Status.Text;
 	case '%':
-		if (src.lookahead() != '}') {
+		if (src.following != '}') {
 			return Status.Error;
 		}
 		tw.pushToken(ref src.loc, TokenKind.CloseStatement, "%}");
@@ -110,8 +110,8 @@ Status lexText(Source src, TokenStream tw)
 
 	while (!src.eof) {
 		if (src.front == '{' &&
-		    (src.lookahead() == '{' ||
-		     src.lookahead() == '%')) {
+		    (src.following == '{' ||
+		     src.following == '%')) {
 			break;
 		}
 		src.popFront();

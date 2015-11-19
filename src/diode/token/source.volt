@@ -60,6 +60,18 @@ public:
 	}
 
 	/**
+	 * Returns the following utf8 char after front.
+	 *
+	 * Side-effects:
+	 *   None.
+	 */
+	@property dchar following()
+	{
+		bool dummy;
+		return lookahead(1, out dummy);
+	}
+
+	/**
 	 * Advance the source one character.
 	 *
 	 * Side-effects:
@@ -102,15 +114,41 @@ public:
 		}
 	}
 
+	/**
+	 * Return the unicode character @p n chars forwards.
+	 * @p lookaheadEOF set to true if we reached EOF, otherwise false.
+	 *
+	 * Throws:
+	 *   UtfException if the source is not valid utf8.
+	 *
+	 * Side-effects:
+	 *   None.
+	 *
+	 * Returns:
+	 *   Unicode char at @p n or @p dchar.init at EOF.
+	 */
+	dchar lookahead(size_t n, out bool lookaheadEOF)
+	{
+		if (n == 0) {
+			lookaheadEOF = eof;
+			return mChar;
+		}
+
+		dchar c;
+		auto index = mNextIndex;
+		for (size_t i; i < n; i++) {
+			c = decodeChar(ref index);
+			if (c == dchar.init) {
+				lookaheadEOF = true;
+				return dchar.init;
+			}
+		}
+		return c;
+	}
+
 	size_t save()
 	{
 		return mLastIndex;
-	}
-
-	dchar lookahead()
-	{
-		size_t tmpIndex = mNextIndex;
-		return decodeChar(ref tmpIndex);
 	}
 
 	string sliceFrom(size_t mark)
