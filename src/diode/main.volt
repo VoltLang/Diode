@@ -2,14 +2,10 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.main;
 
-import diode.parser : parse;
-
 
 int main(string[] args)
 {
-	auto f = parse(text, "test.md");
-	test(f);
-	test(buildTest());
+	test();
 	return 0;
 }
 
@@ -20,11 +16,14 @@ int main(string[] args)
  *
  */
 
+import diode.parser : parse;
 import diode.eval;
 import watt.io;
 
-void test(ir.File f)
+void test()
 {
+	auto f = parse(text, "test.md");
+
 	Set set = buildInbuilt();
 	auto e = new Engine(set);
 
@@ -54,7 +53,6 @@ Set buildInbuilt()
 	return base;
 }
 
-
 enum string text = `---
 layout: default
 title: Test
@@ -69,45 +67,4 @@ Some text here
 
 ender
 {% endfor %}
-`;
-
-import ir = diode.ir;
-import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent,
-                        bChain, bPrintChain;
-
-ir.File buildTest()
-{
-	auto f = bFile();
-	f.nodes ~= bText(part1);
-	f.nodes ~= bFor("post", bChain("site", "posts"),
-		[cast(ir.Node)bText(part2),
-		bPrintChain("post", "title"),
-		bText(part3),
-		bPrintChain("post", "content"),
-		bText(part4),
-		]);
-	f.nodes ~= bChain("site", "base");
-	f.nodes ~= bText("foof");
-	return f;
-}
-
-enum string part1 =
-`### Header
-
-Some text here
-
-`;
-
-enum string part2 =
-`
-#### `;
-
-enum string part3 =
-`
-`;
-
-enum string part4 =
-`
-
-ender
 `;
