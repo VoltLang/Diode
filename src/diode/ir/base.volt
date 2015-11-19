@@ -15,7 +15,9 @@ public:
 	abstract Status accept(Visitor v, Sink sink);
 }
 
-
+/**
+ * Top level container node.
+ */
 class File : Node
 {
 public:
@@ -40,6 +42,9 @@ public:
 	}
 }
 
+/**
+ * A string of text to be printed out directly.
+ */
 class Text : Node
 {
 public:
@@ -58,6 +63,9 @@ public:
 	}
 }
 
+/**
+ * A expression to be evaluated and printed.
+ */
 class Print : Node
 {
 public:
@@ -87,10 +95,16 @@ public:
 	}
 }
 
+/**
+ * Base class for all expressions.
+ */
 abstract class Exp : Node
 {
 }
 
+/**
+ * A single identifier to be looked up in the global scope.
+ */
 class Ident : Exp
 {
 public:
@@ -109,6 +123,9 @@ public:
 	}
 }
 
+/**
+ * Lookup symbol into child expression.
+ */
 class Access : Exp
 {
 public:
@@ -141,6 +158,9 @@ public:
 	}
 }
 
+/**
+ * For loop control statement.
+ */
 class For : Node
 {
 public:
@@ -189,6 +209,10 @@ public:
  *
  */
 
+
+/**
+ * Control the flow of the visitor.
+ */
 enum Status
 {
 	Stop,
@@ -196,6 +220,9 @@ enum Status
 	ContinueParent,
 }
 
+/**
+ * Base visitor class.
+ */
 abstract class Visitor
 {
 	alias Status = .Status;
@@ -217,6 +244,9 @@ abstract class Visitor
 	abstract Status leave(Access a, Sink sink);
 }
 
+/**
+ * Filter out continue parent and turn that into a continue.
+ */
 Status filterParent(Status s)
 {
 	return s == Status.ContinueParent ? Status.Continue : s;
