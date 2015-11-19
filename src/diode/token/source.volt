@@ -9,7 +9,7 @@ import watt.text.ascii : isWhite;
 import diode.token.location;
 
 
-final class Source
+class Source
 {
 public:
 	/// Source code, validated utf8 by constructors.
@@ -54,7 +54,7 @@ public:
 	 * Side-effects:
 	 *   None.
 	 */
-	@property dchar front()
+	final @property dchar front()
 	{
 		return mChar;
 	}
@@ -65,7 +65,7 @@ public:
 	 * Side-effects:
 	 *   None.
 	 */
-	@property dchar following()
+	final @property dchar following()
 	{
 		bool dummy;
 		return lookahead(1, out dummy);
@@ -107,7 +107,7 @@ public:
 	 * Side-effects:
 	 *   @arg @see popFront
 	 */
-	void skipWhitespace()
+	final void skipWhitespace()
 	{
 		while (isWhite(mChar) && !eof) {
 			popFront();
@@ -146,17 +146,17 @@ public:
 		return c;
 	}
 
-	size_t save()
+	final size_t save()
 	{
 		return mLastIndex;
 	}
 
-	string sliceFrom(size_t mark)
+	final string sliceFrom(size_t mark)
 	{
 		return source[mark .. mLastIndex];
 	}
 
-	dchar decodeChar(ref size_t index)
+	final dchar decodeChar(ref size_t index)
 	{
 		if (mNextIndex >= source.length) {
 			return dchar.init;
