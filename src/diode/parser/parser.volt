@@ -10,7 +10,7 @@ import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent;
 
 ir.File parse(string text, string filename)
 {
-	auto tokens = lex(text);
+	auto tokens = lex(text, filename);
 	auto p = new Parser(tokens);
 	ir.File file;
 	auto s = parseFile(p, out file);

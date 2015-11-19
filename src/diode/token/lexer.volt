@@ -9,9 +9,9 @@ import diode.token.source;
 import diode.token.stream;
 
 
-Token[] lex(string text)
+Token[] lex(string text, string filename)
 {
-	auto src = new Source(text);
+	auto src = new Source(text, filename);
 	auto tw = new TokenStream();
 
 	tw.pushToken(TokenKind.Begin, "BEGIN");

@@ -6,23 +6,46 @@ module diode.token.source;
 import watt.text.utf : decode;
 import watt.text.ascii : isWhite;
 
+import diode.token.location;
+
 
 final class Source
 {
 public:
+	/// Source code, validated utf8 by constructors.
 	string source;
-	bool eof;
+	/// The location of the current character @p mChar.
+	Location loc;
+	/// Have we reached EOF, if we have current = dchar.init.
+	bool eof = false;
 
 private:
+	/// The current unicode character.
 	dchar mChar;
+	/// Pointer into the string for the next character.
 	size_t mNextIndex;
+	/// The index for mChar
 	size_t mLastIndex;
 
 public:
-	this(string source)
+	/**
+	 * Sets the source to string and the current location
+	 * and validate it as a utf8 source.
+	 *
+	 * Side-effects:
+	 *   Puts all the other fields into known good states.
+	 *
+	 * Throws:
+	 *   UtfException if the source is not valid utf8.
+	 */
+	this(string s, string filename)
 	{
-		this.source = source;
+		source = s;
+
 		popFront();
+
+		loc.filename = filename;
+		loc.line = 1;
 	}
 
 	/**
@@ -49,6 +72,11 @@ public:
 	 */
 	void popFront()
 	{
+		if (mChar == '\n') {
+			loc.line++;
+			loc.column = 0;
+		}
+
 		mLastIndex = mNextIndex;
 		mChar = decodeChar(ref mNextIndex);
 		if (mChar == dchar.init) {
@@ -56,6 +84,8 @@ public:
 			mNextIndex = source.length;
 			mLastIndex = source.length;
 		}
+
+		loc.column++;
 	}
 
 	/**
