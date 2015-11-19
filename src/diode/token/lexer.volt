@@ -123,12 +123,11 @@ Status lexText(Source src, Writer tw)
 		return Status.End;
 	}
 
+	auto f = src.following;
 	src.popFront();
-	scope (success) {
-		src.popFront();
-	}
+	src.popFront();
 
-	switch (src.front) with (TokenKind) {
+	switch (f) with (TokenKind) {
 	case '%':
 		tw.pushToken(ref src.loc, OpenStatement, "{%");
 		return Status.Statement;
