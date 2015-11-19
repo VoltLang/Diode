@@ -14,7 +14,7 @@ Token[] lex(string text, string filename)
 	auto src = new Source(text, filename);
 	auto tw = new TokenStream();
 
-	tw.pushToken(TokenKind.Begin, "BEGIN");
+	tw.pushToken(ref src.loc, TokenKind.Begin, "BEGIN");
 
 	Status s;
 	while (s != Status.End) {
@@ -31,7 +31,7 @@ Token[] lex(string text, string filename)
 		}
 	}
 
-	tw.pushToken(TokenKind.End, "END");
+	tw.pushToken(ref src.loc, TokenKind.End, "END");
 
 	return tw.mTokens;
 }
@@ -61,7 +61,7 @@ Status lexToken(Source src, TokenStream tw, Status status)
 		if (src.lookahead() != '}') {
 			return Status.Error;
 		}
-		tw.pushToken(TokenKind.ClosePrint, "}}");
+		tw.pushToken(ref src.loc, TokenKind.ClosePrint, "}}");
 		src.popFront();
 		src.popFront();
 		return Status.Text;
@@ -69,12 +69,12 @@ Status lexToken(Source src, TokenStream tw, Status status)
 		if (src.lookahead() != '}') {
 			return Status.Error;
 		}
-		tw.pushToken(TokenKind.CloseStatement, "%}");
+		tw.pushToken(ref src.loc, TokenKind.CloseStatement, "%}");
 		src.popFront();
 		src.popFront();
 		return Status.Text;
 	case '.':
-		tw.pushToken(TokenKind.Dot, ".");
+		tw.pushToken(ref src.loc, TokenKind.Dot, ".");
 		src.popFront();
 		return status;
 	case '_':
@@ -89,7 +89,9 @@ Status lexToken(Source src, TokenStream tw, Status status)
 
 Status lexIdent(Source src, TokenStream tw, Status status)
 {
+	auto loc = src.loc;
 	auto mark = src.save();
+
 	src.popFront();
 	while (src.front.isAlpha() ||
 	       src.front.isDigit() ||
@@ -97,13 +99,15 @@ Status lexIdent(Source src, TokenStream tw, Status status)
 		src.popFront();
 	}
 	auto v = src.sliceFrom(mark);
-	tw.pushToken(identifierKind(v), v);
+	tw.pushToken(ref loc, identifierKind(v), v);
 	return status;
 }
 
 Status lexText(Source src, TokenStream tw)
 {
+	auto loc = src.loc;
 	size_t mark = src.save();
+
 	while (!src.eof) {
 		if (src.front == '{' &&
 		    (src.lookahead() == '{' ||
@@ -113,7 +117,7 @@ Status lexText(Source src, TokenStream tw)
 		src.popFront();
 	}
 
-	tw.pushToken(TokenKind.Text, src.sliceFrom(mark));
+	tw.pushToken(ref loc, TokenKind.Text, src.sliceFrom(mark));
 
 	if (src.eof) {
 		return Status.End;
@@ -126,10 +130,10 @@ Status lexText(Source src, TokenStream tw)
 
 	switch (src.front) with (TokenKind) {
 	case '%':
-		tw.pushToken(OpenStatement, "{%");
+		tw.pushToken(ref src.loc, OpenStatement, "{%");
 		return Status.Statement;
 	case '{':
-		tw.pushToken(OpenPrint, "{{");
+		tw.pushToken(ref src.loc, OpenPrint, "{{");
 		return Status.Exp;
 	default:
 	}

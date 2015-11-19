@@ -2,6 +2,8 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.token.token;
 
+import diode.token.location;
+
 
 /**
  * Holds the kind, the actual string and location within the source file.
@@ -9,6 +11,7 @@ module diode.token.token;
 final class Token
 {
 public:
+	Location loc;
 	TokenKind kind;
 	string value;
 

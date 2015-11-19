@@ -2,6 +2,7 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.token.stream;
 
+import diode.token.location;
 import diode.token.token;
 
 
@@ -11,11 +12,13 @@ protected:
 	Token[] mTokens;
 
 public:
-	void pushToken(TokenKind kind, string value = null)
+	void pushToken(ref const Location loc, TokenKind kind, string value)
 	{
 		auto t = new Token();
 		t.kind = kind;
 		t.value = value;
+		t.loc = loc;
+		t.loc.length = value.length;
 
 		mTokens ~= t;
 	}
