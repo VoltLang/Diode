@@ -2,6 +2,8 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.main;
 
+import diode.interfaces;
+
 
 int main(string[] args)
 {
@@ -19,41 +21,24 @@ int main(string[] args)
 import watt.io;
 import watt.text.sink;
 import diode.eval;
+import diode.driver;
 import diode.parser : parse;
+import diode.interfaces;
 
 
 void test()
 {
-	auto f = parse(text, "test.md");
+	auto s = new Settings();
+	s.workDir = "example";
+	s.fillInDefaults();
 
-	Set set = buildInbuilt();
-	auto e = new Engine(set);
+	auto d = new DiodeDriver(s);
+	d.addLayout(defaultHtmlFile, "default.html");
 
-	StringSink s;
-	f.accept(e, s.sink);
-	writefln("%s", s.toString());
+	d.renderFile(testMdFile, "test.md");
 }
 
-Set buildInbuilt()
-{
-	auto base = new Set();
-	auto site = new Set();
-	base.ctx["site"]  = site;
-	site.ctx["base"]  = new Text("http://helloworld.com");
-	auto p1 = new Set();
-	p1.ctx["title"]   = new Text("The Title");
-	p1.ctx["content"] = new Text("the content");
-	auto p2 = new Set();
-	p2.ctx["title"]   = new Text("Another Title");
-	p2.ctx["content"] = new Text("the content");
-	auto p3 = new Set();
-	p3.ctx["title"]   = new Text("The last Title");
-	p3.ctx["content"] = new Text("the content");
-	site.ctx["posts"] = new Array(p1, p2, p3);
-	return base;
-}
-
-enum string text = `---
+enum string testMdFile = `---
 layout: default
 title: Test
 ---
@@ -68,3 +53,10 @@ Some text here
 ender
 {% endfor %}
 `;
+
+enum string defaultHtmlFile = `<!DOCTYPE html>
+<html lang="en">
+  <body>
+{{ content }}
+  </body>
+</html>`;
