@@ -2,10 +2,51 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.errors;
 
+import watt.text.format : format;
 import ir = diode.ir;
 
 
-class EvalException : object.Exception
+class DiodeException : object.Exception
+{
+	this(string msg)
+	{
+		super(msg);
+	}
+}
+
+
+/*
+ *
+ * Specific Exceptions.
+ *
+ */
+
+DiodeException makeNoExtension(string file)
+{
+	auto str = format("error: no file extension '%s'", file);
+	return new DiodeException(str);
+}
+
+DiodeException makeExtensionNotSupported(string file)
+{
+	auto str = format("error: file extension not supported '%s'", file);
+	return new DiodeException(str);
+}
+
+DiodeException makeLayoutNotFound(string file, string layout)
+{
+	auto str = format("%s:1 error: layout '%s' not found", file, layout);
+	return new DiodeException(str);
+}
+
+
+/*
+ *
+ * Eval Exceptions
+ *
+ */
+
+class EvalException : DiodeException
 {
 	ir.Node n;
 
@@ -14,7 +55,6 @@ class EvalException : object.Exception
 		super(msg);
 	}
 }
-
 
 EvalException makeNoField(ir.Node n, string key)
 {
