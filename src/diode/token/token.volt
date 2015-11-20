@@ -2,7 +2,7 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.token.token;
 
-import diode.token.location;
+import watt.text.source : Location;
 
 
 /**

@@ -3,9 +3,10 @@
 module diode.token.lexer;
 
 import watt.text.ascii : isAlpha, isDigit;
+import watt.text.source : Source;
 import watt.io;
+
 import diode.token.token;
-import diode.token.source;
 import diode.token.writer;
 
 
