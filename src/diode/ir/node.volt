@@ -2,9 +2,9 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.ir.node;
 
+// We are using the one true string sink from watt.
+public import watt.text.sink : Sink;
 
-/// Argument to all visitor functions.
-alias Sink = scope void delegate(const(char)[]);
 
 /**
  * Base class for all nodes.

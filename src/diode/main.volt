@@ -16,9 +16,11 @@ int main(string[] args)
  *
  */
 
-import diode.parser : parse;
-import diode.eval;
 import watt.io;
+import watt.text.sink;
+import diode.eval;
+import diode.parser : parse;
+
 
 void test()
 {
@@ -27,11 +29,9 @@ void test()
 	Set set = buildInbuilt();
 	auto e = new Engine(set);
 
-	void sink(const(char)[] str) {
-		write(str);
-	}
-
-	f.accept(e, sink);
+	StringSink s;
+	f.accept(e, s.sink);
+	writefln("%s", s.toString());
 }
 
 Set buildInbuilt()
