@@ -102,7 +102,7 @@ private:
 		mRoot = new Set();
 		mSite = new Set();
 		mRoot.ctx["site"] = mSite;
-		mSite.ctx["url"] = new Text(settings.url);
+		mSite.ctx["baseurl"] = new Text(settings.url);
 
 		hackInbuilt(mSite);
 	}
