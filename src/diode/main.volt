@@ -34,12 +34,13 @@ void test()
 
 	auto d = new DiodeDriver(s);
 	d.addLayout(defaultHtmlFile, "default.html");
+	d.addLayout(pageHtmlFile, "page.html");
 
 	d.renderFile(testMdFile, "test.md");
 }
 
 enum string testMdFile = `---
-layout: default
+layout: page
 title: Test
 ---
 ### Header
@@ -52,6 +53,14 @@ Some text here
 
 ender
 {% endfor %}
+`;
+
+enum string pageHtmlFile = `---
+layout: default
+---
+<article>
+{{ content }}
+</article>
 `;
 
 enum string defaultHtmlFile = `<!DOCTYPE html>
