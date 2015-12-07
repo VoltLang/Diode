@@ -5,12 +5,14 @@ module diode.driver;
 import watt.io;
 import watt.path;
 import watt.text.sink;
+import watt.text.source;
 
 import ir = diode.ir;
 import diode.eval;
 import diode.errors;
 import diode.interfaces;
-import diode.parser : parse;
+import diode.parser : parseFile = parse;
+import diode.parser.header : Header, parseHeader = parse;
 
 
 /**
@@ -46,24 +48,24 @@ public:
 		// Remove the extension.
 		base = base[0 .. $ - ext.length];
 
+		auto src = new Source(source, filename);
 		auto f = new File();
-		f.file = parse(source, filename);
+		f.filename = filename;
+		f.header = parseHeader(src);
+		f.file = parseFile(src);
+		f.layout = getLayoutForFile(f);
 
 		mLayouts[base] = f;
 	}
 
 	override void renderFile(string source, string filename)
 	{
-		string layout = settings.layoutDefault;
-
-		auto l = layout in mLayouts;
-		if (l is null) {
-			throw makeLayoutNotFound(filename, layout);
-		}
-
+		auto src = new Source(source, filename);
 		auto f = new File();
-		f.file = parse(source, filename);
-		f.layout = mLayouts[layout];
+		f.filename = filename;
+		f.header = parseHeader(src);
+		f.file = parseFile(src);
+		f.layout = getLayoutForFile(f);
 
 		renderFile(f);
 	}
@@ -96,7 +98,38 @@ protected:
 		writefln("%s", s.toString());
 	}
 
-private:
+protected:
+	File getLayoutForFile(File f)
+	{
+		assert(f !is null);
+		bool must = false;
+
+		auto key = f.getOption("layout");
+		if (key is null) {
+			key = settings.layoutDefault;
+		} else {
+			must = true;
+		}
+
+		assert(key !is null);
+
+		auto l = getLayout(key);
+		if (l is null && must) {
+			throw makeLayoutNotFound(f.filename, key);
+		}
+		return l;
+	}
+
+	File getLayout(string key)
+	{
+		auto ret = key in mLayouts;
+		if (ret is null) {
+			return null;
+		} else {
+			return *ret;
+		}
+	}
+
 	void buildRootEnv()
 	{
 		mRoot = new Set();
@@ -113,8 +146,26 @@ private:
  */
 class File
 {
+public:
+	string filename;
 	File layout;
+	Header header;
 	ir.File file;
+
+public:
+	string getOption(string key, string def = null)
+	{
+		if (header is null) {
+			return def;
+		}
+
+		auto ret = key in header.map;
+		if (ret is null) {
+			return def;
+		} else {
+			return *ret;
+		}
+	}
 }
 
 /**

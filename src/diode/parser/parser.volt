@@ -2,17 +2,20 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.parser.parser;
 
+import watt.text.source;
+
 import ir = diode.ir;
 import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent;
 
 import diode.token.lexer : lex;
 import diode.token.token : Token, TokenKind;
 import diode.parser.writer;
+import diode.parser.header;
 
 
-ir.File parse(string text, string filename)
+ir.File parse(Source src)
 {
-	auto tokens = lex(text, filename);
+	auto tokens = lex(src);
 	auto p = new Parser(tokens);
 	ir.File file;
 	auto s = parseFile(p, out file);
