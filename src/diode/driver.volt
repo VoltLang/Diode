@@ -4,8 +4,10 @@ module diode.driver;
 
 import watt.io;
 import watt.path;
+import watt.conv;
 import watt.text.sink;
 import watt.text.source;
+import watt.text.markdown;
 
 import ir = diode.ir;
 import diode.eval;
@@ -35,22 +37,14 @@ public:
 	override void addLayout(string source, string filename)
 	{
 		auto base = baseName(filename);
-		auto ext = extension(base);
+		auto ext = getAndCheckExt(ref base);
 
-		if (ext is null) {
-			throw makeNoExtension(base);
-		}
 
-		if (ext != ".html") {
-			throw makeExtensionNotSupported(base);
-		}
-
-		// Remove the extension.
-		base = base[0 .. $ - ext.length];
 
 		auto src = new Source(source, filename);
 		auto f = new File();
-		f.filename = filename;
+		f.ext = ext;
+		f.filename = base;
 		f.header = parseHeader(src);
 		f.file = parseFile(src);
 		f.layout = getLayoutForFile(f);
@@ -60,9 +54,13 @@ public:
 
 	override void renderFile(string source, string filename)
 	{
+		auto base = baseName(filename);
+		auto ext = getAndCheckExt(ref base);
+
 		auto src = new Source(source, filename);
 		auto f = new File();
-		f.filename = filename;
+		f.ext = ext;
+		f.filename = base;
 		f.header = parseHeader(src);
 		f.file = parseFile(src);
 		f.layout = getLayoutForFile(f);
@@ -78,7 +76,7 @@ protected:
 		Set env = mRoot;
 
 		while (f.layout !is null) {
-			auto c = new Contents();
+			auto c = selectType(f.layout, f);
 			c.engine = e;
 			c.file = f.file;
 			c.env = env;
@@ -120,6 +118,45 @@ protected:
 		return l;
 	}
 
+	Contents selectType(File layout, File contents)
+	{
+		if (layout.ext == File.Ext.HTML &&
+		    contents.ext == File.Ext.Markdown) {
+			return new MarkdownContents();
+
+		} else if (layout.ext == File.Ext.HTML &&
+		           contents.ext == File.Ext.HTML) {
+			return new Contents();
+
+		} else if (layout.ext == File.Ext.Markdown &&
+		           contents.ext == File.Ext.Markdown) {
+			return new Contents();
+		}
+
+		throw makeConversionNotSupported(layout.filename,
+		                                 contents.filename);
+	}
+
+	File.Ext getAndCheckExt(ref string base)
+	{
+		auto ext = extension(base);
+		if (ext is null) {
+			throw makeNoExtension(base);
+		}
+
+		// Remove the extension.
+		base = base[0 .. $ - ext.length];
+
+		switch (toLower(ext)) {
+		case ".html":
+			return File.Ext.HTML;
+		case ".md":
+			return File.Ext.Markdown;
+		default:
+			throw makeExtensionNotSupported(base);
+		}
+	}
+
 	File getLayout(string key)
 	{
 		auto ret = key in mLayouts;
@@ -147,10 +184,17 @@ protected:
 class File
 {
 public:
+	enum Ext
+	{
+		HTML,
+		Markdown,
+	}
+
 	string filename;
 	File layout;
 	Header header;
 	ir.File file;
+	Ext ext;
 
 public:
 	string getOption(string key, string def = null)
@@ -169,7 +213,7 @@ public:
 }
 
 /**
- * Special Value for 
+ * Special Value for the contents value.
  */
 class Contents : Value
 {
@@ -189,6 +233,28 @@ public:
 
 		// Restor old enviroment.
 		engine.env = old;
+	}
+}
+
+/**
+ * Special Value for Markdown to HTML contents.
+ */
+class MarkdownContents : Contents
+{
+public:
+	override void toText(ir.Node n, Sink sink)
+	{
+		// Save the old enviroment.
+		auto old = engine.env;
+		engine.env = env;
+
+		StringSink dst;
+		file.accept(engine, dst.sink);
+
+		// Restor old enviroment.
+		engine.env = old;
+
+		filterMarkdown(sink, dst.toString());
 	}
 }
 

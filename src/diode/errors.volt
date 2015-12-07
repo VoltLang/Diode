@@ -39,6 +39,12 @@ DiodeException makeLayoutNotFound(string file, string layout)
 	return new DiodeException(str);
 }
 
+DiodeException makeConversionNotSupported(string layout, string contents)
+{
+	auto str = format("%s:1 error: can not convert '%s' -> '%s'",
+	                  contents, contents, layout);
+	return new DiodeException(str);
+}
 
 /*
  *
