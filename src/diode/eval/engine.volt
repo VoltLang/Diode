@@ -1,6 +1,6 @@
 // Copyright © 2015, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diod.eval.engine;
+module diode.eval.engine;
 
 import ir = diode.ir;
 import diode.eval.value;
