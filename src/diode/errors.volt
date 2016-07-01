@@ -2,11 +2,12 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.errors;
 
+import core.exception;
 import watt.text.format : format;
 import ir = diode.ir;
 
 
-class DiodeException : object.Exception
+class DiodeException : Exception
 {
 	this(string msg)
 	{
