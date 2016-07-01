@@ -6,6 +6,7 @@ import watt.text.ascii : isAlpha, isDigit;
 import watt.text.source : Source;
 import watt.io;
 
+import diode.errors;
 import diode.token.token;
 import diode.token.writer;
 
@@ -27,7 +28,7 @@ Token[] lex(Source src)
 			break;
 		case End:
 		case Error:
-			throw new Exception("lexer error");
+			throw new DiodeException("lexer error");
 		}
 	}
 

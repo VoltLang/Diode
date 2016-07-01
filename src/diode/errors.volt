@@ -3,6 +3,7 @@
 module diode.errors;
 
 import core.exception;
+import watt.text.source;
 import watt.text.format : format;
 import ir = diode.ir;
 
@@ -46,6 +47,12 @@ DiodeException makeConversionNotSupported(string layout, string contents)
 	                  contents, contents, layout);
 	return new DiodeException(str);
 }
+
+DiodeException makeBadHeader(ref Location loc)
+{
+	return new DiodeException(loc.toString() ~ "error: invalid header");
+}
+
 
 /*
  *

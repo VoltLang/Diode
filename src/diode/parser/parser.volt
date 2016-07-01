@@ -7,6 +7,7 @@ import watt.text.source;
 import ir = diode.ir;
 import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent;
 
+import diode.errors;
 import diode.token.lexer : lex;
 import diode.token.token : Token, TokenKind;
 import diode.parser.writer;
@@ -37,7 +38,7 @@ enum Status {
 	Error = -1,
 }
 
-class LexerError : Exception
+class LexerError : DiodeException
 {
 public:
 	this(Token t, string msg)
@@ -64,7 +65,7 @@ public:
 		return Status.Error;
 	}
 
-	Exception makeException()
+	LexerError makeException()
 	{
 		return new LexerError(mErrorToken, "syntax error");
 	}

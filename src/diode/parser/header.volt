@@ -6,6 +6,8 @@ import watt.text.ascii;
 import watt.text.string;
 import watt.text.source;
 
+import diode.errors;
+
 
 class Header
 {
@@ -123,9 +125,4 @@ string getRestOfLine(Source src)
 		src.popFront();
 	}
 	return ret;
-}
-
-Exception makeBadHeader(ref Location loc)
-{
-	return new Exception(loc.toString() ~ "error: invalid header");
 }
