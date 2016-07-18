@@ -1,2 +1,6 @@
 /diode
 /diode.*
+/.bin
+/GNUmakefile
+/Makefile
+/.battery.config.txt
