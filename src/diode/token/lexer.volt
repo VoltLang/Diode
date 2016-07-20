@@ -118,7 +118,9 @@ Status lexText(Source src, Writer tw)
 		src.popFront();
 	}
 
-	tw.pushToken(ref loc, TokenKind.Text, src.sliceFrom(mark));
+	if (mark != src.save()) {
+		tw.pushToken(ref loc, TokenKind.Text, src.sliceFrom(mark));
+	}
 
 	if (src.eof) {
 		return Status.End;
