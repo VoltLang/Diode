@@ -231,7 +231,7 @@ public:
 
 		file.accept(engine, sink);
 
-		// Restor old enviroment.
+		// Restore old enviroment.
 		engine.env = old;
 	}
 }
