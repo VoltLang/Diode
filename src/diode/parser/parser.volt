@@ -137,10 +137,14 @@ fn parseStatement(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.OpenStatement);
 
-	// We only support for statements for now.
-	switch (p.following.kind) {
-	case tk.If: return parseIf(p, out node);
-	case tk.For: return parseFor(p, out node);
+	if (p.following != tk.Identifier) {
+		p.error();
+	}
+
+	// We use identifiers instead of special tokens for statements.
+	switch (p.following.value) {
+	case "if": return parseIf(p, out node);
+	case "for": return parseFor(p, out node);
 	default: return p.error();
 	}
 }
@@ -155,7 +159,7 @@ fn parseIf(p : Parser, out node : ir.Node) Status
 	nodes : ir.Node[];
 
 	// 'if' something.ident
-	assert(p.front == tk.If);
+	assert(p.front == "if");
 	p.popFront();
 
 	s1 := parseExp(p, out exp);
@@ -171,7 +175,7 @@ fn parseIf(p : Parser, out node : ir.Node) Status
 
 	while (p.front != tk.End) {
 		if (p.front == tk.OpenStatement &&
-		    p.following == tk.EndIf) {
+		    p.following == "endif") {
 			break;
 		}
 		n : ir.Node;
@@ -213,7 +217,7 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	nodes : ir.Node[];
 
 	// 'for' ident in something.exp
-	assert(p.front == tk.For);
+	assert(p.front == "for");
 	p.popFront();
 
 	// for 'ident' in something.exp
@@ -224,7 +228,7 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	p.popFront();
 
 	// for ident 'in' something.exp
-	if (p.front != tk.In) {
+	if (p.front != "in") {
 		return p.error();
 	}
 	p.popFront();
@@ -242,7 +246,7 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 
 	while (p.front != tk.End) {
 		if (p.front == tk.OpenStatement &&
-		    p.following == tk.EndFor) {
+		    p.following == "endfor") {
 			break;
 		}
 		n : ir.Node;

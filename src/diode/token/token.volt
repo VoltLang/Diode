@@ -21,6 +21,11 @@ public:
 	{
 		return this.kind == kind;
 	}
+
+	final fn opEquals(str : string) bool
+	{
+		return kind == TokenKind.Identifier && value == str;
+	}
 }
 
 enum TokenKind
@@ -43,28 +48,18 @@ enum TokenKind
 	Pipe,
 
 	// Keywords
-	In,
-	For,
-	EndFor,
-	If,
-	EndIf,
-	Else,
-	ElseIf,
-	ElseFor,
+	Nil,
+	True,
+	False,
 	Identifier,
 }
 
 fn identifierKind(ident : string) TokenKind
 {
 	switch (ident) with (TokenKind) {
-	case "in":      return In;
-	case "for":     return For;
-	case "endfor":  return EndFor;
-	case "if":      return If;
-	case "endif":   return EndIf;
-	case "else":    return Else;
-	case "elseif":  return ElseIf;
-	case "elsefor": return ElseFor;
-	default:        return Identifier;
+	case "nil":   return Nil;
+	case "true":  return True;
+	case "false": return False;
+	default:      return Identifier;
 	}
 }
