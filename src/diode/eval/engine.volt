@@ -32,6 +32,37 @@ public:
 		return Continue;
 	}
 
+	override Status enter(ir.If i, Sink sink)
+	{
+		// Eval expression
+		// if 'site.has_feature'
+		v = null;
+		i.exp.accept(this, sink);
+		assert(v !is null);
+		bool cond = v.toBool(i);
+		v = null;
+
+		// If the cond is false nothing more to do.
+		if (!cond) {
+			return ContinueParent;
+		}
+
+		// Create a new env for the child nodes.
+		// 'if' site.has_feature
+		auto myEnv = new Set();
+		myEnv.parent = env;
+		env = myEnv;
+
+		// Walk the nodes if cond is true.
+		// 'if' site.has_feature
+		foreach (n; i.nodes) {
+			n.accept(this, sink);
+		}
+		env = env.parent;
+
+		return ContinueParent;
+	}
+
 	override Status enter(ir.For f, Sink sink)
 	{
 		// Eval expression
@@ -102,5 +133,6 @@ public:
 	override Status leave(ir.File, Sink sink) { return Continue; }
 	override Status enter(ir.Access, Sink sink) { return Continue; }
 	override Status enter(ir.Print, Sink sink) { return Continue; }
+	override Status leave(ir.If, Sink sink) { assert(false); }
 	override Status leave(ir.For, Sink sink) { assert(false); }
 }

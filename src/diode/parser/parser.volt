@@ -5,7 +5,7 @@ module diode.parser.parser;
 import watt.text.source;
 
 import ir = diode.ir;
-import diode.ir.build : bFile, bText, bPrint, bFor, bAccess, bIdent;
+import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAccess, bIdent;
 
 import diode.errors;
 import diode.token.lexer : lex;
@@ -137,10 +137,68 @@ Status parseStatement(Parser p, out ir.Node node)
 	assert(p.front == tk.OpenStatement);
 
 	// We only support for statements for now.
-	if (p.following != tk.For) {
+	switch (p.following.kind) {
+	case tk.If: return parseIf(p, out node);
+	case tk.For: return parseFor(p, out node);
+	default: return p.error();
+	}
+}
+
+Status parseIf(Parser p, out ir.Node node)
+{
+	assert(p.front == tk.OpenStatement);
+	p.popFront();
+
+	// This is a if.
+	ir.Exp exp;
+	ir.Node[] nodes;
+
+	// 'if' something.ident
+	assert(p.front == tk.If);
+	p.popFront();
+
+	auto s1 = parseExp(p, out exp);
+	if (s1 != Status.Ok) {
+		return s1;
+	}
+
+	// Check the end.
+	if (p.front != tk.CloseStatement) {
 		return p.error();
 	}
-	return parseFor(p, out node);
+	p.popFront();
+
+	while (p.front != tk.End) {
+		if (p.front == tk.OpenStatement &&
+		    p.following == tk.EndIf) {
+			break;
+		}
+		ir.Node n;
+		auto s2 = parseNode(p, out n);
+		if (s2 != Status.Ok) {
+			return s2;
+		}
+
+		nodes ~= n;
+	}
+
+	if (p.front == tk.End) {
+		return p.error();
+	}
+
+	// Pop {% endif
+	p.popFront();
+	p.popFront();
+
+	// Check for %}
+	if (p.front != tk.CloseStatement) {
+		return p.error();
+	}
+
+	p.popFront();
+
+	node = bIf(exp, nodes);
+	return Status.Ok;
 }
 
 Status parseFor(Parser p, out ir.Node node)

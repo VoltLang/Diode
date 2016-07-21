@@ -159,6 +159,48 @@ public:
 }
 
 /**
+ * If control statement.
+ */
+class If : Node
+{
+public:
+	Node[] nodes;
+	Exp exp;
+
+public:
+	this(Exp exp, Node[] nodes)
+	{
+		assert(exp !is null);
+		this.exp = exp;
+		this.nodes = nodes;
+	}
+
+	override Status accept(Visitor v, Sink sink)
+	{
+		auto s1 = v.enter(this, sink);
+		if (s1 != Status.Continue) {
+			return filterParent(s1);
+		}
+
+		assert(exp !is null);
+		auto s2 = exp.accept(v, sink);
+		if (s2 == Status.Stop) {
+			return s2;
+		}
+
+		foreach (n; nodes) {
+			auto s3 = n.accept(v, sink);
+			if (s3 == Status.Stop) {
+				return s3;
+			}
+		}
+
+		return filterParent(v.leave(this, sink));
+	}
+}
+
+
+/**
  * For loop control statement.
  */
 class For : Node
@@ -236,6 +278,8 @@ abstract class Visitor
 	abstract Status visit(Text t, Sink sink);
 	abstract Status enter(Print p, Sink sink);
 	abstract Status leave(Print p, Sink sink);
+	abstract Status enter(If i, Sink sink);
+	abstract Status leave(If i, Sink sink);
 	abstract Status enter(For f, Sink sink);
 	abstract Status leave(For f, Sink sink);
 

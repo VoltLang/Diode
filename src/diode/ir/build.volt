@@ -25,6 +25,11 @@ ir.For bFor(string ident, ir.Exp exp, ir.Node[] nodes)
 	return new ir.For(ident, exp, nodes);
 }
 
+ir.If bIf(ir.Exp exp, ir.Node[] nodes)
+{
+	return new ir.If(exp, nodes);
+}
+
 ir.Access bAccess(ir.Exp exp, string key)
 {
 	return new ir.Access(exp, key);
