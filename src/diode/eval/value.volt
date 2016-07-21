@@ -27,6 +27,14 @@ abstract class Value
 	}
 }
 
+class Nil : Value
+{
+	override Value[] toArray(ir.Node)
+	{
+		return null;
+	}
+}
+
 class Text : Value
 {
 	string text;
