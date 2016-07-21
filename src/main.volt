@@ -38,6 +38,7 @@ void test()
 	auto d = new DiodeDriver(s);
 	d.addLayout(defaultHtmlFile, "default.html");
 	d.addLayout(pageHtmlFile, "page.html");
+	d.addDoc(testDocJsonFile, "exp.json");
 
 	d.renderFile(testMdFile, "test.md");
 }
@@ -50,11 +51,12 @@ title: Test
 
 Some text here
 
-{% for post in site.posts %}
-#### {{ post.title }}
-{{ post.content }}
-
-ender
+{% for mod in doc.modules %}
+#### {{ mod.name }}
+{{ mod.doc }}
+{% for c in mod.all %}
+{{ c.name }}
+{% endfor %}
 {% endfor %}
 `;
 
@@ -72,3 +74,29 @@ enum string defaultHtmlFile = `<!DOCTYPE html>
 {{ content }}
   </body>
 </html>`;
+
+enum string testDocJsonFile = `[
+{"kind":"module","name":"main","doc":"\nHolds the main function and some small test code.\n","children":[
+	{"kind":"fn","name":"main","args":[{"name":"args","type":"string[]","typeFull":"immutable(char)[][]"}],"rets":[{"type":"int"}]},
+	{"kind":"fn","name":"test","rets":[{"type":"void"}]}
+]},
+{"kind":"module","name":"diode.interfaces","children":[
+	{"kind":"class","name":"Driver","doc":"\nMain class driving everything.\n","children":[
+		{"kind":"var","name":"settings","type":"Settings","typeFull":"diode.interfaces.Settings"},
+		{"kind":"ctor","args":[{"name":"settings","type":"Settings","typeFull":"diode.interfaces.Settings"}]},
+		{"kind":"member","name":"addLayout","args":[{"name":"source","type":"string","typeFull":"immutable(char)[]"},{"name":"filename","type":"string","typeFull":"immutable(char)[]"}],"rets":[{"type":"void"}]},
+		{"kind":"member","name":"renderFile","args":[{"name":"source","type":"string","typeFull":"immutable(char)[]"},{"name":"filename","type":"string","typeFull":"immutable(char)[]"}],"rets":[{"type":"void"}]}
+	]},
+	{"kind":"class","name":"Settings","doc":"\nHolds settings for Diode.\n","children":[
+		{"kind":"var","name":"workDir","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"var","name":"outputDir","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"var","name":"layoutDir","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"var","name":"includeDir","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"var","name":"titleDefault","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"var","name":"layoutDefault","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"var","name":"url","type":"string","typeFull":"immutable(char)[]"},
+		{"kind":"member","name":"fillInDefaults","rets":[{"type":"void"}]},
+		{"kind":"member","name":"processPath","args":[{"name":"val","type":"string","typeFull":"immutable(char)[]"},{"name":"def","type":"string","typeFull":"immutable(char)[]"}],"rets":[{"type":"void"}]},
+		{"kind":"ctor"}
+	]}
+]}]`;

@@ -20,6 +20,7 @@ public:
 	}
 
 	abstract void addLayout(string source, string filename);
+	abstract void addDoc(string source, string filename);
 	abstract void renderFile(string source, string filename);
 }
 

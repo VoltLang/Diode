@@ -1,4 +1,4 @@
-// Copyright © 2015, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2015-2016, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.driver;
 
@@ -15,6 +15,7 @@ import diode.errors;
 import diode.interfaces;
 import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
+import diode.doc.volt;
 
 
 /**
@@ -26,6 +27,8 @@ protected:
 	File[string] mLayouts;
 	Set mRoot;
 	Set mSite;
+	Set mDoc;
+	Array mModules;
 
 public:
 	this(Settings settings)
@@ -66,6 +69,11 @@ public:
 		f.layout = getLayoutForFile(f);
 
 		renderFile(f);
+	}
+
+	override void addDoc(string source, string filename)
+	{
+		mModules.vals ~= parse(source);
 	}
 
 protected:
@@ -169,12 +177,17 @@ protected:
 
 	void buildRootEnv()
 	{
+		mDoc = new Set();
 		mRoot = new Set();
 		mSite = new Set();
-		mRoot.ctx["site"] = mSite;
-		mSite.ctx["baseurl"] = new Text(settings.url);
+		mModules = new Array(null);
 
-		hackInbuilt(mSite);
+		mRoot.ctx["doc"] = mDoc;
+		mRoot.ctx["site"] = mSite;
+
+		mDoc.ctx["modules"] = mModules;
+
+		mSite.ctx["baseurl"] = new Text(settings.url);
 	}
 }
 
@@ -256,21 +269,4 @@ public:
 
 		filterMarkdown(sink, dst.toString());
 	}
-}
-
-/**
- * Temporary hack.
- */
-void hackInbuilt(Set site)
-{
-	auto p1 = new Set();
-	p1.ctx["title"]   = new Text("The Title");
-	p1.ctx["content"] = new Text("the content");
-	auto p2 = new Set();
-	p2.ctx["title"]   = new Text("Another Title");
-	p2.ctx["content"] = new Text("the content");
-	auto p3 = new Set();
-	p3.ctx["title"]   = new Text("The last Title");
-	p3.ctx["content"] = new Text("the content");
-	site.ctx["posts"] = new Array(p1, p2, p3);
 }
