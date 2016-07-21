@@ -52,11 +52,19 @@ title: Test
 Some text here
 
 {% for mod in doc.modules %}
-#### {{ mod.name }}
+### {{ mod.name }}
 {{ mod.doc }}
-{% for c in mod.all %}
+
+{% for c in mod.classes %}
+{% if forloop.first %}#### Classes{% endif %}
 {{ c.name }}
 {% endfor %}
+
+{% for f in mod.functions %}
+{% if forloop.first %}#### Functions{% endif %}
+{{ f.name }}
+{% endfor %}
+
 {% endfor %}
 `;
 

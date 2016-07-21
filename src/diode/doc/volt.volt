@@ -72,6 +72,11 @@ public:
 public:
 	override Value ident(ir.Node n, string key)
 	{
+		c := Collection.make(children, key);
+		if (c !is null) {
+			return c;
+		}
+
 		switch (key) {
 		case "name": return new Text(name);
 		case "doc": return new Text(doc);
@@ -116,6 +121,63 @@ class Function : Named
 {
 	args : Value[];
 	rets : Value[];
+}
+
+/**
+ * A special array that you can access fields on to filter the members.
+ */
+class Collection : Array
+{
+public:
+	this(vals : Value[])
+	{
+		super(vals);
+	}
+
+	static fn make(vals : Value[], key : string) Value
+	{
+		kind : Kind;
+		switch (key) with (Kind) {
+		case "enums": kind = Enum; break;
+		case "classes": kind = Class; break;
+		case "unions": kind = Union; break;
+		case "structs": kind = Struct; break;
+		case "modules": kind = Module; break;
+		case "members": kind = Member; break;
+		case "functions": kind = Function; break;
+		case "variables": kind = Variable; break;
+		case "destructors": kind = Destructor; break;
+		case "constructors": kind = Constructor; break;
+		default: return null;
+		}
+
+		num : size_t;
+		ret := new Value[](vals.length);
+		foreach (v; vals) {
+			b := cast(Base)v;
+			if (b is null || b.kind != kind) {
+				continue;
+			}
+
+			ret[num++] = v;
+		}
+
+		if (num > 0) {
+			return new Collection(ret[0 .. num]);
+		} else {
+			return new Nil();
+		}
+	}
+
+	override Value ident(ir.Node n, string key)
+	{
+		c := make(vals, key);
+		if (c is null) {
+			throw makeNoField(n, key);
+		} else {
+			return c;
+		}
+	}
 }
 
 /**
