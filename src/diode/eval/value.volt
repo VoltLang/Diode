@@ -11,22 +11,23 @@ alias Sink = ir.Sink;
 
 abstract class Value
 {
-	Value ident(ir.Node n, string key)
+public:
+	fn ident(n : ir.Node, key : string) Value
 	{
 		throw makeNotSet(n);
 	}
 
-	void toText(ir.Node n, Sink)
+	fn toText(n : ir.Node, sink : Sink)
 	{
 		throw makeNotText(n);
 	}
 
-	Value[] toArray(ir.Node n)
+	fn toArray(n : ir.Node) Value[]
 	{
 		throw makeNotArray(n);
 	}
 
-	bool toBool(ir.Node n)
+	fn toBool(n : ir.Node) bool
 	{
 		return true;
 	}
@@ -34,12 +35,13 @@ abstract class Value
 
 class Nil : Value
 {
-	override Value[] toArray(ir.Node)
+public:
+	override fn toArray(n : ir.Node) Value[]
 	{
 		return null;
 	}
 
-	override bool toBool(ir.Node)
+	override fn toBool(n : ir.Node) bool
 	{
 		return false;
 	}
@@ -47,14 +49,17 @@ class Nil : Value
 
 class Bool : Value
 {
-	bool value;
+public:
+	value : bool;
 
-	this(bool value)
+
+public:
+	this(value : bool)
 	{
 		this.value = value;
 	}
 
-	override bool toBool(ir.Node)
+	override fn toBool(n : ir.Node) bool
 	{
 		return value;
 	}	
@@ -62,14 +67,17 @@ class Bool : Value
 
 class Text : Value
 {
-	string text;
+public:
+	text : string;
 
+
+public:
 	this(string text)
 	{
 		this.text = text;
 	}
 
-	override void toText(ir.Node, Sink sink)
+	override fn toText(n : ir.Node, sink : Sink)
 	{
 		sink(text);
 	}
@@ -77,14 +85,17 @@ class Text : Value
 
 class Array : Value
 {
-	Value[] vals;
+public:
+	vals : Value[];
 
-	this(Value[] vals...)
+
+public:
+	this(vals : Value[]...)
 	{
 		this.vals = vals;
 	}
 
-	override Value[] toArray(ir.Node n)
+	override fn toArray(n : ir.Node) Value[]
 	{
 		return vals;
 	}
@@ -92,12 +103,24 @@ class Array : Value
 
 class Set : Value
 {
-	Set parent;
-	Value[string] ctx;
+public:
+	parent : Set;
+	ctx : Value[string];
 
-	override Value ident(ir.Node n, string key)
+
+public:
+	this()
 	{
-		auto ret = key in ctx;
+	}
+
+	this(parent : Set)
+	{
+		this.parent = parent;
+	}
+
+	override fn ident(n : ir.Node, key : string) Value
+	{
+		ret := key in ctx;
 		if (ret !is null) {
 			return *ret;
 		} else if (parent !is null) {

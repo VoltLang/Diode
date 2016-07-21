@@ -8,11 +8,12 @@ import diode.token.token;
 class Writer
 {
 protected:
-	Token[] mTokens;
-	size_t mIndex;
+	mTokens : Token[];
+	mIndex : size_t;
+
 
 public:
-	this(Token[] tokens)
+	this(tokens : Token[])
 	{
 		assert(tokens.length > 0);
 		mTokens = tokens;
@@ -24,7 +25,7 @@ public:
 	 * Side-effects:
 	 *   None.
 	 */
-	final @property Token front()
+	final @property fn front() Token
 	{
 		return mTokens[mIndex];
 	}
@@ -35,7 +36,7 @@ public:
 	 * Side-effects:
 	 *   None.
 	 */
-	final @property Token following()
+	final @property fn following() Token
 	{
 		return lookahead(1);
 	}
@@ -46,7 +47,7 @@ public:
 	 * Side-effects:
 	 *   Icrements mIndex.
 	 */
-	void popFront()
+	fn popFront()
 	{
 		mIndex++;
 		if (mIndex >= mTokens.length) {
@@ -60,9 +61,9 @@ public:
 	 * Side-effects:
 	 *   None.
 	 */
-	final Token lookahead(size_t n)
+	final fn lookahead(n : size_t) Token
 	{
-		size_t i = mIndex + n;
+		i := mIndex + n;
 		if (i >= mTokens.length) {
 			return mTokens[$ - 1];
 		}

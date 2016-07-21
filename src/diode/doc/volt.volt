@@ -50,7 +50,7 @@ public:
 
 
 public:
-	override Value ident(ir.Node n, string key)
+	override fn ident(n : ir.Node, key : string) Value
 	{
 		switch (key) {
 		case "name": return new Text(name);
@@ -70,7 +70,7 @@ public:
 
 
 public:
-	override Value ident(ir.Node n, string key)
+	override fn ident(n : ir.Node,  key : string) Value
 	{
 		c := Collection.make(children, key);
 		if (c !is null) {
@@ -169,7 +169,7 @@ public:
 		}
 	}
 
-	override Value ident(ir.Node n, string key)
+	override fn ident(n : ir.Node, key : string) Value
 	{
 		c := make(vals, key);
 		if (c is null) {

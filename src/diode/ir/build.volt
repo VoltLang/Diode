@@ -5,50 +5,49 @@ module diode.ir.build;
 import ir = diode.ir;
 
 
-ir.File bFile()
+fn bFile() ir.File
 {
 	return new ir.File();
 }
 
-ir.Print bPrint(ir.Exp e)
+fn bPrint(e : ir.Exp) ir.Print
 {
 	return new ir.Print(e);
 }
 
-ir.Text bText(string str)
+fn bText(str : string) ir.Text
 {
 	return new ir.Text(str);
 }
 
-ir.For bFor(string ident, ir.Exp exp, ir.Node[] nodes)
+fn bFor(ident : string, exp : ir.Exp, nodes : ir.Node[]) ir.For
 {
 	return new ir.For(ident, exp, nodes);
 }
 
-ir.If bIf(ir.Exp exp, ir.Node[] nodes)
+fn bIf(exp : ir.Exp, nodes : ir.Node[]) ir.If
 {
 	return new ir.If(exp, nodes);
 }
 
-ir.Access bAccess(ir.Exp exp, string key)
+fn bAccess(exp : ir.Exp, key : string) ir.Access
 {
 	return new ir.Access(exp, key);
 }
 
-ir.Ident bIdent(string ident)
+fn bIdent(ident : string) ir.Ident
 {
 	return new ir.Ident(ident);
 }
 
-
-ir.Print bPrintChain(string start, string[] idents...)
+fn bPrintChain(start : string, idents : string[]...) ir.Print
 {
 	return new ir.Print(bChain(start, idents));
 }
 
-ir.Exp bChain(string start, string[] idents...)
+fn bChain(start : string, idents : string[]...) ir.Exp
 {
-	ir.Exp exp = bIdent(start);
+	exp : ir.Exp = bIdent(start);
 	foreach(ident; idents) {
 		exp = bAccess(exp, ident);
 	}

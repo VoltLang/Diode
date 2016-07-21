@@ -11,13 +11,13 @@ import diode.token.token;
 import diode.token.writer;
 
 
-Token[] lex(Source src)
+fn lex(src : Source) Token[]
 {
-	auto tw = new Writer();
+	tw := new Writer();
 
 	tw.pushToken(ref src.loc, TokenKind.Begin, "BEGIN");
 
-	Status s;
+	s : Status;
 	while (s != Status.End) {
 		final switch (s) with (Status) {
 		case Text:
@@ -47,11 +47,11 @@ enum Status
 	Error = -1,
 }
 
-Status lexToken(Source src, Writer tw, Status status)
+fn lexToken(src : Source, tw : Writer, status : Status) Status
 {
 	assert(status != Status.Text);
 
-	size_t mark = src.save();
+	mark := src.save();
 	src.skipWhitespace();
 	if (src.eof) {
 		return Status.End;
@@ -88,10 +88,10 @@ Status lexToken(Source src, Writer tw, Status status)
 	}
 }
 
-Status lexIdent(Source src, Writer tw, Status status)
+fn lexIdent(src : Source, tw : Writer, status : Status) Status
 {
-	auto loc = src.loc;
-	auto mark = src.save();
+	loc := src.loc;
+	mark := src.save();
 
 	src.popFront();
 	while (src.front.isAlpha() ||
@@ -99,15 +99,15 @@ Status lexIdent(Source src, Writer tw, Status status)
 	       src.front == '_') {
 		src.popFront();
 	}
-	auto v = src.sliceFrom(mark);
+	v := src.sliceFrom(mark);
 	tw.pushToken(ref loc, identifierKind(v), v);
 	return status;
 }
 
-Status lexText(Source src, Writer tw)
+fn lexText(src : Source, tw : Writer) Status
 {
-	auto loc = src.loc;
-	size_t mark = src.save();
+	loc := src.loc;
+	mark := src.save();
 
 	while (!src.eof) {
 		if (src.front == '{' &&
@@ -126,7 +126,7 @@ Status lexText(Source src, Writer tw)
 		return Status.End;
 	}
 
-	auto f = src.following;
+	f := src.following;
 	src.popFront();
 	src.popFront();
 

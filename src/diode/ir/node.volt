@@ -12,7 +12,7 @@ public import watt.text.sink : Sink;
 abstract class Node
 {
 public:
-	abstract Status accept(Visitor v, Sink sink);
+	abstract fn accept(v : Visitor, sink : Sink) Status;
 }
 
 /**
@@ -21,18 +21,19 @@ public:
 class File : Node
 {
 public:
-	Node[] nodes;
+	nodes : Node[];
+
 
 public:
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
-		auto s1 = v.enter(this, sink);
+		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		foreach (n; nodes) {
-			auto s3 = n.accept(v, sink);
+			s3 := n.accept(v, sink);
 			if (s3 == Status.Stop) {
 				return s3;
 			}
@@ -48,16 +49,17 @@ public:
 class Text : Node
 {
 public:
-	string text;
+	text : string;
+
 
 public:
-	this(string text)
+	this(text : string)
 	{
 		assert(text.length > 0);
 		this.text = text;
 	}
 
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
 		return filterParent(v.visit(this, sink));
 	}
@@ -69,24 +71,25 @@ public:
 class Print : Node
 {
 public:
-	Exp exp;
+	exp : Exp;
+
 
 public:
-	this(Exp exp)
+	this(exp : Exp)
 	{
 		assert(exp !is null);
 		this.exp = exp;
 	}
 
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
-		auto s1 = v.enter(this, sink);
+		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(exp !is null);
-		auto s2 = exp.accept(v, sink);
+		s2 := exp.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
@@ -108,16 +111,17 @@ abstract class Exp : Node
 class Ident : Exp
 {
 public:
-	string ident;
+	ident : string;
+
 
 public:
-	this(string ident)
+	this(ident : string)
 	{
 		assert(ident !is null);
 		this.ident = ident;
 	}
 
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
 		return filterParent(v.visit(this, sink));
 	}
@@ -129,11 +133,12 @@ public:
 class Access : Exp
 {
 public:
-	Exp child;
-	string ident;
+	child : Exp;
+	ident : string;
+
 
 public:
-	this(Exp child, string ident)
+	this(child : Exp, ident : string)
 	{
 		assert(child !is null);
 		assert(ident !is null);
@@ -141,15 +146,15 @@ public:
 		this.ident = ident;
 	}
 
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
-		auto s1 = v.enter(this, sink);
+		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(child !is null);
-		auto s2 = child.accept(v, sink);
+		s2 := child.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
@@ -164,32 +169,33 @@ public:
 class If : Node
 {
 public:
-	Node[] nodes;
-	Exp exp;
+	nodes : Node[];
+	exp : Exp;
+
 
 public:
-	this(Exp exp, Node[] nodes)
+	this(exp : Exp, nodes : Node[])
 	{
 		assert(exp !is null);
 		this.exp = exp;
 		this.nodes = nodes;
 	}
 
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
-		auto s1 = v.enter(this, sink);
+		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(exp !is null);
-		auto s2 = exp.accept(v, sink);
+		s2 := exp.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
 
 		foreach (n; nodes) {
-			auto s3 = n.accept(v, sink);
+			s3 := n.accept(v, sink);
 			if (s3 == Status.Stop) {
 				return s3;
 			}
@@ -206,12 +212,13 @@ public:
 class For : Node
 {
 public:
-	string var;
-	Node[] nodes;
-	Exp exp;
+	var : string;
+	nodes : Node[];
+	exp : Exp;
+
 
 public:
-	this(string var, Exp exp, Node[] nodes)
+	this(var : string, exp : Exp, nodes : Node[])
 	{
 		assert(var !is null);
 		assert(exp !is null);
@@ -220,21 +227,21 @@ public:
 		this.nodes = nodes;
 	}
 
-	override Status accept(Visitor v, Sink sink)
+	override fn accept(v : Visitor, sink : Sink) Status
 	{
-		auto s1 = v.enter(this, sink);
+		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
 			return filterParent(s1);
 		}
 
 		assert(exp !is null);
-		auto s2 = exp.accept(v, sink);
+		s2 := exp.accept(v, sink);
 		if (s2 == Status.Stop) {
 			return s2;
 		}
 
 		foreach (n; nodes) {
-			auto s3 = n.accept(v, sink);
+			s3 := n.accept(v, sink);
 			if (s3 == Status.Stop) {
 				return s3;
 			}
@@ -272,26 +279,26 @@ abstract class Visitor
 	alias Continue = Status.Continue;
 	alias ContinueParent = Status.ContinueParent;
 
-	abstract Status enter(File f, Sink sink);
-	abstract Status leave(File f, Sink sink);
+	abstract fn enter(File, Sink) Status;
+	abstract fn leave(File, Sink) Status;
 
-	abstract Status visit(Text t, Sink sink);
-	abstract Status enter(Print p, Sink sink);
-	abstract Status leave(Print p, Sink sink);
-	abstract Status enter(If i, Sink sink);
-	abstract Status leave(If i, Sink sink);
-	abstract Status enter(For f, Sink sink);
-	abstract Status leave(For f, Sink sink);
+	abstract fn visit(Text, Sink) Status;
+	abstract fn enter(Print, Sink) Status;
+	abstract fn leave(Print, Sink) Status;
+	abstract fn enter(If, Sink) Status;
+	abstract fn leave(If, Sink) Status;
+	abstract fn enter(For, Sink) Status;
+	abstract fn leave(For, Sink) Status;
 
-	abstract Status visit(Ident p, Sink sink);
-	abstract Status enter(Access a, Sink sink);
-	abstract Status leave(Access a, Sink sink);
+	abstract fn visit(Ident, Sink) Status;
+	abstract fn enter(Access, Sink) Status;
+	abstract fn leave(Access, Sink) Status;
 }
 
 /**
  * Filter out continue parent and turn that into a continue.
  */
-Status filterParent(Status s)
+fn filterParent(s : Status) Status
 {
 	return s == Status.ContinueParent ? Status.Continue : s;
 }

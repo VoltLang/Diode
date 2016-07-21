@@ -14,12 +14,12 @@ import diode.parser.writer;
 import diode.parser.header;
 
 
-ir.File parse(Source src)
+fn parse(src : Source) ir.File
 {
-	auto tokens = lex(src);
-	auto p = new Parser(tokens);
-	ir.File file;
-	auto s = parseFile(p, out file);
+	tokens := lex(src);
+	p := new Parser(tokens);
+	file : ir.File;
+	s := parseFile(p, out file);
 
 	if (s != Status.Ok) {
 		throw p.makeException();
@@ -33,7 +33,8 @@ private:
 /// Helper alias to make typing easier.
 alias tk = TokenKind;
 
-enum Status {
+enum Status
+{
 	Ok,
 	Error = -1,
 }
@@ -51,36 +52,36 @@ public:
 class Parser : Writer
 {
 protected:
-	Token mErrorToken;
+	mErrorToken : Token;
 
 public:
-	this(Token[] tokens)
+	this(tokens : Token[])
 	{
 		super(tokens);
 	}
 
-	Status error()
+	fn error() Status
 	{
 		mErrorToken = front;
 		return Status.Error;
 	}
 
-	LexerError makeException()
+	fn makeException() LexerError
 	{
 		return new LexerError(mErrorToken, "syntax error");
 	}
 }
 
-Status parseFile(Parser p, out ir.File file)
+fn parseFile(p : Parser, out file : ir.File) Status
 {
 	if (p.front != tk.Begin) {
 		return p.error();
 	}
 	p.popFront();
 
-	Status s;
-	ir.Node node;
-	ir.Node[] nodes;
+	s : Status;
+	node : ir.Node;
+	nodes : ir.Node[];
 	while (p.front != tk.End &&
 	       (s = parseNode(p, out node)) == Status.Ok) {
 		nodes ~= node;
@@ -91,9 +92,9 @@ Status parseFile(Parser p, out ir.File file)
 	return s;
 }
 
-Status parseNode(Parser p, out ir.Node node)
+fn parseNode(p : Parser, out node : ir.Node) Status
 {
-	auto t = p.front;
+	t := p.front;
 	switch (t.kind) with (TokenKind) {
 	case Text:
 		return parseText(p, out node);
@@ -106,7 +107,7 @@ Status parseNode(Parser p, out ir.Node node)
 	}
 }
 
-Status parseText(Parser p, out ir.Node node)
+fn parseText(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.Text);
 	node = bText(p.front.value);
@@ -114,13 +115,13 @@ Status parseText(Parser p, out ir.Node node)
 	return Status.Ok;
 }
 
-Status parsePrint(Parser p, out ir.Node node)
+fn parsePrint(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.OpenPrint);
 	p.popFront();
 
-	ir.Exp exp;
-	auto s = parseExp(p, out exp);
+	exp : ir.Exp;
+	s := parseExp(p, out exp);
 	if (s != Status.Ok ||
 	    p.front != tk.ClosePrint) {
 		return p.error();
@@ -132,7 +133,7 @@ Status parsePrint(Parser p, out ir.Node node)
 	return Status.Ok;
 }
 
-Status parseStatement(Parser p, out ir.Node node)
+fn parseStatement(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.OpenStatement);
 
@@ -144,20 +145,20 @@ Status parseStatement(Parser p, out ir.Node node)
 	}
 }
 
-Status parseIf(Parser p, out ir.Node node)
+fn parseIf(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.OpenStatement);
 	p.popFront();
 
 	// This is a if.
-	ir.Exp exp;
-	ir.Node[] nodes;
+	exp : ir.Exp;
+	nodes : ir.Node[];
 
 	// 'if' something.ident
 	assert(p.front == tk.If);
 	p.popFront();
 
-	auto s1 = parseExp(p, out exp);
+	s1 := parseExp(p, out exp);
 	if (s1 != Status.Ok) {
 		return s1;
 	}
@@ -173,8 +174,8 @@ Status parseIf(Parser p, out ir.Node node)
 		    p.following == tk.EndIf) {
 			break;
 		}
-		ir.Node n;
-		auto s2 = parseNode(p, out n);
+		n : ir.Node;
+		s2 := parseNode(p, out n);
 		if (s2 != Status.Ok) {
 			return s2;
 		}
@@ -201,15 +202,15 @@ Status parseIf(Parser p, out ir.Node node)
 	return Status.Ok;
 }
 
-Status parseFor(Parser p, out ir.Node node)
+fn parseFor(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.OpenStatement);
 	p.popFront();
 
 	// This is a for.
-	string ident;
-	ir.Exp exp;
-	ir.Node[] nodes;
+	ident : string;
+	exp : ir.Exp;
+	nodes : ir.Node[];
 
 	// 'for' ident in something.exp
 	assert(p.front == tk.For);
@@ -228,7 +229,7 @@ Status parseFor(Parser p, out ir.Node node)
 	}
 	p.popFront();
 
-	auto s1 = parseExp(p, out exp);
+	s1 := parseExp(p, out exp);
 	if (s1 != Status.Ok) {
 		return s1;
 	}
@@ -244,8 +245,8 @@ Status parseFor(Parser p, out ir.Node node)
 		    p.following == tk.EndFor) {
 			break;
 		}
-		ir.Node n;
-		auto s2 = parseNode(p, out n);
+		n : ir.Node;
+		s2 := parseNode(p, out n);
 		if (s2 != Status.Ok) {
 			return s2;
 		}
@@ -272,7 +273,7 @@ Status parseFor(Parser p, out ir.Node node)
 	return Status.Ok;
 }
 
-Status parseExp(Parser p, out ir.Exp exp)
+fn parseExp(p : Parser, out exp : ir.Exp) Status
 {
 	if (p.front != tk.Identifier) {
 		return p.error();

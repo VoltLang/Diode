@@ -12,10 +12,10 @@ import diode.errors;
 class Header
 {
 public:
-	string[string] map;
+	map : string[string];
 }
 
-Header parse(Source src)
+fn parse(src : Source) Header
 {
 	if (!src.isTrippleDash()) {
 		return null;
@@ -23,7 +23,7 @@ Header parse(Source src)
 	// Skip the dashes and the rest of the line.
 	src.skipEndOfLine();
 
-	auto header = new Header();
+	header := new Header();
 
 	//writefln("DFD %s", src.mSrc.mLastIndex);
 
@@ -36,9 +36,9 @@ Header parse(Source src)
 		// We now know that this is not a tripple dash line
 		// and the character that src is point on is not a
 		// whitespace character.
-		auto key = src.getIdent();
+		key := src.getIdent();
 		src.skipWhiteTillAfterColon();
-		auto val = src.getRestOfLine().strip();
+		val := src.getRestOfLine().strip();
 
 		// Update the key in the header.
 		header.map[key] = val;
@@ -53,9 +53,9 @@ Header parse(Source src)
 /**
  * Does not advance the source, just check if the next 3 chars are dashes.
  */
-bool isTrippleDash(Source src)
+fn isTrippleDash(src : Source) bool
 {
-	bool eof;
+	eof : bool;
 
 	return src.lookahead(0, out eof) == '-' &&
 	       src.lookahead(1, out eof) == '-' &&
@@ -65,9 +65,9 @@ bool isTrippleDash(Source src)
 /**
  * Does what it says on the tin, yes I felt bad naming this function.
  */
-bool skipWhiteAndCheckIfEmptyLine(Source src)
+fn skipWhiteAndCheckIfEmptyLine(src : Source) bool
 {
-	dchar d = src.front;
+	d := src.front;
 	while (d != '\n' && d.isWhite() && !src.eof) {
 		src.popFront();
 		d == src.front;
@@ -81,9 +81,9 @@ bool skipWhiteAndCheckIfEmptyLine(Source src)
 	}
 }
 
-void skipWhiteTillAfterColon(Source src)
+fn skipWhiteTillAfterColon(src : Source)
 {
-	dchar d = src.front;
+	d := src.front;
 	while (d != ':' && !src.eof) {
 		if (!src.front.isWhite()) {
 			throw makeBadHeader(ref src.loc);
@@ -96,9 +96,9 @@ void skipWhiteTillAfterColon(Source src)
 	}
 }
 
-string getIdent(Source src)
+fn getIdent(src : Source) string
 {
-	auto mark = src.save();
+	mark := src.save();
 	if (!src.front.isAlpha()) {
 		throw makeBadHeader(ref src.loc);
 	}
@@ -112,15 +112,15 @@ string getIdent(Source src)
 	return src.sliceFrom(mark);
 }
 
-string getRestOfLine(Source src)
+fn getRestOfLine(src : Source) string
 {
-	auto mark = src.save();
-	dchar d = src.front;
+	mark := src.save();
+	d := src.front;
 	while (d != '\n' && !src.eof) {
 		src.popFront();
 		d = src.front;
 	}
-	auto ret = src.sliceFrom(mark);
+	ret := src.sliceFrom(mark);
 	if (d == '\n') {
 		src.popFront();
 	}

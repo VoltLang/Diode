@@ -8,7 +8,7 @@ module main;
 import diode.interfaces;
 
 
-int main(string[] args)
+fn main(args : string[]) i32
 {
 	test();
 	return 0;
@@ -29,13 +29,13 @@ import diode.parser : parse;
 import diode.interfaces;
 
 
-void test()
+fn test()
 {
-	auto s = new Settings();
+	s := new Settings();
 	s.workDir = "example";
 	s.fillInDefaults();
 
-	auto d = new DiodeDriver(s);
+	d := new DiodeDriver(s);
 	d.addLayout(defaultHtmlFile, "default.html");
 	d.addLayout(pageHtmlFile, "page.html");
 	d.addDoc(testDocJsonFile, "exp.json");

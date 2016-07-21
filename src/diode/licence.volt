@@ -2,8 +2,9 @@
 // See copyright just below.
 module diode.license;
 
+
 /**
- * This is the license for the diode .
+ * This is the license for the diode.
  */
 enum string license = `
 Copyright © 2015, Jakob Bornecrantz. All rights reserved.
@@ -33,9 +34,9 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 `;
 
-static string[] licenseArray;
+global licenseArray : string[];
 
-static this()
+global this()
 {
 	licenseArray ~= license;
 }

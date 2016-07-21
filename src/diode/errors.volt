@@ -10,7 +10,7 @@ import ir = diode.ir;
 
 class DiodeException : Exception
 {
-	this(string msg)
+	this(msg : string)
 	{
 		super(msg);
 	}
@@ -23,32 +23,32 @@ class DiodeException : Exception
  *
  */
 
-DiodeException makeNoExtension(string file)
+fn makeNoExtension(file : string) DiodeException
 {
-	auto str = format("error: no file extension '%s'", file);
+	str := format("error: no file extension '%s'", file);
 	return new DiodeException(str);
 }
 
-DiodeException makeExtensionNotSupported(string file)
+fn makeExtensionNotSupported(file : string) DiodeException
 {
-	auto str = format("error: file extension not supported '%s'", file);
+	str := format("error: file extension not supported '%s'", file);
 	return new DiodeException(str);
 }
 
-DiodeException makeLayoutNotFound(string file, string layout)
+fn makeLayoutNotFound(file : string, layout : string) DiodeException
 {
-	auto str = format("%s:1 error: layout '%s' not found", file, layout);
+	str := format("%s:1 error: layout '%s' not found", file, layout);
 	return new DiodeException(str);
 }
 
-DiodeException makeConversionNotSupported(string layout, string contents)
+fn makeConversionNotSupported(layout : string, contents : string) DiodeException
 {
-	auto str = format("%s:1 error: can not convert '%s' -> '%s'",
+	str := format("%s:1 error: can not convert '%s' -> '%s'",
 	                  contents, contents, layout);
 	return new DiodeException(str);
 }
 
-DiodeException makeBadHeader(ref Location loc)
+fn makeBadHeader(ref loc : Location) DiodeException
 {
 	return new DiodeException(loc.toString() ~ "error: invalid header");
 }
@@ -62,30 +62,33 @@ DiodeException makeBadHeader(ref Location loc)
 
 class EvalException : DiodeException
 {
-	ir.Node n;
+public:
+	n : ir.Node;
 
-	this(ir.Node n, string msg)
+
+public:
+	this(n : ir.Node, msg : string)
 	{
 		super(msg);
 	}
 }
 
-EvalException makeNoField(ir.Node n, string key)
+fn makeNoField(n : ir.Node, key : string) EvalException
 {
 	return new EvalException(n, "no field named '" ~ key ~ "'");
 }
 
-EvalException makeNotSet(ir.Node n)
+fn makeNotSet(n : ir.Node) EvalException
 {
 	return new EvalException(n, "value is not a set");
 }
 
-EvalException makeNotText(ir.Node n)
+fn makeNotText(n : ir.Node) EvalException
 {
 	return new EvalException(n, "value is not text (or convertable)");
 }
 
-EvalException makeNotArray(ir.Node n)
+fn makeNotArray(n : ir.Node) EvalException
 {
 	return new EvalException(n, "value is not an array");
 }

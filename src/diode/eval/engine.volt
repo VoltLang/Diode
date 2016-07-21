@@ -9,37 +9,37 @@ import diode.eval.value;
 class Engine : ir.Visitor
 {
 public:
-	Set env;
-	Value v;
+	env : Set;
+	v : Value;
 
-	this(Set env)
+	this(env : Set)
 	{
 		assert(env !is null);
 		this.env = env;
 	}
 
 public:
-	override Status visit(ir.Text t, Sink sink)
+	override fn visit(t : ir.Text, sink : Sink) Status
 	{
 		sink(t.text);
 		return Continue;
 	}
 
-	override Status leave(ir.Print f, Sink sink)
+	override fn leave(p : ir.Print, sink : Sink) Status
 	{
-		v.toText(f, sink);
+		v.toText(p, sink);
 		v = null;
 		return Continue;
 	}
 
-	override Status enter(ir.If i, Sink sink)
+	override fn enter(i : ir.If, sink : Sink) Status
 	{
 		// Eval expression
 		// if 'site.has_feature'
 		v = null;
 		i.exp.accept(this, sink);
 		assert(v !is null);
-		bool cond = v.toBool(i);
+		cond := v.toBool(i);
 		v = null;
 
 		// If the cond is false nothing more to do.
@@ -49,7 +49,7 @@ public:
 
 		// Create a new env for the child nodes.
 		// 'if' site.has_feature
-		auto myEnv = new Set();
+		myEnv := new Set();
 		myEnv.parent = env;
 		env = myEnv;
 
@@ -63,7 +63,7 @@ public:
 		return ContinueParent;
 	}
 
-	override Status enter(ir.For f, Sink sink)
+	override fn enter(f : ir.For, sink : Sink) Status
 	{
 		// Eval expression
 		// for post in 'site.url'
@@ -73,14 +73,14 @@ public:
 
 		// Set new env with var in it.
 		// for 'post' in site.url
-		auto myEnv = new Set();
+		myEnv := new Set();
 		myEnv.parent = env;
-		auto arr = v.toArray(f.exp);
+		arr := v.toArray(f.exp);
 		v = null;
 
-		auto first = new Bool(true);
-		auto last = new Bool(false);
-		auto forloop = new Set();
+		first := new Bool(true);
+		last := new Bool(false);
+		forloop := new Set();
 		forloop.ctx["first"] = first;
 		forloop.ctx["last"] = last;
 		env.ctx["forloop"] = forloop;
@@ -109,14 +109,14 @@ public:
 	 *
 	 */
 
-	override Status leave(ir.Access p, Sink sink)
+	override fn leave(p : ir.Access, sink : Sink) Status
 	{
 		assert(v !is null);
 		v = v.ident(p, p.ident);
 		return Continue;
 	}
 
-	override Status visit(ir.Ident p, Sink sink)
+	override fn visit(p : ir.Ident, sink : Sink) Status
 	{
 		v = env.ident(p, p.ident);
 		return Continue;
@@ -129,10 +129,10 @@ public:
 	 *
 	 */
 
-	override Status enter(ir.File, Sink sink) { return Continue; }
-	override Status leave(ir.File, Sink sink) { return Continue; }
-	override Status enter(ir.Access, Sink sink) { return Continue; }
-	override Status enter(ir.Print, Sink sink) { return Continue; }
-	override Status leave(ir.If, Sink sink) { assert(false); }
-	override Status leave(ir.For, Sink sink) { assert(false); }
+	override fn enter(ir.File, Sink) Status { return Continue; }
+	override fn leave(ir.File, Sink) Status { return Continue; }
+	override fn enter(ir.Access, Sink) Status { return Continue; }
+	override fn enter(ir.Print, Sink) Status { return Continue; }
+	override fn leave(ir.If, Sink) Status { assert(false); }
+	override fn leave(ir.For, Sink) Status { assert(false); }
 }
