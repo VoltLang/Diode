@@ -25,6 +25,11 @@ abstract class Value
 	{
 		throw makeNotArray(n);
 	}
+
+	bool toBool(ir.Node n)
+	{
+		return true;
+	}
 }
 
 class Nil : Value
@@ -33,6 +38,26 @@ class Nil : Value
 	{
 		return null;
 	}
+
+	override bool toBool(ir.Node)
+	{
+		return false;
+	}
+}
+
+class Bool : Value
+{
+	bool value;
+
+	this(bool value)
+	{
+		this.value = value;
+	}
+
+	override bool toBool(ir.Node)
+	{
+		return value;
+	}	
 }
 
 class Text : Value
