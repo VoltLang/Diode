@@ -46,6 +46,7 @@ enum TokenKind
 	// Symbols
 	Dot,
 	Pipe,
+	Comma,
 
 	// Keywords
 	Nil,
