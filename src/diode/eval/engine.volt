@@ -47,9 +47,20 @@ public:
 		auto arr = v.toArray(f.exp);
 		v = null;
 
+		auto first = new Bool(true);
+		auto last = new Bool(false);
+		auto forloop = new Set();
+		forloop.ctx["first"] = first;
+		forloop.ctx["last"] = last;
+		env.ctx["forloop"] = forloop;
+
 		// Setup new env and loop over nodes.
 		env = myEnv;
-		foreach(elm; arr) {
+		foreach(i, elm; arr) {
+			// Update variables
+			first.value = i == 0;
+			last.value = i == arr.length - 1;
+
 			env.ctx[f.var] = elm;
 			foreach(n; f.nodes) {
 				n.accept(this, sink);
