@@ -17,7 +17,7 @@ public:
 
 fn parse(src : Source) Header
 {
-	if (!src.isTrippleDash()) {
+	if (!src.isTripleDash()) {
 		return null;
 	}
 	// Skip the dashes and the rest of the line.
@@ -27,7 +27,7 @@ fn parse(src : Source) Header
 
 	//writefln("DFD %s", src.mSrc.mLastIndex);
 
-	while (!src.eof && !src.isTrippleDash()) {
+	while (!src.eof && !src.isTripleDash()) {
 		// If it is a empty line, just skip it.
 		if (src.skipWhiteAndCheckIfEmptyLine()) {
 			continue;
@@ -53,7 +53,7 @@ fn parse(src : Source) Header
 /**
  * Does not advance the source, just check if the next 3 chars are dashes.
  */
-fn isTrippleDash(src : Source) bool
+fn isTripleDash(src : Source) bool
 {
 	eof : bool;
 
