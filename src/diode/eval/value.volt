@@ -14,17 +14,17 @@ abstract class Value
 public:
 	fn ident(n : ir.Node, key : string) Value
 	{
-		throw makeNotSet(n);
+		return null;
 	}
 
 	fn toText(n : ir.Node, sink : Sink)
 	{
-		throw makeNotText(n);
+
 	}
 
 	fn toArray(n : ir.Node) Value[]
 	{
-		throw makeNotArray(n);
+		return null;
 	}
 
 	fn toBool(n : ir.Node) bool
@@ -36,11 +36,6 @@ public:
 class Nil : Value
 {
 public:
-	override fn toArray(n : ir.Node) Value[]
-	{
-		return null;
-	}
-
 	override fn toBool(n : ir.Node) bool
 	{
 		return false;
@@ -57,6 +52,11 @@ public:
 	this(value : bool)
 	{
 		this.value = value;
+	}
+
+	override fn toText(n : ir.Node, sink : Sink)
+	{
+		sink(value ? "true" : "false");
 	}
 
 	override fn toBool(n : ir.Node) bool
@@ -126,7 +126,7 @@ public:
 		} else if (parent !is null) {
 			return parent.ident(n, key);
 		} else {
-			throw makeNoField(n, key);
+			return new Nil();
 		}
 	}
 }
