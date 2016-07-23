@@ -49,16 +49,16 @@ public:
 
 		// Create a new env for the child nodes.
 		// 'if' site.has_feature
-		myEnv := new Set();
-		myEnv.parent = env;
-		env = myEnv;
+		parent := env;
+		env = new Set();
+		env.parent = parent;
 
 		// Walk the nodes if cond is true.
 		// 'if' site.has_feature
 		foreach (n; i.nodes) {
 			n.accept(this, sink);
 		}
-		env = env.parent;
+		env = parent;
 
 		return ContinueParent;
 	}
@@ -73,31 +73,32 @@ public:
 
 		// Set new env with var in it.
 		// for 'post' in site.url
-		myEnv := new Set();
-		myEnv.parent = env;
 		arr := v.toArray(f.exp);
 		v = null;
 
+		parent := env;
 		first := new Bool(true);
 		last := new Bool(false);
 		forloop := new Set();
 		forloop.ctx["first"] = first;
 		forloop.ctx["last"] = last;
-		env.ctx["forloop"] = forloop;
 
 		// Setup new env and loop over nodes.
-		env = myEnv;
 		foreach(i, elm; arr) {
+			env = new Set();
+			env.parent = parent;
+			env.ctx[f.var] = elm;
+			env.ctx["forloop"] = forloop;
+
 			// Update variables
 			first.value = i == 0;
 			last.value = i == arr.length - 1;
 
-			env.ctx[f.var] = elm;
 			foreach(n; f.nodes) {
 				n.accept(this, sink);
 			}
 		}
-		env = env.parent;
+		env = parent;
 
 		return ContinueParent;
 	}
