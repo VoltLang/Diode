@@ -20,6 +20,11 @@ fn bText(str : string) ir.Text
 	return new ir.Text(str);
 }
 
+fn bAssign(ident : string, exp : ir.Exp) ir.Assign
+{
+	return new ir.Assign(ident, exp);
+}
+
 fn bFor(ident : string, exp : ir.Exp, nodes : ir.Node[]) ir.For
 {
 	return new ir.For(ident, exp, nodes);

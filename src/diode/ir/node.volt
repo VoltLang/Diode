@@ -251,6 +251,39 @@ public:
 	}
 }
 
+class Assign : Node
+{
+public:
+	ident : string;
+	exp : Exp;
+
+
+public:
+	this(ident : string, exp : Exp)
+	{
+		assert(ident !is null);
+		assert(exp !is null);
+		this.ident = ident;
+		this.exp = exp;
+	}
+
+	override fn accept(v : Visitor, sink : Sink) Status
+	{
+		s1 := v.enter(this, sink);
+		if (s1 != Status.Continue) {
+			return filterParent(s1);
+		}
+
+		assert(exp !is null);
+		s2 := exp.accept(v, sink);
+		if (s2 == Status.Stop) {
+			return s2;
+		}
+
+		return filterParent(v.leave(this, sink));
+	}
+}
+
 
 /*
  *
@@ -289,6 +322,8 @@ abstract class Visitor
 	abstract fn leave(If, Sink) Status;
 	abstract fn enter(For, Sink) Status;
 	abstract fn leave(For, Sink) Status;
+	abstract fn enter(Assign, Sink) Status;
+	abstract fn leave(Assign, Sink) Status;
 
 	abstract fn visit(Ident, Sink) Status;
 	abstract fn enter(Access, Sink) Status;

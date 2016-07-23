@@ -103,6 +103,15 @@ public:
 		return ContinueParent;
 	}
 
+	override fn leave(a : ir.Assign, sink : Sink) Status
+	{
+		assert(a.ident !is null);
+		assert(v !is null);
+		env.ctx[a.ident] = v;
+		v = null;
+
+		return Continue;
+	}
 
 	/*
 	 *
@@ -130,6 +139,7 @@ public:
 	 *
 	 */
 
+	override fn enter(ir.Assign, Sink) Status { return Continue; }
 	override fn enter(ir.File, Sink) Status { return Continue; }
 	override fn leave(ir.File, Sink) Status { return Continue; }
 	override fn enter(ir.Access, Sink) Status { return Continue; }
