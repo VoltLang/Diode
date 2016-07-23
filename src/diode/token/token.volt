@@ -47,6 +47,7 @@ enum TokenKind
 	Dot,
 	Pipe,
 	Comma,
+	Assign,
 
 	// Keywords
 	Nil,

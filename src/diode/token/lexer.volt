@@ -86,6 +86,10 @@ fn lexToken(src : Source, tw : Writer, status : Status) Status
 		tw.pushToken(ref src.loc, TokenKind.Comma, ",");
 		src.popFront();
 		return status;
+	case '=':
+		tw.pushToken(ref src.loc, TokenKind.Assign, "=");
+		src.popFront();
+		return status;
 	case '_':
 		return lexIdent(src, tw, status);
 	default:
