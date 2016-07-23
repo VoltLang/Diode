@@ -5,7 +5,7 @@ module diode.parser.parser;
 import watt.text.source;
 
 import ir = diode.ir;
-import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAccess, bIdent;
+import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bAccess, bIdent;
 
 import diode.errors;
 import diode.token.lexer : lex;
@@ -145,6 +145,7 @@ fn parseStatement(p : Parser, out node : ir.Node) Status
 	switch (p.following.value) {
 	case "if": return parseIf(p, out node);
 	case "for": return parseFor(p, out node);
+	case "assign": return parseAssign(p, out node);
 	default: return p.error();
 	}
 }
@@ -274,6 +275,48 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	p.popFront();
 
 	node = bFor(ident, exp, nodes);
+	return Status.Ok;
+}
+
+fn parseAssign(p : Parser, out node : ir.Node) Status
+{
+	assert(p.front == tk.OpenStatement);
+	p.popFront();
+
+	// This is a assign.
+	ident : string;
+	exp : ir.Exp;
+
+	// 'assign' ident = exp
+	assert(p.front == "assign");
+	p.popFront();
+
+	// assign 'ident' = exp
+	if (p.front != tk.Identifier) {
+		return p.error();
+	}
+	ident = p.front.value;
+	p.popFront();
+
+	// assign ident '=' exp
+	if (p.front != tk.Assign) {
+		return p.error();
+	}
+	p.popFront();
+
+	// assign ident = 'exp'
+	s1 := parseExp(p, out exp);
+	if (s1 != Status.Ok) {
+		return s1;
+	}
+
+	// Check the end.
+	if (p.front != tk.CloseStatement) {
+		return p.error();
+	}
+	p.popFront();
+
+	node = bAssign(ident, exp);
 	return Status.Ok;
 }
 
