@@ -42,8 +42,8 @@ public:
 		cond := v.toBool(i);
 		v = null;
 
-		// If the cond is false nothing more to do.
-		if (!cond) {
+		// If the cond is false nothing more to do, unless its inverted.
+		if (cond == i.invert) {
 			return ContinueParent;
 		}
 
@@ -112,6 +112,7 @@ public:
 
 		return Continue;
 	}
+
 
 	/*
 	 *

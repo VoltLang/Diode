@@ -30,9 +30,9 @@ fn bFor(ident : string, exp : ir.Exp, nodes : ir.Node[]) ir.For
 	return new ir.For(ident, exp, nodes);
 }
 
-fn bIf(exp : ir.Exp, nodes : ir.Node[]) ir.If
+fn bIf(invert : bool, exp : ir.Exp, nodes : ir.Node[]) ir.If
 {
-	return new ir.If(exp, nodes);
+	return new ir.If(invert, exp, nodes);
 }
 
 fn bAccess(exp : ir.Exp, key : string) ir.Access

@@ -143,24 +143,26 @@ fn parseStatement(p : Parser, out node : ir.Node) Status
 
 	// We use identifiers instead of special tokens for statements.
 	switch (p.following.value) {
-	case "if": return parseIf(p, out node);
 	case "for": return parseFor(p, out node);
 	case "assign": return parseAssign(p, out node);
+	case "unless", "if": return parseIfUnless(p, out node);
 	default: return p.error();
 	}
 }
 
-fn parseIf(p : Parser, out node : ir.Node) Status
+fn parseIfUnless(p : Parser, out node : ir.Node) Status
 {
 	assert(p.front == tk.OpenStatement);
 	p.popFront();
 
-	// This is a if.
+	// This is a if or unless.
+	invert : bool;
 	exp : ir.Exp;
 	nodes : ir.Node[];
 
-	// 'if' something.ident
-	assert(p.front == "if");
+	// ['if'|'unless'] something.ident
+	assert(p.front == "if" || p.front == "unless");
+	invert = p.front == "unless";
 	p.popFront();
 
 	s1 := parseExp(p, out exp);
@@ -203,7 +205,7 @@ fn parseIf(p : Parser, out node : ir.Node) Status
 
 	p.popFront();
 
-	node = bIf(exp, nodes);
+	node = bIf(invert, exp, nodes);
 	return Status.Ok;
 }
 

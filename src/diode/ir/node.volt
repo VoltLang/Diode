@@ -171,12 +171,14 @@ class If : Node
 public:
 	nodes : Node[];
 	exp : Exp;
+	invert : bool;
 
 
 public:
-	this(exp : Exp, nodes : Node[])
+	this(invert : bool, exp : Exp, nodes : Node[])
 	{
 		assert(exp !is null);
+		this.invert = invert;
 		this.exp = exp;
 		this.nodes = nodes;
 	}
