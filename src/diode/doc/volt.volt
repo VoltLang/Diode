@@ -91,9 +91,22 @@ public:
  */
 class Arg : Base
 {
+public:
 	name : string;
 	type : string;
 	typeFull : string;
+
+
+public:
+	override fn ident(n : ir.Node,  key : string) Value
+	{
+		switch (key) {
+		case "name": return new Text(name);
+		case "type": return new Text(type);
+		case "typeFull": return new Text(typeFull);
+		default: throw makeNoField(n, key);
+		}
+	}
 }
 
 /**
@@ -101,8 +114,20 @@ class Arg : Base
  */
 class Return : Base
 {
+public:
 	type : string;
 	typeFull : string;
+
+
+public:
+	override fn ident(n : ir.Node,  key : string) Value
+	{
+		switch (key) {
+		case "type": return new Text(type);
+		case "typeFull": return new Text(typeFull);
+		default: throw makeNoField(n, key);
+		}
+	}
 }
 
 /**
@@ -110,8 +135,20 @@ class Return : Base
  */
 class Variable : Named
 {
+public:
 	type : string;
 	typeFull : string;
+
+
+public:
+	override fn ident(n : ir.Node,  key : string) Value
+	{
+		switch (key) {
+		case "type": return makeNilOrText(type);
+		case "typeFull": return makeNilOrText(typeFull);
+		default: return super.ident(n, key);
+		}
+	}
 }
 
 /**
@@ -119,8 +156,20 @@ class Variable : Named
  */
 class Function : Named
 {
+public:
 	args : Value[];
 	rets : Value[];
+
+
+public:
+	override fn ident(n : ir.Node,  key : string) Value
+	{
+		switch (key) {
+		case "args": return makeNilOrArray(args);
+		case "rets": return makeNilOrArray(rets);
+		default: return super.ident(n, key);
+		}
+	}
 }
 
 /**
@@ -179,6 +228,31 @@ public:
 		}
 	}
 }
+
+/**
+ * Create a text Value, nil if string is empty.
+ */
+fn makeNilOrText(text : string) Value
+{
+	if (text.length == 0) {
+		return new Nil();
+	} else {
+		return new Text(text);
+	}
+}
+
+/**
+ * Create a array Value, nil if string is empty.
+ */
+fn makeNilOrArray(array : Value[]) Value
+{
+	if (array.length == 0) {
+		return new Nil();
+	} else {
+		return new Array(array);
+	}
+}
+
 
 /**
  * Used to collect information during parsing.
