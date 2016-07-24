@@ -5,6 +5,7 @@
  */
 module main;
 
+import diode.licence;
 import diode.interfaces;
 
 
