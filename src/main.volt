@@ -79,6 +79,9 @@ layout: default
 
 enum string defaultHtmlFile = `<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <link rel="stylesheet" href="style.css" type="text/css">
+  </head>
   <body>
 {{ content }}
   </body>
