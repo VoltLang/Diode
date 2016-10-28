@@ -62,7 +62,7 @@ public:
 	override fn toBool(n : ir.Node) bool
 	{
 		return value;
-	}	
+	}
 }
 
 class Text : Value
