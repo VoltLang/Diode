@@ -14,7 +14,7 @@ abstract class Value
 public:
 	fn ident(n : ir.Node, key : string) Value
 	{
-		return null;
+		return new Nil();
 	}
 
 	fn toText(n : ir.Node, sink : Sink)
