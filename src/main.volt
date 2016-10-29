@@ -55,31 +55,37 @@ title: Test
 	<span class='listname'>Getting Started</span>
 	<span class='listsearch'>Getting Started</span>
 </span>
-{% for mod in doc.modules %}
+{%- for mod in doc.modules -%}
 <span class='indexcommand mod'>
 	<span class='listname'>module {{ mod.name }}</span>
 	<span class='listsearch'>{{ mod.name }}</span>
 </span>
-{% endfor %}
-{% for mod in doc.modules %}
-{% for class in mod.classes %}
+{%- endfor -%}
+{%- for mod in doc.modules -%}
+{%- for class in mod.classes -%}
 <span class='indexcommand class'>
 	<span class='listname'>class {{ mod.name }}.{{ class.name }} { }</span>
 	<span class='listsearch'>{{ mod.name }}.{{ class.name }}</span>
 </span>
-{% endfor %}
-{% endfor %}
-{% for mod in doc.modules %}
-{% for func in mod.functions %}
+{%- endfor -%}
+{%- endfor -%}
+{%- for mod in doc.modules -%}
+{%- for func in mod.functions -%}
 <span class='indexcommand fn'>
-	<span class='listname'>fn {{ mod.name }}.{{ func.name }}({%
-for arg in func.args %}{{ arg.type
-}}{% unless forloop.last %}, {% endif %}{% endfor %}) {%
-for r in func.rets %}{{ r.type }}{% endfor %}</span>
+	<span class='listname'>fn {{ mod.name }}.{{ func.name }}(
+{%- for arg in func.args -%}
+{{- arg.type -}}
+{%- unless forloop.last %}, {% endif -%}
+{%- endfor %}) {% for r in func.rets -%}
+{{- r.type -}}
+{%- endfor -%}
+{%- if func.hasBody %} { }{% endif -%}
+{%- unless func.hasBody -%};{% endif -%}
+</span>
 	<span class='listsearch'>{{ mod.name }}.{{ func.name }}</span>
 </span>
-{% endfor %}
-{% endfor %}
+{%- endfor -%}
+{%- endfor -%}
 `;
 
 enum string testMdFile = r"---
