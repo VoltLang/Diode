@@ -37,6 +37,7 @@ fn test()
 	s.fillInDefaults();
 
 	d := new DiodeDriver(s);
+	d.addLayout(noneFile, "none.html");
 	d.addLayout(defaultHtmlFile, "default.html");
 	d.addLayout(pageHtmlFile, "page.html");
 	d.addDoc(testDocJsonFile, "exp.json");
@@ -129,6 +130,8 @@ for r in f.rets %}{{ r.type }}{% endfor %};
 
 {% endfor %}
 ";
+
+enum string noneFile = "{{ content }}";
 
 enum string pageHtmlFile = `---
 layout: default
