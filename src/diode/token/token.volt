@@ -38,6 +38,7 @@ enum TokenKind
 
 	// Control Tokens.
 	Text,
+	Hyphen,
 	OpenPrint,
 	ClosePrint,
 	OpenStatement,

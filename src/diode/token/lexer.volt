@@ -51,6 +51,7 @@ fn lexToken(src : Source, tw : Writer, status : Status) Status
 {
 	assert(status != Status.Text);
 
+	hyphen := false;
 	mark := src.save();
 	src.skipWhitespace();
 	if (src.eof) {
@@ -58,11 +59,27 @@ fn lexToken(src : Source, tw : Writer, status : Status) Status
 	}
 
 	switch (src.front) {
+	case '-':
+		src.popFront();
+		if (src.front == '}') {
+			hyphen = true;
+			goto case '}';
+		} else if (src.front == '%') {
+			hyphen = true;
+			goto case '%';
+		} else {
+			return Status.Error;
+		}
+		assert(false);
 	case '}':
 		if (src.following != '}') {
 			return Status.Error;
 		}
 		tw.pushToken(ref src.loc, TokenKind.ClosePrint, "}}");
+		// Add the hyphen token after the ClosePrint token.
+		if (hyphen) {
+			tw.pushToken(ref src.loc, TokenKind.Hyphen, "-");
+		}
 		src.popFront();
 		src.popFront();
 		return Status.Text;
@@ -71,6 +88,10 @@ fn lexToken(src : Source, tw : Writer, status : Status) Status
 			return Status.Error;
 		}
 		tw.pushToken(ref src.loc, TokenKind.CloseStatement, "%}");
+		// Add the hyphen token after the CloseStatement token.
+		if (hyphen) {
+			tw.pushToken(ref src.loc, TokenKind.Hyphen, "-");
+		}
 		src.popFront();
 		src.popFront();
 		return Status.Text;
@@ -130,8 +151,9 @@ fn lexText(src : Source, tw : Writer) Status
 		src.popFront();
 	}
 
-	if (mark != src.save()) {
-		tw.pushToken(ref loc, TokenKind.Text, src.sliceFrom(mark));
+	text := src.sliceFrom(mark);
+	if (text.length > 0) {
+		tw.pushToken(ref loc, TokenKind.Text, text);
 	}
 
 	if (src.eof) {
@@ -141,6 +163,12 @@ fn lexText(src : Source, tw : Writer) Status
 	f := src.following;
 	src.popFront();
 	src.popFront();
+
+	// Add the hyphen before the Open[Statement|Print] token.
+	if (src.front == '-') {
+		tw.pushToken(ref src.loc, TokenKind.Hyphen, "-");
+		src.popFront();
+	}
 
 	switch (f) with (TokenKind) {
 	case '%':

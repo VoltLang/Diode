@@ -3,6 +3,7 @@
 module diode.parser.parser;
 
 import watt.text.source;
+import watt.text.string : stripLeft, stripRight;
 
 import ir = diode.ir;
 import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bAccess, bIdent;
@@ -80,11 +81,12 @@ fn parseFile(p : Parser, out file : ir.File) Status
 	p.popFront();
 
 	s : Status;
-	node : ir.Node;
 	nodes : ir.Node[];
-	while (p.front != tk.End &&
-	       (s = parseNode(p, out node)) == Status.Ok) {
-		nodes ~= node;
+	while (p.front != tk.End) {
+		s = parseNode(p, ref nodes);
+		if (s != Status.Ok) {
+			return s;
+		}
 	}
 
 	file = bFile();
@@ -92,26 +94,62 @@ fn parseFile(p : Parser, out file : ir.File) Status
 	return s;
 }
 
-fn parseNode(p : Parser, out node : ir.Node) Status
+fn parseNode(p : Parser, ref nodes : ir.Node[]) Status
 {
+	s: Status;
+	node: ir.Node;
 	t := p.front;
 	switch (t.kind) with (TokenKind) {
 	case Text:
-		return parseText(p, out node);
+	case Hyphen:
+		s = parseText(p, out node); break;
 	case OpenPrint:
-		return parsePrint(p, out node);
+		s = parsePrint(p, out node); break;
 	case OpenStatement:
-		return parseStatement(p, out node);
+		s = parseStatement(p, out node); break;
 	default:
-		return p.error();
+		s = p.error();
 	}
+
+	if (node !is null) {
+		nodes ~= node;
+	}
+	return s;
 }
+
+import watt.io : error;
 
 fn parseText(p : Parser, out node : ir.Node) Status
 {
+	hyphen := stripAnyHyphen(p);
+
+	// Handle {{ bar -}}{{- foo }}
+	if (p.front != tk.Text) {
+		assert(hyphen);
+		return Status.Ok;
+	}
+
+	// Get the text.
 	assert(p.front == tk.Text);
-	node = bText(p.front.value);
+	text := p.front.value;
+
+	// Strip whitespace if there was a preceding hyphen.
+	if (hyphen) {
+		text = stripLeft(text);
+	}
+
 	p.popFront();
+
+	hyphen = stripAnyHyphen(p);
+
+	// Strip whitespace if there was a following hyphen.
+	if (hyphen) {
+		text = stripRight(text);
+	}
+
+	if (text.length > 0) {
+		node = bText(text);
+	}
 	return Status.Ok;
 }
 
@@ -181,13 +219,10 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 		    p.following == "endif") {
 			break;
 		}
-		n : ir.Node;
-		s2 := parseNode(p, out n);
+		s2 := parseNode(p, ref nodes);
 		if (s2 != Status.Ok) {
 			return s2;
 		}
-
-		nodes ~= n;
 	}
 
 	if (p.front == tk.End) {
@@ -252,13 +287,10 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 		    p.following == "endfor") {
 			break;
 		}
-		n : ir.Node;
-		s2 := parseNode(p, out n);
+		s2 := parseNode(p, ref nodes);
 		if (s2 != Status.Ok) {
 			return s2;
 		}
-
-		nodes ~= n;
 	}
 
 	if (p.front == tk.End) {
@@ -346,4 +378,15 @@ fn parseExp(p : Parser, out exp : ir.Exp) Status
 		}
 	}
 	return Status.Ok;
+}
+
+/// Returns true if any hyphen was found.
+fn stripAnyHyphen(p : Parser) bool
+{
+	hyphen := false;
+	while (p.front == tk.Hyphen) {
+		hyphen = true;
+		p.popFront();
+	}
+	return hyphen;
 }
