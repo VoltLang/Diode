@@ -27,6 +27,7 @@ public:
 
 	override fn leave(p : ir.Print, sink : Sink) Status
 	{
+		assert(v !is null);
 		v.toText(p, sink);
 		v = null;
 		return Continue;
