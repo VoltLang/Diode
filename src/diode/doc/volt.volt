@@ -19,6 +19,8 @@ enum Kind
 	Invalid,
 	Arg,
 	Enum,
+	EnumDecl,
+	Alias,
 	Class,
 	Union,
 	Return,
@@ -159,6 +161,8 @@ class Function : Named
 public:
 	args : Value[];
 	rets : Value[];
+	linkage : string;
+	hasBody : bool;
 
 
 public:
@@ -167,6 +171,8 @@ public:
 		switch (key) {
 		case "args": return makeNilOrArray(args);
 		case "rets": return makeNilOrArray(rets);
+		case "linkage": return makeNilOrText(linkage);
+		case "hasBody": return new Bool(hasBody);
 		default: return super.ident(n, key);
 		}
 	}
@@ -265,6 +271,9 @@ public:
 	doc : string;
 	type : string;
 	typeFull : string;
+	hasBody : bool;
+	linkage : string;
+	value : string;
 	children : Value[];
 	rets : Value[];
 	args : Value[];
@@ -282,6 +291,9 @@ public:
 			case "name": this.name = v.str(); break;
 			case "type": this.type = v.str(); break;
 			case "kind": this.kind = getKindFromString(v.str()); break;
+			case "value": this.value = v.str(); break;
+			case "linkage": this.linkage = v.str(); break;
+			case "hasBody": this.hasBody = v.boolean(); break;
 			case "typeFull": this.typeFull = v.str(); break;
 			case "children": children.fromArray(ref v); break;
 			default: writefln("unknown key '" ~ k ~ "'");
@@ -355,6 +367,8 @@ public:
 		copyToNamed(b);
 		b.args = args;
 		b.rets = rets;
+		b.hasBody = hasBody;
+		b.linkage = linkage;
 		switch (kind) with (Kind) {
 		case Destructor: b.name = "~this"; break;
 		case Constructor: b.name = "this"; break;
@@ -374,6 +388,8 @@ fn fromArray(ref arr : Value[], ref v : json.Value, defKind : Kind = Kind.Invali
 		case Invalid: throw new Exception("kind not specified");
 		case Arg: arr ~= info.toArg(); break;
 		case Enum: arr ~= info.toNamed(); break;
+		case Alias: break; // TODO Add alias
+		case EnumDecl: break; // TODO Add EnumDecl
 		case Class: arr ~= info.toParent(); break;
 		case Union: arr ~= info.toParent(); break;
 		case Return: arr ~= info.toReturn(); break;
@@ -396,6 +412,8 @@ fn getKindFromString(str : string) Kind
 	case "ctor": return Constructor;
 	case "dtor": return Destructor;
 	case "enum": return Enum;
+	case "enumdecl": return Enum;
+	case "alias": return Alias;
 	case "class": return Class;
 	case "union": return Union;
 	case "struct": return Struct;
