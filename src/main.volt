@@ -23,6 +23,7 @@ fn main(args : string[]) i32
  */
 
 import watt.io;
+import watt.io.file : read;
 import watt.text.sink;
 import diode.eval;
 import diode.driver;
@@ -40,10 +41,46 @@ fn test()
 	d.addLayout(noneFile, "none.html");
 	d.addLayout(defaultHtmlFile, "default.html");
 	d.addLayout(pageHtmlFile, "page.html");
-	d.addDoc(testDocJsonFile, "exp.json");
 
-	d.renderFile(testMdFile, "test.md");
+	d.addDoc(cast(string)read("watt.json"), "exp.json");
+	d.addLayout(cast(string)read("site/search.html"), "search.html");
+	d.renderFile(testHtmlFile, "test.html");
 }
+
+enum testHtmlFile = `---
+layout: search
+title: Test
+---
+<span class='indexcommand page'>
+	<span class='listname'>Getting Started</span>
+	<span class='listsearch'>Getting Started</span>
+</span>
+{% for mod in doc.modules %}
+<span class='indexcommand mod'>
+	<span class='listname'>module {{ mod.name }}</span>
+	<span class='listsearch'>{{ mod.name }}</span>
+</span>
+{% endfor %}
+{% for mod in doc.modules %}
+{% for class in mod.classes %}
+<span class='indexcommand class'>
+	<span class='listname'>class {{ mod.name }}.{{ class.name }} { }</span>
+	<span class='listsearch'>{{ mod.name }}.{{ class.name }}</span>
+</span>
+{% endfor %}
+{% endfor %}
+{% for mod in doc.modules %}
+{% for func in mod.functions %}
+<span class='indexcommand fn'>
+	<span class='listname'>fn {{ mod.name }}.{{ func.name }}({%
+for arg in func.args %}{{ arg.type
+}}{% unless forloop.last %}, {% endif %}{% endfor %}) {%
+for r in func.rets %}{{ r.type }}{% endfor %}</span>
+	<span class='listsearch'>{{ mod.name }}.{{ func.name }}</span>
+</span>
+{% endfor %}
+{% endfor %}
+`;
 
 enum string testMdFile = r"---
 layout: page
