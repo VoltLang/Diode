@@ -49,7 +49,7 @@ fn test()
 fn addLayouts(d: Driver)
 {
 	dir := d.settings.layoutDir;
-	if (!exists(dir) || !isDir(dir)) {
+	if (!isDir(dir)) {
 		error.writefln("dir not found '%s'", dir);
 		return;
 	}
@@ -71,7 +71,7 @@ fn addLayouts(d: Driver)
 fn addVdocs(d: Driver)
 {
 	dir := d.settings.vdocDir;
-	if (!exists(dir) || !isDir(dir)) {
+	if (!isDir(dir)) {
 		error.writefln("dir not found '%s'", dir);
 		return;
 	}
