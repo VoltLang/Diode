@@ -169,19 +169,19 @@ public:
 class If : Node
 {
 public:
-	nodes : Node[];
+	thenNodes : Node[];
 	elseNodes : Node[];
 	exp : Exp;
 	invert : bool;
 
 
 public:
-	this(invert : bool, exp : Exp, nodes : Node[], elseNodes : Node[])
+	this(invert : bool, exp : Exp, thenNodes : Node[], elseNodes : Node[])
 	{
 		assert(exp !is null);
 		this.invert = invert;
 		this.exp = exp;
-		this.nodes = nodes;
+		this.thenNodes = thenNodes;
 		this.elseNodes = elseNodes;
 	}
 
@@ -198,7 +198,7 @@ public:
 			return s2;
 		}
 
-		foreach (n; nodes) {
+		foreach (n; thenNodes) {
 			s3 := n.accept(v, sink);
 			if (s3 == Status.Stop) {
 				return s3;

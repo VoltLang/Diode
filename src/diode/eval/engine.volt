@@ -45,7 +45,7 @@ public:
 
 		// If the cond is false nothing more to do, unless its inverted.
 		condFalse := cond == i.invert;
-		nodes := i.nodes;
+		nodes := i.thenNodes;
 		if (condFalse && i.elseNodes.length == 0) {
 			return ContinueParent;
 		} else if (condFalse && i.elseNodes.length > 0) {

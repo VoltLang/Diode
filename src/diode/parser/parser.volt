@@ -196,7 +196,7 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 	// This is a if or unless.
 	invert : bool;
 	exp : ir.Exp;
-	nodes : ir.Node[];
+	thenNodes : ir.Node[];
 	elseNodes : ir.Node[];
 
 	// ['if'|'unless'] something.ident
@@ -235,7 +235,7 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 		}
 		s2 : Status;
 		if (!elseBlock) {
-			s2 = parseNode(p, ref nodes);
+			s2 = parseNode(p, ref thenNodes);
 		} else {
 			s2 = parseNode(p, ref elseNodes);
 		}
@@ -259,7 +259,7 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 
 	p.popFront();
 
-	node = bIf(invert, exp, nodes, elseNodes);
+	node = bIf(invert, exp, thenNodes, elseNodes);
 	return Status.Ok;
 }
 
