@@ -170,17 +170,19 @@ class If : Node
 {
 public:
 	nodes : Node[];
+	elseNodes : Node[];
 	exp : Exp;
 	invert : bool;
 
 
 public:
-	this(invert : bool, exp : Exp, nodes : Node[])
+	this(invert : bool, exp : Exp, nodes : Node[], elseNodes : Node[])
 	{
 		assert(exp !is null);
 		this.invert = invert;
 		this.exp = exp;
 		this.nodes = nodes;
+		this.elseNodes = elseNodes;
 	}
 
 	override fn accept(v : Visitor, sink : Sink) Status
@@ -203,10 +205,16 @@ public:
 			}
 		}
 
+		foreach (n; elseNodes) {
+			s4 := n.accept(v, sink);
+			if (s4 == Status.Stop) {
+				return s4;
+			}
+		}
+
 		return filterParent(v.leave(this, sink));
 	}
 }
-
 
 /**
  * For loop control statement.

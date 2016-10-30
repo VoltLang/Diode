@@ -44,8 +44,12 @@ public:
 		v = null;
 
 		// If the cond is false nothing more to do, unless its inverted.
-		if (cond == i.invert) {
+		condFalse := cond == i.invert;
+		nodes := i.nodes;
+		if (condFalse && i.elseNodes.length == 0) {
 			return ContinueParent;
+		} else if (condFalse && i.elseNodes.length > 0) {
+			nodes = i.elseNodes;
 		}
 
 		// Create a new env for the child nodes.
@@ -56,7 +60,7 @@ public:
 
 		// Walk the nodes if cond is true.
 		// 'if' site.has_feature
-		foreach (n; i.nodes) {
+		foreach (n; nodes) {
 			n.accept(this, sink);
 		}
 		env = parent;

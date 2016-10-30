@@ -197,6 +197,7 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 	invert : bool;
 	exp : ir.Exp;
 	nodes : ir.Node[];
+	elseNodes : ir.Node[];
 
 	// ['if'|'unless'] something.ident
 	assert(p.front == "if" || p.front == "unless");
@@ -214,12 +215,30 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 	}
 	p.popFront();
 
+	elseBlock := false;
 	while (p.front != tk.End) {
 		if (p.front == tk.OpenStatement &&
 		    p.following == "endif") {
 			break;
 		}
-		s2 := parseNode(p, ref nodes);
+		if (p.front == tk.OpenStatement &&
+			p.following == "else") {
+			// Pop {% else %}
+			p.popFront();
+			p.popFront();
+			// Check for %}
+			if (p.front != tk.CloseStatement) {
+				return p.error();
+			}
+			p.popFront();
+			elseBlock = true;
+		}
+		s2 : Status;
+		if (!elseBlock) {
+			s2 = parseNode(p, ref nodes);
+		} else {
+			s2 = parseNode(p, ref elseNodes);
+		}
 		if (s2 != Status.Ok) {
 			return s2;
 		}
@@ -240,7 +259,7 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 
 	p.popFront();
 
-	node = bIf(invert, exp, nodes);
+	node = bIf(invert, exp, nodes, elseNodes);
 	return Status.Ok;
 }
 
