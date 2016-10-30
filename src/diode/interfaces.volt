@@ -36,8 +36,6 @@ public:
 	layoutDir : string;
 	includeDir : string;
 
-	titleDefault : string = "Title";
-	layoutDefault : string = "default";
 	url : string = "http://example.com";
 
 	// These depend on workDir and are set with fillInDefaults.

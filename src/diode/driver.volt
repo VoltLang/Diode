@@ -107,21 +107,18 @@ protected:
 	fn getLayoutForFile(f : File) File
 	{
 		assert(f !is null);
-		must := false;
 
+		l: File;
 		key := f.getOption("layout");
 		if (key is null) {
-			key = settings.layoutDefault;
-		} else {
-			must = true;
+			return null;
 		}
 
-		assert(key !is null);
-
-		l := getLayout(key);
-		if (l is null && must) {
+		l = getLayout(key);
+		if (l is null) {
 			throw makeLayoutNotFound(f.filename, key);
 		}
+
 		return l;
 	}
 
