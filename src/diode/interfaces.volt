@@ -2,7 +2,7 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.interfaces;
 
-import watt.path : removeTrailingSlashes;
+import watt.path : removeTrailingSlashes, dirSeparator;
 
 
 /**
@@ -31,7 +31,8 @@ public:
 class Settings
 {
 public:
-	workDir : string;
+	sourceDir : string;
+	vdocDir : string;
 	outputDir : string;
 	layoutDir : string;
 	includeDir : string;
@@ -39,7 +40,7 @@ public:
 	url : string = "http://example.com";
 
 	// These depend on workDir and are set with fillInDefaults.
-	enum string workDirDefault = null;
+	enum string vdocDirDefault = "_vdoc";
 	enum string outputDirDefault = "_site";
 	enum string layoutDirDefault = "_layouts";
 	enum string includeDirDefault = "_includes";
@@ -48,10 +49,12 @@ public:
 public:
 	fn fillInDefaults()
 	{
-		if (workDir is null) {
-			removeTrailingSlashes(ref workDir);
+		if (sourceDir !is null) {
+			removeTrailingSlashes(ref sourceDir);
+			sourceDir ~= dirSeparator;
 		}
 
+		processPath(ref vdocDir, vdocDirDefault);
 		processPath(ref outputDir, outputDirDefault);
 		processPath(ref layoutDir, layoutDirDefault);
 		processPath(ref includeDir, includeDirDefault);
@@ -61,8 +64,8 @@ public:
 	{
 		if (val is null) {
 			val = def;
-			if (workDir is null) {
-				val = workDir ~ '/' ~ val;
+			if (sourceDir !is null) {
+				val = sourceDir ~ val;
 			}
 		}
 
