@@ -43,12 +43,12 @@ fn test()
 	d.addLayout(pageHtmlFile, "page.html");
 
 	d.addDoc(cast(string)read("watt.json"), "exp.json");
-	d.addLayout(cast(string)read("site/search.html"), "search.html");
+//	d.addLayout(cast(string)read("site/search.html"), "search.html");
 	d.renderFile(testHtmlFile, "test.html");
 }
 
 enum testHtmlFile = `---
-layout: search
+layout: default
 title: Test
 ---
 <span class='indexcommand page'>
