@@ -23,7 +23,8 @@ fn main(args : string[]) i32
  */
 
 import watt.io;
-import watt.io.file : read;
+import watt.io.file : read, exists, searchDir, isDir;
+import watt.path : dirSeparator;
 import watt.text.sink;
 import diode.eval;
 import diode.driver;
@@ -34,18 +35,61 @@ import diode.interfaces;
 fn test()
 {
 	s := new Settings();
-	s.workDir = "example";
+	s.sourceDir = "example";
+	s.outputDir = "output";
 	s.fillInDefaults();
 
 	d := new DiodeDriver(s);
-	d.addLayout(noneFile, "none.html");
-	d.addLayout(defaultHtmlFile, "default.html");
-	d.addLayout(pageHtmlFile, "page.html");
+	d.addLayouts();
+	d.addVdocs();
 
-	d.addDoc(cast(string)read("watt.json"), "exp.json");
-//	d.addLayout(cast(string)read("site/search.html"), "search.html");
 	d.renderFile(testHtmlFile, "test.html");
 }
+
+fn addLayouts(d: Driver)
+{
+	dir := d.settings.layoutDir;
+	if (!exists(dir) || !isDir(dir)) {
+		error.writefln("dir not found '%s'", dir);
+		return;
+	}
+
+	fn hit(file: string) {
+		if (isDir(file)) {
+			return;
+		}
+		fullpath := dir ~ dirSeparator ~ file;
+		str := cast(string)read(fullpath);
+		d.addLayout(str, file);
+
+		error.writefln("added layout '%s'", fullpath);
+	}
+
+	searchDir(dir, "*.html", hit);
+}
+
+fn addVdocs(d: Driver)
+{
+	dir := d.settings.vdocDir;
+	if (!exists(dir) || !isDir(dir)) {
+		error.writefln("dir not found '%s'", dir);
+		return;
+	}
+
+	fn hit(file: string) {
+		if (isDir(file)) {
+			return;
+		}
+		fullpath := dir ~ dirSeparator ~ file;
+		str := cast(string)read(fullpath);
+		d.addDoc(str, file);
+
+		error.writefln("added vdoc '%s'", fullpath);
+	}
+
+	searchDir(dir, "*.json", hit);
+}
+
 
 enum testHtmlFile = `---
 layout: default
@@ -173,49 +217,3 @@ for r in f.rets %}{{ r.type }}{% endfor %};
 
 {% endfor %}
 ";
-
-enum string noneFile = "{{ content }}";
-
-enum string pageHtmlFile = `---
-layout: default
----
-<article>
-{{ content }}
-</article>
-`;
-
-enum string defaultHtmlFile = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <link rel="stylesheet" href="style.css" type="text/css">
-  </head>
-  <body>
-{{ content }}
-  </body>
-</html>`;
-
-enum string testDocJsonFile = `[
-{"kind":"module","name":"main","doc":"\nHolds the main function and some small test code.\n","children":[
-	{"kind":"fn","name":"main","args":[{"name":"args","type":"string[]","typeFull":"immutable(char)[][]"}],"rets":[{"type":"int"}]},
-	{"kind":"fn","name":"test","rets":[{"type":"void"}]}
-]},
-{"kind":"module","name":"diode.interfaces","children":[
-	{"kind":"class","name":"Driver","doc":"\nMain class driving everything.\n","children":[
-		{"kind":"var","name":"settings","type":"Settings","typeFull":"diode.interfaces.Settings"},
-		{"kind":"ctor","args":[{"name":"settings","type":"Settings","typeFull":"diode.interfaces.Settings"}]},
-		{"kind":"member","name":"addLayout","args":[{"name":"source","type":"string","typeFull":"immutable(char)[]"},{"name":"filename","type":"string","typeFull":"immutable(char)[]"}],"rets":[{"type":"void"}]},
-		{"kind":"member","name":"renderFile","args":[{"name":"source","type":"string","typeFull":"immutable(char)[]"},{"name":"filename","type":"string","typeFull":"immutable(char)[]"}],"rets":[{"type":"void"}]}
-	]},
-	{"kind":"class","name":"Settings","doc":"\nHolds settings for Diode.\n","children":[
-		{"kind":"var","name":"workDir","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"var","name":"outputDir","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"var","name":"layoutDir","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"var","name":"includeDir","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"var","name":"titleDefault","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"var","name":"layoutDefault","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"var","name":"url","type":"string","typeFull":"immutable(char)[]"},
-		{"kind":"member","name":"fillInDefaults","rets":[{"type":"void"}]},
-		{"kind":"member","name":"processPath","args":[{"name":"val","type":"string","typeFull":"immutable(char)[]"},{"name":"def","type":"string","typeFull":"immutable(char)[]"}],"rets":[{"type":"void"}]},
-		{"kind":"ctor"}
-	]}
-]}]`;
