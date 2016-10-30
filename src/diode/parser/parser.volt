@@ -234,7 +234,14 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 			elseBlock = true;
 		}
 		s2 : Status;
-		if (!elseBlock) {
+		if (p.front == tk.OpenStatement &&
+			p.following == "elsif") {
+			elsifNode: ir.Node;
+			s2 = parseElsIf(p, ref elsifNode);
+			if (elsifNode !is null) {
+				elseNodes ~= elsifNode;
+			}
+		} else if (!elseBlock) {
 			s2 = parseNode(p, ref thenNodes);
 		} else {
 			s2 = parseNode(p, ref elseNodes);
@@ -260,6 +267,63 @@ fn parseIfUnless(p : Parser, out node : ir.Node) Status
 	p.popFront();
 
 	node = bIf(invert, exp, thenNodes, elseNodes);
+	return Status.Ok;
+}
+
+fn parseElsIf(p : Parser, ref node : ir.Node) Status
+{
+	assert(p.front == tk.OpenStatement);
+	p.popFront();
+
+	exp : ir.Exp;
+	thenNodes : ir.Node[];
+	elseNodes : ir.Node[];
+
+	// ['if'|'unless'] something.ident
+	assert(p.front == "elsif");
+	p.popFront();
+
+	s1 := parseExp(p, out exp);
+	if (s1 != Status.Ok) {
+		return s1;
+	}
+
+	// Check the end.
+	if (p.front != tk.CloseStatement) {
+		return p.error();
+	}
+	p.popFront();
+
+	elseBlock := false;
+	while (p.front != tk.End) {
+		if (p.front == tk.OpenStatement &&
+		    p.following == "endif") {
+			break;
+		}
+		if (p.front == tk.OpenStatement &&
+			p.following == "else") {
+			// Pop {% else %}
+			p.popFront();
+			p.popFront();
+			// Check for %}
+			if (p.front != tk.CloseStatement) {
+				return p.error();
+			}
+			p.popFront();
+			elseBlock = true;
+		}
+		s2 : Status;
+		if (!elseBlock) {
+			s2 = parseNode(p, ref thenNodes);
+		} else {
+			s2 = parseNode(p, ref elseNodes);
+		}
+		if (s2 != Status.Ok) {
+			return s2;
+		}
+	}
+
+	node = bIf(false, exp, thenNodes, elseNodes);
 	return Status.Ok;
 }
 
