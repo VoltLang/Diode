@@ -34,7 +34,7 @@ fn lex(src : Source) Token[]
 
 	tw.pushToken(ref src.loc, TokenKind.End, "END");
 
-	return tw.mTokens;
+	return tw.takeTokens();
 }
 
 private:

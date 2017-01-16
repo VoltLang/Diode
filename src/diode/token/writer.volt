@@ -23,4 +23,11 @@ public:
 
 		mTokens ~= t;
 	}
+
+	fn takeTokens() Token[]
+	{
+		ret := mTokens;
+		mTokens = null;
+		return ret;
+	}
 }

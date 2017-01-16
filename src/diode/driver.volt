@@ -75,8 +75,7 @@ public:
 		mModules.vals ~= parse(source);
 	}
 
-protected:
-	fn renderFile(f : File)
+	override fn renderFile(f : File)
 	{
 		e := new Engine(mRoot);
 		// For layout we modify the enviroment.
@@ -102,6 +101,7 @@ protected:
 		f.file.accept(e, s.sink);
 		writefln("%s", s.toString());
 	}
+
 
 protected:
 	fn getLayoutForFile(f : File) File
