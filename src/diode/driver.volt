@@ -75,7 +75,7 @@ public:
 		mModules.vals ~= parse(source);
 	}
 
-	override fn renderFile(f : File)
+	fn renderFile(f : File)
 	{
 		e := new Engine(mRoot);
 		// For layout we modify the enviroment.
