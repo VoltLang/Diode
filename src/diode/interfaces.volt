@@ -23,6 +23,8 @@ public:
 	abstract fn addLayout(source : string, filename : string);
 	abstract fn addDoc(source : string, filename : string);
 	abstract fn renderFile(source : string, filename : string);
+
+	abstract fn info(fmt: string, ...);
 }
 
 /**

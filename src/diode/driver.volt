@@ -75,6 +75,15 @@ public:
 		mModules.vals ~= parse(source);
 	}
 
+	override fn info(fmt: string, ...)
+	{
+		vl: va_list;
+		va_start(vl);
+		error.vwritefln(fmt, ref _typeids, ref vl);
+		error.flush();
+		va_end(vl);
+	}
+
 	fn renderFile(f : File)
 	{
 		e := new Engine(mRoot);

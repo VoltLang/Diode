@@ -50,7 +50,7 @@ fn addLayouts(d: Driver)
 {
 	dir := d.settings.layoutDir;
 	if (!isDir(dir)) {
-		error.writefln("dir not found '%s'", dir);
+		d.info("dir not found '%s'", dir);
 		return;
 	}
 
@@ -62,7 +62,7 @@ fn addLayouts(d: Driver)
 		str := cast(string)read(fullpath);
 		d.addLayout(str, file);
 
-		error.writefln("added layout '%s'", fullpath);
+		d.info("added layout '%s'", fullpath);
 	}
 
 	searchDir(dir, "*.html", hit);
@@ -72,7 +72,7 @@ fn addVdocs(d: Driver)
 {
 	dir := d.settings.vdocDir;
 	if (!isDir(dir)) {
-		error.writefln("dir not found '%s'", dir);
+		d.info("dir not found '%s'", dir);
 		return;
 	}
 
@@ -84,7 +84,7 @@ fn addVdocs(d: Driver)
 		str := cast(string)read(fullpath);
 		d.addDoc(str, file);
 
-		error.writefln("added vdoc '%s'", fullpath);
+		d.info("added vdoc '%s'", fullpath);
 	}
 
 	searchDir(dir, "*.json", hit);
