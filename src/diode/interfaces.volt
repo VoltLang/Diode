@@ -60,6 +60,11 @@ public:
 		processPath(ref outputDir, outputDirDefault);
 		processPath(ref layoutDir, layoutDirDefault);
 		processPath(ref includeDir, includeDirDefault);
+
+		// Make sure that all dirs have the same form.
+		if (sourceDir !is null) {
+			removeTrailingSlashes(ref sourceDir);
+		}
 	}
 
 	fn processPath(ref val : string, def : string)
