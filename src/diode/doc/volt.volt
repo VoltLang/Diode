@@ -199,6 +199,7 @@ public:
 		case "structs": kind = Struct; break;
 		case "modules": kind = Module; break;
 		case "members": kind = Member; break;
+		case "enumdecls": kind = EnumDecl; break;
 		case "functions": kind = Function; break;
 		case "variables": kind = Variable; break;
 		case "destructors": kind = Destructor; break;
@@ -387,9 +388,9 @@ fn fromArray(ref arr : Value[], ref v : json.Value, defKind : Kind = Kind.Invali
 		final switch (info.kind) with (Kind) {
 		case Invalid: throw new Exception("kind not specified");
 		case Arg: arr ~= info.toArg(); break;
-		case Enum: arr ~= info.toNamed(); break;
+		case Enum: arr ~= info.toParent(); break;
 		case Alias: break; // TODO Add alias
-		case EnumDecl: break; // TODO Add EnumDecl
+		case EnumDecl: arr ~= info.toNamed(); break;
 		case Class: arr ~= info.toParent(); break;
 		case Union: arr ~= info.toParent(); break;
 		case Return: arr ~= info.toReturn(); break;
@@ -412,7 +413,7 @@ fn getKindFromString(str : string) Kind
 	case "ctor": return Constructor;
 	case "dtor": return Destructor;
 	case "enum": return Enum;
-	case "enumdecl": return Enum;
+	case "enumdecl": return EnumDecl;
 	case "alias": return Alias;
 	case "class": return Class;
 	case "union": return Union;
