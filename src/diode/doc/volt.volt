@@ -198,12 +198,12 @@ public:
 		case "unions": kind = Union; break;
 		case "structs": kind = Struct; break;
 		case "modules": kind = Module; break;
-		case "members": kind = Member; break;
 		case "enumdecls": kind = EnumDecl; break;
 		case "functions": kind = Function; break;
 		case "variables": kind = Variable; break;
 		case "destructors": kind = Destructor; break;
 		case "constructors": kind = Constructor; break;
+		case "members", "methods": kind = Member; break;
 		default: return null;
 		}
 

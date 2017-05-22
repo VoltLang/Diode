@@ -228,7 +228,7 @@ fn parseInclude(p : Parser, out node : ir.Node) Status
 	base : string;
 	ext : string;
 	exp : ir.Exp;
-	nodes : ir.Node[];
+	assigns : ir.Assign[];
 
 	// 'include' base.ext
 	assert(p.front == "include");
@@ -249,12 +249,33 @@ fn parseInclude(p : Parser, out node : ir.Node) Status
 		return err;
 	}
 
+	while (p.front == tk.Identifier) {
+		ident : string;
+
+		// assign 'ident' = exp
+		if (err := p.matchAndGet(out ident)) {
+			return err;
+		}
+
+		// assign ident '=' exp
+		if (err := p.match(tk.Assign)) {
+			return err;
+		}
+
+		// assign ident = 'exp'
+		if (err := parseExp(p, out exp)) {
+			return err;
+		}
+
+		assigns ~= bAssign(ident, exp);
+	}
+
 	// Check for %}
 	if (err := p.match(tk.CloseStatement)) {
 		return err;
 	}
 
-	node = bInclude(base ~ "." ~ ext);
+	node = bInclude(base ~ "." ~ ext, assigns);
 	return Status.Ok;
 }
 

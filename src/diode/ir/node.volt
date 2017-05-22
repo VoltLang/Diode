@@ -298,13 +298,15 @@ class Include : Node
 {
 public:
 	filename : string;
+	assigns : Assign[];
 
 
 public:
-	this(filename : string)
+	this(filename : string, assigns : Assign[])
 	{
 		assert(filename !is null);
 		this.filename = filename;
+		this.assigns = assigns;
 	}
 
 	override fn accept(v : Visitor, sink : Sink) Status

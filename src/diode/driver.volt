@@ -236,9 +236,20 @@ public:
 
 		f := *ret;
 
+
+		include := new Set();
+		foreach (a; p.assigns) {
+			a.exp.accept(this, sink);
+			include.ctx[a.ident] = this.v;
+			v = null;
+		}
+
 		old := env;
+
 		env = new Set();
 		env.parent = mRoot;
+		env.ctx["include"] = include;
+
 		f.file.accept(this, sink);
 
 		env = old;
