@@ -36,7 +36,7 @@ alias tk = TokenKind;
 
 enum Status
 {
-	Ok,
+	Ok = 0,
 	Error = -1,
 }
 
@@ -117,6 +117,40 @@ fn parseNode(p : Parser, ref nodes : ir.Node[]) Status
 	return s;
 }
 
+fn match(p : Parser, t : TokenKind) Status
+{
+	if (p.front != t) {
+		return p.error();
+	}
+	p.popFront();
+	return Status.Ok;
+}
+
+fn match(p : Parser, str : string) Status
+{
+	if (p.front.value != str) {
+		return p.error();
+	}
+	p.popFront();
+	return Status.Ok;
+}
+
+fn matchAndGet(p : Parser, out str : string) Status
+{
+	if (p.front != tk.Identifier) {
+		return p.error();
+	}
+	str = p.front.value;
+	p.popFront();
+	return Status.Ok;
+}
+
+fn matchAssert(p : Parser, t : TokenKind)
+{
+	assert(p.front == t);
+	p.popFront();
+}
+
 import watt.io : error;
 
 fn parseText(p : Parser, out node : ir.Node) Status
@@ -155,17 +189,19 @@ fn parseText(p : Parser, out node : ir.Node) Status
 
 fn parsePrint(p : Parser, out node : ir.Node) Status
 {
-	assert(p.front == tk.OpenPrint);
-	p.popFront();
+	// Check for {{
+	p.matchAssert(tk.OpenPrint);
 
+	// {{ <exp> }}
 	exp : ir.Exp;
-	s := parseExp(p, out exp);
-	if (s != Status.Ok ||
-	    p.front != tk.ClosePrint) {
-		return p.error();
+	if (err := parseExp(p, out exp)) {
+		return err;
 	}
 
-	p.popFront();
+	// Check for }}
+	if (err := p.match(tk.ClosePrint)) {
+		return err;
+	}
 
 	node = bPrint(exp);
 	return Status.Ok;
@@ -173,12 +209,6 @@ fn parsePrint(p : Parser, out node : ir.Node) Status
 
 fn parseStatement(p : Parser, out node : ir.Node) Status
 {
-	assert(p.front == tk.OpenStatement);
-
-	if (p.following != tk.Identifier) {
-		p.error();
-	}
-
 	// We use identifiers instead of special tokens for statements.
 	switch (p.following.value) {
 	case "for": return parseFor(p, out node);
@@ -192,8 +222,7 @@ fn parseStatement(p : Parser, out node : ir.Node) Status
 fn parseInclude(p : Parser, out node : ir.Node) Status
 {
 	// Check for {%
-	assert(p.front == tk.OpenStatement);
-	p.popFront();
+	p.matchAssert(tk.OpenStatement);
 
 	// This is a for.
 	base : string;
@@ -206,30 +235,24 @@ fn parseInclude(p : Parser, out node : ir.Node) Status
 	p.popFront();
 
 	// include 'base'.ext
-	if (p.front != tk.Identifier) {
-		return p.error();
+	if (err := p.matchAndGet(out base)) {
+		return err;
 	}
-	base = p.front.value;
-	p.popFront();
 
 	// include base'.'ext
-	if (p.front != tk.Dot) {
-		return p.error();
+	if (err := p.match(tk.Dot)) {
+		return err;
 	}
-	p.popFront();
 
 	// include base.'ext'
-	if (p.front != tk.Identifier) {
-		return p.error();
+	if (err := p.matchAndGet(out ext)) {
+		return err;
 	}
-	ext = p.front.value;
-	p.popFront();
 
 	// Check for %}
-	if (p.front != tk.CloseStatement) {
-		return p.error();
+	if (err := p.match(tk.CloseStatement)) {
+		return err;
 	}
-	p.popFront();
 
 	node = bInclude(base ~ "." ~ ext);
 	return Status.Ok;
@@ -237,8 +260,8 @@ fn parseInclude(p : Parser, out node : ir.Node) Status
 
 fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
 {
-	assert(p.front == tk.OpenStatement);
-	p.popFront();
+	// Check for {%
+	p.matchAssert(tk.OpenStatement);
 
 	// This is a if or unless.
 	invert : bool;
@@ -255,16 +278,14 @@ fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
 	invert = p.front == "unless";
 	p.popFront();
 
-	s1 := parseExp(p, out exp);
-	if (s1 != Status.Ok) {
-		return s1;
+	if (err := p.parseExp(out exp)) {
+		return err;
 	}
 
 	// Check the end.
-	if (p.front != tk.CloseStatement) {
-		return p.error();
+	if (err := p.match(tk.CloseStatement)) {
+		return err;
 	}
-	p.popFront();
 
 	elseBlock := false;
 	while (p.front != tk.End) {
@@ -312,11 +333,9 @@ fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
 		p.popFront();
 
 		// Check for %}
-		if (p.front != tk.CloseStatement) {
-			return p.error();
+		if (err := p.match(tk.CloseStatement)) {
+			return err;
 		}
-
-		p.popFront();
 	}
 
 	node = bIf(invert, exp, thenNodes, elseNodes);
@@ -325,8 +344,8 @@ fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
 
 fn parseFor(p : Parser, out node : ir.Node) Status
 {
-	assert(p.front == tk.OpenStatement);
-	p.popFront();
+	// Check for {%
+	p.matchAssert(tk.OpenStatement);
 
 	// This is a for.
 	ident : string;
@@ -338,11 +357,9 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	p.popFront();
 
 	// for 'ident' in something.exp
-	if (p.front != tk.Identifier) {
-		return p.error();
+	if (err := p.matchAndGet(out ident)) {
+		return err;
 	}
-	ident = p.front.value;
-	p.popFront();
 
 	// for ident 'in' something.exp
 	if (p.front != "in") {
@@ -350,25 +367,22 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	}
 	p.popFront();
 
-	s1 := parseExp(p, out exp);
-	if (s1 != Status.Ok) {
-		return s1;
+	if (err := parseExp(p, out exp)) {
+		return err;
 	}
 
 	// Check the end.
-	if (p.front != tk.CloseStatement) {
-		return p.error();
+	if (err := p.match(tk.CloseStatement)) {
+		return err;
 	}
-	p.popFront();
 
 	while (p.front != tk.End) {
 		if (p.front == tk.OpenStatement &&
 		    p.following == "endfor") {
 			break;
 		}
-		s2 := parseNode(p, ref nodes);
-		if (s2 != Status.Ok) {
-			return s2;
+		if (err := parseNode(p, ref nodes)) {
+			return err;
 		}
 	}
 
@@ -381,11 +395,9 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	p.popFront();
 
 	// Check for %}
-	if (p.front != tk.CloseStatement) {
+	if (p.match(tk.CloseStatement)) {
 		return p.error();
 	}
-
-	p.popFront();
 
 	node = bFor(ident, exp, nodes);
 	return Status.Ok;
@@ -393,41 +405,37 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 
 fn parseAssign(p : Parser, out node : ir.Node) Status
 {
-	assert(p.front == tk.OpenStatement);
-	p.popFront();
+	// Check for {%
+	p.matchAssert(tk.OpenStatement);
 
 	// This is a assign.
 	ident : string;
 	exp : ir.Exp;
 
 	// 'assign' ident = exp
-	assert(p.front == "assign");
-	p.popFront();
+	if (err := p.match("assign")) {
+		return err;
+	}
 
 	// assign 'ident' = exp
-	if (p.front != tk.Identifier) {
-		return p.error();
+	if (err := p.matchAndGet(out ident)) {
+		return err;
 	}
-	ident = p.front.value;
-	p.popFront();
 
 	// assign ident '=' exp
-	if (p.front != tk.Assign) {
-		return p.error();
+	if (err := p.match(tk.Assign)) {
+		return err;
 	}
-	p.popFront();
 
 	// assign ident = 'exp'
-	s1 := parseExp(p, out exp);
-	if (s1 != Status.Ok) {
-		return s1;
+	if (err := parseExp(p, out exp)) {
+		return err;
 	}
 
 	// Check the end.
-	if (p.front != tk.CloseStatement) {
-		return p.error();
+	if (err := p.match(tk.CloseStatement)) {
+		return err;
 	}
-	p.popFront();
 
 	node = bAssign(ident, exp);
 	return Status.Ok;
@@ -435,22 +443,22 @@ fn parseAssign(p : Parser, out node : ir.Node) Status
 
 fn parseExp(p : Parser, out exp : ir.Exp) Status
 {
-	if (p.front != tk.Identifier) {
-		return p.error();
+	v : string;
+	if (err := p.matchAndGet(out v)) {
+		return err;
 	}
 
-	exp = bIdent(p.front.value);
-	p.popFront();
+	exp = bIdent(v);
 
 	while (true) {
 		switch (p.front.kind) with (TokenKind) {
 		case Dot:
 			p.popFront();
-			if (p.front != tk.Identifier) {
-				return p.error();
+
+			if (err := p.matchAndGet(out v)) {
+				return err;
 			}
-			exp = bAccess(exp, p.front.value);
-			p.popFront();
+			exp = bAccess(exp, v);
 			break;
 		default:
 			return Status.Ok;
