@@ -25,6 +25,11 @@ fn bAssign(ident : string, exp : ir.Exp) ir.Assign
 	return new ir.Assign(ident, exp);
 }
 
+fn bInclude(filename : string) ir.Include
+{
+	return new ir.Include(filename);
+}
+
 fn bFor(ident : string, exp : ir.Exp, nodes : ir.Node[]) ir.For
 {
 	return new ir.For(ident, exp, nodes);

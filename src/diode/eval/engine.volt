@@ -152,4 +152,5 @@ public:
 	override fn enter(ir.Print, Sink) Status { return Continue; }
 	override fn leave(ir.If, Sink) Status { assert(false); }
 	override fn leave(ir.For, Sink) Status { assert(false); }
+	override fn visit(ir.Include, Sink) Status { return Continue; }
 }

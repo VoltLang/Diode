@@ -294,6 +294,25 @@ public:
 	}
 }
 
+class Include : Node
+{
+public:
+	filename : string;
+
+
+public:
+	this(filename : string)
+	{
+		assert(filename !is null);
+		this.filename = filename;
+	}
+
+	override fn accept(v : Visitor, sink : Sink) Status
+	{
+		return filterParent(v.visit(this, sink));
+	}
+}
+
 
 /*
  *
@@ -334,10 +353,11 @@ abstract class Visitor
 	abstract fn leave(For, Sink) Status;
 	abstract fn enter(Assign, Sink) Status;
 	abstract fn leave(Assign, Sink) Status;
+	abstract fn visit(Include, Sink) Status;
 
-	abstract fn visit(Ident, Sink) Status;
 	abstract fn enter(Access, Sink) Status;
 	abstract fn leave(Access, Sink) Status;
+	abstract fn visit(Ident, Sink) Status;
 }
 
 /**
