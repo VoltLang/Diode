@@ -29,6 +29,7 @@ protected:
 	mSite : Set;
 	mDoc : Set;
 	mModules : Array;
+	mEngine : DriverEngine;
 
 
 public:
@@ -36,39 +37,26 @@ public:
 	{
 		super(settings);
 		buildRootEnv();
+
+		mEngine = new DriverEngine(this, mRoot);
 	}
 
 	override fn addLayout(source : string, filename : string)
 	{
-		base := baseName(filename);
-		ext := getAndCheckExt(ref base);
+		f := createFile(source, filename);
+		mLayouts[f.filename] = f;
+	}
 
-		src := new Source(source, filename);
-		f := new File();
-		f.ext = ext;
-		f.filename = base;
-		f.header = parseHeader(src);
-		f.file = parseFile(src);
-		f.layout = getLayoutForFile(f);
-
-		mLayouts[base] = f;
+	override fn addInclude(source : string, filename : string)
+	{
+		mEngine.addInclude(createFile(source, filename), filename);
 	}
 
 	override fn renderFile(source : string, filename : string) string
 	{
-		base := baseName(filename);
-		ext := getAndCheckExt(ref base);
-
-		src := new Source(source, filename);
-		f := new File();
-		f.ext = ext;
-		f.filename = base;
-		f.header = parseHeader(src);
-		f.file = parseFile(src);
-		f.layout = getLayoutForFile(f);
-
 		s : StringSink;
-		renderFile(f, s.sink);
+		f := createFile(source, filename);
+		mEngine.renderFile(f, s.sink);
 		return s.toString();
 	}
 
@@ -86,33 +74,24 @@ public:
 		va_end(vl);
 	}
 
-	fn renderFile(f : File, sink: Sink)
-	{
-		e := new Engine(mRoot);
-		// For layout we modify the enviroment.
-		env := mRoot;
-
-		while (f.layout !is null) {
-			c := selectType(f.layout, f);
-			c.engine = e;
-			c.file = f.file;
-			c.env = env;
-
-			env = new Set();
-			env.parent = mRoot;
-			env.ctx["content"] = c;
-
-			f = f.layout;
-		}
-
-		// Update the enviroment.
-		e.env = env;
-
-		f.file.accept(e, sink);
-	}
-
 
 protected:
+	fn createFile(source : string, filename : string) File
+	{
+		base := baseName(filename);
+		ext := getAndCheckExt(ref base);
+
+		src := new Source(source, filename);
+		f := new File();
+		f.ext = ext;
+		f.filename = base;
+		f.header = parseHeader(src);
+		f.file = parseFile(src);
+		f.layout = getLayoutForFile(f);
+
+		return f;
+	}
+
 	fn getLayoutForFile(f : File) File
 	{
 		assert(f !is null);
@@ -193,6 +172,77 @@ protected:
 		mDoc.ctx["modules"] = mModules;
 
 		mSite.ctx["baseurl"] = new Text(settings.url);
+	}
+}
+
+/**
+ *
+ */
+class DriverEngine : Engine
+{
+private:
+	mDrv : DiodeDriver;
+	mRoot : Set;
+	mIncludes : File[string];
+
+
+public:
+	this(d : DiodeDriver, root : Set)
+	{
+		super(root);
+
+		mDrv = d;
+		mRoot = root;
+	}
+
+	fn addInclude(f : File, filename : string)
+	{
+		base := baseName(filename);
+		mIncludes[base] = f;
+	}
+
+	fn renderFile(f : File, sink: Sink)
+	{
+		// We always create a new env for each file.
+		env := new Set();
+		env.parent = mRoot;
+
+		while (f.layout !is null) {
+			c := mDrv.selectType(f.layout, f);
+			c.engine = this;
+			c.file = f.file;
+			c.env = env;
+
+			env = new Set();
+			env.parent = mRoot;
+			env.ctx["content"] = c;
+
+			f = f.layout;
+		}
+
+		// Update the enviroment.
+		this.env = env;
+
+		f.file.accept(this, sink);
+	}
+
+	override fn visit(p : ir.Include, sink : Sink) Status
+	{
+		ret := p.filename in mIncludes;
+		if (ret is null) {
+			mDrv.info("no such include '%s'", p.filename);
+			return Continue;
+		}
+
+		f := *ret;
+
+		old := env;
+		env = new Set();
+		env.parent = mRoot;
+		f.file.accept(this, sink);
+
+		env = old;
+		return Continue;
 	}
 }
 

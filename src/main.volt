@@ -44,6 +44,7 @@ fn test()
 
 	d := new DiodeDriver(s);
 	d.addLayouts();
+	d.addIncludes();
 	d.addVdocs();
 
 	d.renderFiles();
@@ -108,6 +109,28 @@ fn addLayouts(d: Driver)
 	}
 
 	searchDir(dir, "*.html", hit);
+}
+
+fn addIncludes(d: Driver)
+{
+	dir := d.settings.includeDir;
+	if (!isDir(dir)) {
+		d.info("dir not found '%s'", dir);
+		return;
+	}
+
+	fn hit(file: string) {
+		if (isDir(file)) {
+			return;
+		}
+		fullpath := dir ~ dirSeparator ~ file;
+		str := cast(string)read(fullpath);
+		d.addInclude(str, file);
+
+		d.info("added include '%s'", fullpath);
+	}
+
+	searchDir(dir, "*", hit);
 }
 
 fn addVdocs(d: Driver)
