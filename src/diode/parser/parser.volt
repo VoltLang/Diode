@@ -6,7 +6,7 @@ import watt.text.source;
 import watt.text.string : stripLeft, stripRight;
 
 import ir = diode.ir;
-import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bAccess, bIdent;
+import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude, bAccess, bIdent;
 
 import diode.errors;
 import diode.token.lexer : lex;
@@ -183,9 +183,56 @@ fn parseStatement(p : Parser, out node : ir.Node) Status
 	switch (p.following.value) {
 	case "for": return parseFor(p, out node);
 	case "assign": return parseAssign(p, out node);
+	case "include": return parseInclude(p, out node);
 	case "unless", "if": return parseIfUnless(p, out node);
 	default: return p.error();
 	}
+}
+
+fn parseInclude(p : Parser, out node : ir.Node) Status
+{
+	// Check for {%
+	assert(p.front == tk.OpenStatement);
+	p.popFront();
+
+	// This is a for.
+	base : string;
+	ext : string;
+	exp : ir.Exp;
+	nodes : ir.Node[];
+
+	// 'include' base.ext
+	assert(p.front == "include");
+	p.popFront();
+
+	// include 'base'.ext
+	if (p.front != tk.Identifier) {
+		return p.error();
+	}
+	base = p.front.value;
+	p.popFront();
+
+	// include base'.'ext
+	if (p.front != tk.Dot) {
+		return p.error();
+	}
+	p.popFront();
+
+	// include base.'ext'
+	if (p.front != tk.Identifier) {
+		return p.error();
+	}
+	ext = p.front.value;
+	p.popFront();
+
+	// Check for %}
+	if (p.front != tk.CloseStatement) {
+		return p.error();
+	}
+	p.popFront();
+
+	node = bInclude(base ~ "." ~ ext);
+	return Status.Ok;
 }
 
 fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
