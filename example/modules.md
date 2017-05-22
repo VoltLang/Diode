@@ -13,6 +13,12 @@ module {{ mod.name }}
 {%
 
 
+for e in mod.enumdecls
+%}{% if forloop.first %}
+{% endif %}enum {{ e.name }};
+{% endfor %}{%
+
+
 for e in mod.enums
 %}{% if forloop.first %}
 {% endif %}enum {{ e.name }}
