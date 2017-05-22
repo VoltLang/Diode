@@ -23,9 +23,12 @@ fn main(args : string[]) i32
  */
 
 import watt.io;
-import watt.io.file : read, exists, searchDir, isDir;
+import watt.io.streams;
+import watt.io.file : read, exists, searchDir, isDir, isFile;
 import watt.path : dirSeparator;
+import watt.text.string : endsWith;
 import watt.text.sink;
+
 import diode.eval;
 import diode.driver;
 import diode.parser : parse;
@@ -43,7 +46,46 @@ fn test()
 	d.addLayouts();
 	d.addVdocs();
 
-	d.renderFile(testHtmlFile, "test.html");
+	d.renderFiles();
+}
+
+fn renderFiles(d: Driver)
+{
+	srcDir := d.settings.sourceDir;
+	outDir := d.settings.outputDir;
+
+	if (!isDir(srcDir)) {
+		d.info("source dir not found '%s'", srcDir);
+		return;
+	}
+	if (!isDir(outDir)) {
+		d.info("output dir not found '%s'", outDir);
+		return;
+	}
+
+	fn hit(file: string) {
+		srcPath := srcDir ~ dirSeparator ~ file;
+		outPath := outDir ~ dirSeparator ~ file;
+
+		if (!isFile(srcPath)) {
+			return;
+		}
+
+		if (endsWith(outPath, ".md")) {
+			outPath = outPath[0 .. $ - 3] ~ ".html";
+		}
+
+		d.info("rendering '%s' to '%s'", srcPath, outPath);
+
+		str := cast(string)read(srcPath);
+		str = d.renderFile(str, srcPath);
+		o := new OutputFileStream(outPath);
+		o.writefln("%s", str);
+		o.flush();
+		o.close();
+	}
+
+	searchDir(srcDir, "*", hit);
 }
 
 fn addLayouts(d: Driver)

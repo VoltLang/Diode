@@ -54,7 +54,7 @@ public:
 		mLayouts[base] = f;
 	}
 
-	override fn renderFile(source : string, filename : string)
+	override fn renderFile(source : string, filename : string) string
 	{
 		base := baseName(filename);
 		ext := getAndCheckExt(ref base);
@@ -67,7 +67,9 @@ public:
 		f.file = parseFile(src);
 		f.layout = getLayoutForFile(f);
 
-		renderFile(f);
+		s : StringSink;
+		renderFile(f, s.sink);
+		return s.toString();
 	}
 
 	override fn addDoc(source : string, filename : string)
@@ -84,7 +86,7 @@ public:
 		va_end(vl);
 	}
 
-	fn renderFile(f : File)
+	fn renderFile(f : File, sink: Sink)
 	{
 		e := new Engine(mRoot);
 		// For layout we modify the enviroment.
@@ -106,9 +108,7 @@ public:
 		// Update the enviroment.
 		e.env = env;
 
-		s : StringSink;
-		f.file.accept(e, s.sink);
-		writefln("%s", s.toString());
+		f.file.accept(e, sink);
 	}
 
 
