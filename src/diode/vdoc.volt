@@ -49,7 +49,7 @@ class Named : Base
 {
 public:
 	name: string;
-	// Raw doccomment string.
+	/// Raw doccomment string.
 	raw: string;
 
 
