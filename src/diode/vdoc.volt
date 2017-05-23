@@ -1,6 +1,6 @@
-// Copyright © 2016, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2016-2017, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.doc.volt;
+module diode.vdoc;
 
 import core.exception;
 import watt.io.file;

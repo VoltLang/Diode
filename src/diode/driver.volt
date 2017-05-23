@@ -15,7 +15,7 @@ import diode.errors;
 import diode.interfaces;
 import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
-import diode.doc.volt;
+import diode.vdoc;
 
 
 /**
