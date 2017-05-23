@@ -99,6 +99,10 @@ fn lexToken(src: Source, tw: Writer, status: Status) Status
 		tw.pushToken(ref src.loc, TokenKind.Dot, ".");
 		src.popFront();
 		return status;
+	case ':':
+		tw.pushToken(ref src.loc, TokenKind.Colon, ":");
+		src.popFront();
+		return status;
 	case '|':
 		tw.pushToken(ref src.loc, TokenKind.Pipe, "|");
 		src.popFront();

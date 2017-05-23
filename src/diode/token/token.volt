@@ -47,6 +47,7 @@ enum TokenKind
 	// Symbols
 	Dot,
 	Pipe,
+	Colon,
 	Comma,
 	Assign,
 
