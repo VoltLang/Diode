@@ -4,8 +4,9 @@ module diode.doc.volt;
 
 import core.exception;
 import watt.io.file;
-import watt.io : writefln;
+import io = watt.io;
 import json = watt.text.json;
+import watt.text.vdoc;
 
 import diode.errors;
 import diode.eval;
@@ -39,7 +40,6 @@ enum Kind
 class Base : Value
 {
 	kind : Kind;
-	doc : string;
 }
 
 /**
@@ -49,6 +49,8 @@ class Named : Base
 {
 public:
 	name : string;
+	// Raw doccomment string.
+	raw : string;
 
 
 public:
@@ -56,7 +58,8 @@ public:
 	{
 		switch (key) {
 		case "name": return new Text(name);
-		case "doc": return new Text(doc);
+		case "doc": return makeNilOrText(rawToFull(raw));
+		case "brief": return makeNilOrText(rawToBrief(raw));
 		default: throw makeNoField(n, key);
 		}
 	}
@@ -72,19 +75,14 @@ public:
 
 
 public:
-	override fn ident(n : ir.Node,  key : string) Value
+	override fn ident(n : ir.Node, key : string) Value
 	{
 		c := Collection.make(children, key);
 		if (c !is null) {
 			return c;
 		}
 
-		switch (key) {
-		case "name": return new Text(name);
-		case "doc": return new Text(doc);
-		case "all": return new Array(children);
-		default: throw makeNoField(n, key);
-		}
+		return super.ident(n, key);
 	}
 }
 
@@ -193,6 +191,12 @@ public:
 	{
 		kind : Kind;
 		switch (key) with (Kind) {
+		case "all":
+			if (vals.length > 0) {
+				return new Collection(vals);
+			} else {
+				return new Nil();
+			}
 		case "enums": kind = Enum; break;
 		case "classes": kind = Class; break;
 		case "unions": kind = Union; break;
@@ -297,21 +301,21 @@ public:
 			case "hasBody": this.hasBody = v.boolean(); break;
 			case "typeFull": this.typeFull = v.str(); break;
 			case "children": children.fromArray(ref v); break;
-			default: writefln("unknown key '" ~ k ~ "'");
+			default: io.writefln("unknown key '" ~ k ~ "'");
 			}
 		}
 	}
 
-	fn copyToBase(b : Base )
+	fn copyToBase(b : Base)
 	{
 		b.kind = kind;
-		b.doc = doc;
 	}
 
 	fn copyToNamed(b : Named)
 	{
 		copyToBase(b);
 		b.name = name;
+		b.raw = doc;
 	}
 
 	fn copyToParent(b : Parent)
@@ -337,7 +341,7 @@ public:
 	fn toArg() Arg
 	{
 		b := new Arg();
-		b.doc = doc;
+		copyToBase(b);
 		b.name = name;
 		b.type = type;
 		b.typeFull = typeFull;
