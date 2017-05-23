@@ -24,16 +24,16 @@ import diode.vdoc;
 class DiodeDriver : Driver
 {
 protected:
-	mLayouts : File[string];
-	mRoot : Set;
-	mSite : Set;
-	mDoc : Set;
-	mModules : Array;
-	mEngine : DriverEngine;
+	mLayouts: File[string];
+	mRoot: Set;
+	mSite: Set;
+	mDoc: Set;
+	mModules: Array;
+	mEngine: DriverEngine;
 
 
 public:
-	this(settings : Settings)
+	this(settings: Settings)
 	{
 		super(settings);
 		buildRootEnv();
@@ -41,26 +41,26 @@ public:
 		mEngine = new DriverEngine(this, mRoot);
 	}
 
-	override fn addLayout(source : string, filename : string)
+	override fn addLayout(source: string, filename: string)
 	{
 		f := createFile(source, filename);
 		mLayouts[f.filename] = f;
 	}
 
-	override fn addInclude(source : string, filename : string)
+	override fn addInclude(source: string, filename: string)
 	{
 		mEngine.addInclude(createFile(source, filename), filename);
 	}
 
-	override fn renderFile(source : string, filename : string) string
+	override fn renderFile(source: string, filename: string) string
 	{
-		s : StringSink;
+		s: StringSink;
 		f := createFile(source, filename);
 		mEngine.renderFile(f, s.sink);
 		return s.toString();
 	}
 
-	override fn addDoc(source : string, filename : string)
+	override fn addDoc(source: string, filename: string)
 	{
 		mModules.vals ~= parse(source);
 	}
@@ -76,7 +76,7 @@ public:
 
 
 protected:
-	fn createFile(source : string, filename : string) File
+	fn createFile(source: string, filename: string) File
 	{
 		base := baseName(filename);
 		ext := getAndCheckExt(ref base);
@@ -92,7 +92,7 @@ protected:
 		return f;
 	}
 
-	fn getLayoutForFile(f : File) File
+	fn getLayoutForFile(f: File) File
 	{
 		assert(f !is null);
 
@@ -110,7 +110,7 @@ protected:
 		return l;
 	}
 
-	fn selectType(layout : File, contents : File) Contents
+	fn selectType(layout: File, contents: File) Contents
 	{
 		if (layout.ext == File.Ext.HTML &&
 		    contents.ext == File.Ext.Markdown) {
@@ -129,7 +129,7 @@ protected:
 		                                 contents.filename);
 	}
 
-	fn getAndCheckExt(ref base : string) File.Ext
+	fn getAndCheckExt(ref base: string) File.Ext
 	{
 		ext := extension(base);
 		if (ext is null) {
@@ -149,7 +149,7 @@ protected:
 		}
 	}
 
-	fn getLayout(key : string) File
+	fn getLayout(key: string) File
 	{
 		ret := key in mLayouts;
 		if (ret is null) {
@@ -181,13 +181,13 @@ protected:
 class DriverEngine : Engine
 {
 private:
-	mDrv : DiodeDriver;
-	mRoot : Set;
-	mIncludes : File[string];
+	mDrv: DiodeDriver;
+	mRoot: Set;
+	mIncludes: File[string];
 
 
 public:
-	this(d : DiodeDriver, root : Set)
+	this(d: DiodeDriver, root: Set)
 	{
 		super(root);
 
@@ -195,13 +195,13 @@ public:
 		mRoot = root;
 	}
 
-	fn addInclude(f : File, filename : string)
+	fn addInclude(f: File, filename: string)
 	{
 		base := baseName(filename);
 		mIncludes[base] = f;
 	}
 
-	fn renderFile(f : File, sink: Sink)
+	fn renderFile(f: File, sink: Sink)
 	{
 		// We always create a new env for each file.
 		env := new Set();
@@ -226,7 +226,7 @@ public:
 		f.file.accept(this, sink);
 	}
 
-	override fn visit(p : ir.Include, sink : Sink) Status
+	override fn visit(p: ir.Include, sink: Sink) Status
 	{
 		ret := p.filename in mIncludes;
 		if (ret is null) {
@@ -269,15 +269,15 @@ public:
 		Markdown,
 	}
 
-	filename : string;
-	layout : File;
-	header : Header;
-	file : ir.File;
-	ext : Ext;
+	filename: string;
+	layout: File;
+	header: Header;
+	file: ir.File;
+	ext: Ext;
 
 
 public:
-	fn getOption(key : string, def : string = null) string
+	fn getOption(key: string, def: string = null) string
 	{
 		if (header is null) {
 			return def;
@@ -295,16 +295,16 @@ public:
 /**
  * Special Value for the contents value.
  */
-class Contents : Value
+class Contents: Value
 {
 public:
-	engine : Engine;
-	file : ir.File;
-	env : Set;
+	engine: Engine;
+	file: ir.File;
+	env: Set;
 
 
 public:
-	override fn toText(n : ir.Node, sink : Sink)
+	override fn toText(n: ir.Node, sink: Sink)
 	{
 		// Save the old enviroment.
 		old := engine.env;
@@ -323,13 +323,13 @@ public:
 class MarkdownContents : Contents
 {
 public:
-	override fn toText(n : ir.Node, sink : Sink)
+	override fn toText(n: ir.Node, sink: Sink)
 	{
 		// Save the old enviroment.
 		old := engine.env;
 		engine.env = env;
 
-		dst : StringSink;
+		dst: StringSink;
 		file.accept(engine, dst.sink);
 
 		// Restor old enviroment.

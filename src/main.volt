@@ -10,7 +10,7 @@ import diode.license;
 import diode.interfaces;
 
 
-fn main(args : string[]) i32
+fn main(args: string[]) i32
 {
 	if (args.length > 1 && args[1] == "--test") {
 		return runTest(args);

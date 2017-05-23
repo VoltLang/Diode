@@ -12,10 +12,10 @@ import diode.errors;
 class Header
 {
 public:
-	map : string[string];
+	map: string[string];
 }
 
-fn parse(src : Source) Header
+fn parse(src: Source) Header
 {
 	if (!src.isTripleDash()) {
 		return null;
@@ -53,9 +53,9 @@ fn parse(src : Source) Header
 /**
  * Does not advance the source, just check if the next 3 chars are dashes.
  */
-fn isTripleDash(src : Source) bool
+fn isTripleDash(src: Source) bool
 {
-	eof : bool;
+	eof: bool;
 
 	return src.lookahead(0, out eof) == '-' &&
 	       src.lookahead(1, out eof) == '-' &&
@@ -65,7 +65,7 @@ fn isTripleDash(src : Source) bool
 /**
  * Does what it says on the tin, yes I felt bad naming this function.
  */
-fn skipWhiteAndCheckIfEmptyLine(src : Source) bool
+fn skipWhiteAndCheckIfEmptyLine(src: Source) bool
 {
 	d := src.front;
 	while (d != '\n' && d.isWhite() && !src.eof) {
@@ -81,7 +81,7 @@ fn skipWhiteAndCheckIfEmptyLine(src : Source) bool
 	}
 }
 
-fn skipWhiteTillAfterColon(src : Source)
+fn skipWhiteTillAfterColon(src: Source)
 {
 	d := src.front;
 	while (d != ':' && !src.eof) {
@@ -96,7 +96,7 @@ fn skipWhiteTillAfterColon(src : Source)
 	}
 }
 
-fn getIdent(src : Source) string
+fn getIdent(src: Source) string
 {
 	mark := src.save();
 	if (!src.front.isAlpha()) {
@@ -112,7 +112,7 @@ fn getIdent(src : Source) string
 	return src.sliceFrom(mark);
 }
 
-fn getRestOfLine(src : Source) string
+fn getRestOfLine(src: Source) string
 {
 	mark := src.save();
 	d := src.front;

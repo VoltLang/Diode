@@ -9,23 +9,23 @@ import diode.eval.value;
 class Engine : ir.Visitor
 {
 public:
-	env : Set;
-	v : Value;
+	env: Set;
+	v: Value;
 
-	this(env : Set)
+	this(env: Set)
 	{
 		assert(env !is null);
 		this.env = env;
 	}
 
 public:
-	override fn visit(t : ir.Text, sink : Sink) Status
+	override fn visit(t: ir.Text, sink: Sink) Status
 	{
 		sink(t.text);
 		return Continue;
 	}
 
-	override fn leave(p : ir.Print, sink : Sink) Status
+	override fn leave(p: ir.Print, sink: Sink) Status
 	{
 		assert(v !is null);
 		v.toText(p, sink);
@@ -33,7 +33,7 @@ public:
 		return Continue;
 	}
 
-	override fn enter(i : ir.If, sink : Sink) Status
+	override fn enter(i: ir.If, sink: Sink) Status
 	{
 		// Eval expression
 		// if 'site.has_feature'
@@ -68,7 +68,7 @@ public:
 		return ContinueParent;
 	}
 
-	override fn enter(f : ir.For, sink : Sink) Status
+	override fn enter(f: ir.For, sink: Sink) Status
 	{
 		// Eval expression
 		// for post in 'site.url'
@@ -108,7 +108,7 @@ public:
 		return ContinueParent;
 	}
 
-	override fn leave(a : ir.Assign, sink : Sink) Status
+	override fn leave(a: ir.Assign, sink: Sink) Status
 	{
 		assert(a.ident !is null);
 		assert(v !is null);
@@ -125,14 +125,14 @@ public:
 	 *
 	 */
 
-	override fn leave(p : ir.Access, sink : Sink) Status
+	override fn leave(p: ir.Access, sink: Sink) Status
 	{
 		assert(v !is null);
 		v = v.ident(p, p.ident);
 		return Continue;
 	}
 
-	override fn visit(p : ir.Ident, sink : Sink) Status
+	override fn visit(p: ir.Ident, sink: Sink) Status
 	{
 		v = env.ident(p, p.ident);
 		return Continue;

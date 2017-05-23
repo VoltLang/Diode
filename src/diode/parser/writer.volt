@@ -8,12 +8,12 @@ import diode.token.token;
 class Writer
 {
 protected:
-	mTokens : Token[];
-	mIndex : size_t;
+	mTokens: Token[];
+	mIndex: size_t;
 
 
 public:
-	this(tokens : Token[])
+	this(tokens: Token[])
 	{
 		assert(tokens.length > 0);
 		mTokens = tokens;
@@ -61,7 +61,7 @@ public:
 	 * Side-effects:
 	 *   None.
 	 */
-	final fn lookahead(n : size_t) Token
+	final fn lookahead(n: size_t) Token
 	{
 		i := mIndex + n;
 		if (i >= mTokens.length) {

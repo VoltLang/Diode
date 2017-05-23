@@ -39,7 +39,7 @@ enum Kind
  */
 class Base : Value
 {
-	kind : Kind;
+	kind: Kind;
 }
 
 /**
@@ -48,13 +48,13 @@ class Base : Value
 class Named : Base
 {
 public:
-	name : string;
+	name: string;
 	// Raw doccomment string.
-	raw : string;
+	raw: string;
 
 
 public:
-	override fn ident(n : ir.Node, key : string) Value
+	override fn ident(n: ir.Node, key: string) Value
 	{
 		switch (key) {
 		case "name": return new Text(name);
@@ -71,11 +71,11 @@ public:
 class Parent : Named
 {
 public:
-	children : Value[];
+	children: Value[];
 
 
 public:
-	override fn ident(n : ir.Node, key : string) Value
+	override fn ident(n: ir.Node, key: string) Value
 	{
 		c := Collection.make(children, key);
 		if (c !is null) {
@@ -92,13 +92,13 @@ public:
 class Arg : Base
 {
 public:
-	name : string;
-	type : string;
-	typeFull : string;
+	name: string;
+	type: string;
+	typeFull: string;
 
 
 public:
-	override fn ident(n : ir.Node,  key : string) Value
+	override fn ident(n: ir.Node,  key: string) Value
 	{
 		switch (key) {
 		case "name": return new Text(name);
@@ -115,12 +115,12 @@ public:
 class Return : Base
 {
 public:
-	type : string;
-	typeFull : string;
+	type: string;
+	typeFull: string;
 
 
 public:
-	override fn ident(n : ir.Node,  key : string) Value
+	override fn ident(n: ir.Node,  key: string) Value
 	{
 		switch (key) {
 		case "type": return new Text(type);
@@ -136,12 +136,12 @@ public:
 class Variable : Named
 {
 public:
-	type : string;
-	typeFull : string;
+	type: string;
+	typeFull: string;
 
 
 public:
-	override fn ident(n : ir.Node,  key : string) Value
+	override fn ident(n: ir.Node,  key: string) Value
 	{
 		switch (key) {
 		case "type": return makeNilOrText(type);
@@ -157,14 +157,14 @@ public:
 class Function : Named
 {
 public:
-	args : Value[];
-	rets : Value[];
-	linkage : string;
-	hasBody : bool;
+	args: Value[];
+	rets: Value[];
+	linkage: string;
+	hasBody: bool;
 
 
 public:
-	override fn ident(n : ir.Node,  key : string) Value
+	override fn ident(n: ir.Node,  key: string) Value
 	{
 		switch (key) {
 		case "args": return makeNilOrArray(args);
@@ -182,14 +182,14 @@ public:
 class Collection : Array
 {
 public:
-	this(vals : Value[])
+	this(vals: Value[])
 	{
 		super(vals);
 	}
 
-	static fn make(vals : Value[], key : string) Value
+	static fn make(vals: Value[], key: string) Value
 	{
-		kind : Kind;
+		kind: Kind;
 		switch (key) with (Kind) {
 		case "all":
 			if (vals.length > 0) {
@@ -211,7 +211,7 @@ public:
 		default: return null;
 		}
 
-		num : size_t;
+		num: size_t;
 		ret := new Value[](vals.length);
 		foreach (v; vals) {
 			b := cast(Base)v;
@@ -229,7 +229,7 @@ public:
 		}
 	}
 
-	override fn ident(n : ir.Node, key : string) Value
+	override fn ident(n: ir.Node, key: string) Value
 	{
 		c := make(vals, key);
 		if (c is null) {
@@ -243,7 +243,7 @@ public:
 /**
  * Create a text Value, nil if string is empty.
  */
-fn makeNilOrText(text : string) Value
+fn makeNilOrText(text: string) Value
 {
 	if (text.length == 0) {
 		return new Nil();
@@ -255,7 +255,7 @@ fn makeNilOrText(text : string) Value
 /**
  * Create a array Value, nil if string is empty.
  */
-fn makeNilOrArray(array : Value[]) Value
+fn makeNilOrArray(array: Value[]) Value
 {
 	if (array.length == 0) {
 		return new Nil();
@@ -271,21 +271,21 @@ fn makeNilOrArray(array : Value[]) Value
 struct Info
 {
 public:
-	kind : Kind;
-	name : string;
-	doc : string;
-	type : string;
-	typeFull : string;
-	hasBody : bool;
-	linkage : string;
-	value : string;
-	children : Value[];
-	rets : Value[];
-	args : Value[];
+	kind: Kind;
+	name: string;
+	doc: string;
+	type: string;
+	typeFull: string;
+	hasBody: bool;
+	linkage: string;
+	value: string;
+	children: Value[];
+	rets: Value[];
+	args: Value[];
 
 
 public:
-	fn getFields(ref e : json.Value)
+	fn getFields(ref e: json.Value)
 	{
 		foreach (k; e.keys()) {
 			v := e.lookupObjectKey(k);
@@ -306,19 +306,19 @@ public:
 		}
 	}
 
-	fn copyToBase(b : Base)
+	fn copyToBase(b: Base)
 	{
 		b.kind = kind;
 	}
 
-	fn copyToNamed(b : Named)
+	fn copyToNamed(b: Named)
 	{
 		copyToBase(b);
 		b.name = name;
 		b.raw = doc;
 	}
 
-	fn copyToParent(b : Parent)
+	fn copyToParent(b: Parent)
 	{
 		copyToNamed(b);
 		b.children = children;
@@ -383,10 +383,10 @@ public:
 	}
 }
 
-fn fromArray(ref arr : Value[], ref v : json.Value, defKind : Kind = Kind.Invalid)
+fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 {
 	foreach (ref e; v.array()) {
-		info : Info;
+		info: Info;
 		info.kind = defKind;
 		info.getFields(ref e);
 		final switch (info.kind) with (Kind) {
@@ -409,7 +409,7 @@ fn fromArray(ref arr : Value[], ref v : json.Value, defKind : Kind = Kind.Invali
 	}
 }
 
-fn getKindFromString(str : string) Kind
+fn getKindFromString(str: string) Kind
 {
 	switch (str) with (Kind) {
 	case "fn": return Function;
@@ -428,11 +428,11 @@ fn getKindFromString(str : string) Kind
 	}
 }
 
-fn parse(data : string) Value[]
+fn parse(data: string) Value[]
 {
 	root := json.parse(data);
 
-	mods : Value[];
+	mods: Value[];
 	mods.fromArray(ref root);
 
 	return mods;

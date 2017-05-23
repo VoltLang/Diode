@@ -11,13 +11,13 @@ import diode.token.token;
 import diode.token.writer;
 
 
-fn lex(src : Source) Token[]
+fn lex(src: Source) Token[]
 {
 	tw := new Writer();
 
 	tw.pushToken(ref src.loc, TokenKind.Begin, "BEGIN");
 
-	s : Status;
+	s: Status;
 	while (s != Status.End) {
 		final switch (s) with (Status) {
 		case Text:
@@ -47,7 +47,7 @@ enum Status
 	Error = -1,
 }
 
-fn lexToken(src : Source, tw : Writer, status : Status) Status
+fn lexToken(src: Source, tw: Writer, status: Status) Status
 {
 	assert(status != Status.Text);
 
@@ -121,7 +121,7 @@ fn lexToken(src : Source, tw : Writer, status : Status) Status
 	}
 }
 
-fn lexIdent(src : Source, tw : Writer, status : Status) Status
+fn lexIdent(src: Source, tw: Writer, status: Status) Status
 {
 	loc := src.loc;
 	mark := src.save();
@@ -137,7 +137,7 @@ fn lexIdent(src : Source, tw : Writer, status : Status) Status
 	return status;
 }
 
-fn lexText(src : Source, tw : Writer) Status
+fn lexText(src: Source, tw: Writer) Status
 {
 	loc := src.loc;
 	mark := src.save();

@@ -15,11 +15,11 @@ import diode.parser.writer;
 import diode.parser.header;
 
 
-fn parse(src : Source) ir.File
+fn parse(src: Source) ir.File
 {
 	tokens := lex(src);
 	p := new Parser(tokens);
-	file : ir.File;
+	file: ir.File;
 	s := parseFile(p, out file);
 
 	if (s != Status.Ok) {
@@ -53,10 +53,10 @@ public:
 class Parser : Writer
 {
 protected:
-	mErrorToken : Token;
+	mErrorToken: Token;
 
 public:
-	this(tokens : Token[])
+	this(tokens: Token[])
 	{
 		super(tokens);
 	}
@@ -73,15 +73,15 @@ public:
 	}
 }
 
-fn parseFile(p : Parser, out file : ir.File) Status
+fn parseFile(p: Parser, out file: ir.File) Status
 {
 	if (p.front != tk.Begin) {
 		return p.error();
 	}
 	p.popFront();
 
-	s : Status;
-	nodes : ir.Node[];
+	s: Status;
+	nodes: ir.Node[];
 	while (p.front != tk.End) {
 		s = parseNode(p, ref nodes);
 		if (s != Status.Ok) {
@@ -94,7 +94,7 @@ fn parseFile(p : Parser, out file : ir.File) Status
 	return s;
 }
 
-fn parseNode(p : Parser, ref nodes : ir.Node[]) Status
+fn parseNode(p: Parser, ref nodes: ir.Node[]) Status
 {
 	s: Status;
 	node: ir.Node;
@@ -117,7 +117,7 @@ fn parseNode(p : Parser, ref nodes : ir.Node[]) Status
 	return s;
 }
 
-fn match(p : Parser, t : TokenKind) Status
+fn match(p: Parser, t: TokenKind) Status
 {
 	if (p.front != t) {
 		return p.error();
@@ -126,7 +126,7 @@ fn match(p : Parser, t : TokenKind) Status
 	return Status.Ok;
 }
 
-fn match(p : Parser, str : string) Status
+fn match(p: Parser, str: string) Status
 {
 	if (p.front.value != str) {
 		return p.error();
@@ -135,7 +135,7 @@ fn match(p : Parser, str : string) Status
 	return Status.Ok;
 }
 
-fn matchAndGet(p : Parser, out str : string) Status
+fn matchAndGet(p: Parser, out str: string) Status
 {
 	if (p.front != tk.Identifier) {
 		return p.error();
@@ -145,7 +145,7 @@ fn matchAndGet(p : Parser, out str : string) Status
 	return Status.Ok;
 }
 
-fn matchAssert(p : Parser, t : TokenKind)
+fn matchAssert(p: Parser, t: TokenKind)
 {
 	assert(p.front == t);
 	p.popFront();
@@ -153,7 +153,7 @@ fn matchAssert(p : Parser, t : TokenKind)
 
 import watt.io : error;
 
-fn parseText(p : Parser, out node : ir.Node) Status
+fn parseText(p: Parser, out node: ir.Node) Status
 {
 	hyphen := stripAnyHyphen(p);
 
@@ -187,13 +187,13 @@ fn parseText(p : Parser, out node : ir.Node) Status
 	return Status.Ok;
 }
 
-fn parsePrint(p : Parser, out node : ir.Node) Status
+fn parsePrint(p: Parser, out node: ir.Node) Status
 {
 	// Check for {{
 	p.matchAssert(tk.OpenPrint);
 
 	// {{ <exp> }}
-	exp : ir.Exp;
+	exp: ir.Exp;
 	if (err := parseExp(p, out exp)) {
 		return err;
 	}
@@ -207,7 +207,7 @@ fn parsePrint(p : Parser, out node : ir.Node) Status
 	return Status.Ok;
 }
 
-fn parseStatement(p : Parser, out node : ir.Node) Status
+fn parseStatement(p: Parser, out node: ir.Node) Status
 {
 	// We use identifiers instead of special tokens for statements.
 	switch (p.following.value) {
@@ -219,16 +219,16 @@ fn parseStatement(p : Parser, out node : ir.Node) Status
 	}
 }
 
-fn parseInclude(p : Parser, out node : ir.Node) Status
+fn parseInclude(p: Parser, out node: ir.Node) Status
 {
 	// Check for {%
 	p.matchAssert(tk.OpenStatement);
 
 	// This is a for.
-	base : string;
-	ext : string;
-	exp : ir.Exp;
-	assigns : ir.Assign[];
+	base: string;
+	ext: string;
+	exp: ir.Exp;
+	assigns: ir.Assign[];
 
 	// 'include' base.ext
 	assert(p.front == "include");
@@ -250,7 +250,7 @@ fn parseInclude(p : Parser, out node : ir.Node) Status
 	}
 
 	while (p.front == tk.Identifier) {
-		ident : string;
+		ident: string;
 
 		// assign 'ident' = exp
 		if (err := p.matchAndGet(out ident)) {
@@ -279,16 +279,16 @@ fn parseInclude(p : Parser, out node : ir.Node) Status
 	return Status.Ok;
 }
 
-fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
+fn parseIfUnless(p: Parser, out node: ir.Node, elsif: bool = false) Status
 {
 	// Check for {%
 	p.matchAssert(tk.OpenStatement);
 
 	// This is a if or unless.
-	invert : bool;
-	exp : ir.Exp;
-	thenNodes : ir.Node[];
-	elseNodes : ir.Node[];
+	invert: bool;
+	exp: ir.Exp;
+	thenNodes: ir.Node[];
+	elseNodes: ir.Node[];
 
 	// ['if'|'unless'] something.ident
 	if (elsif) {
@@ -326,7 +326,7 @@ fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
 			p.popFront();
 			elseBlock = true;
 		}
-		s2 : Status;
+		s2: Status;
 		if (p.front == tk.OpenStatement &&
 			p.following == "elsif") {
 			elsifNode: ir.Node;
@@ -363,15 +363,15 @@ fn parseIfUnless(p : Parser, out node : ir.Node, elsif : bool = false) Status
 	return Status.Ok;
 }
 
-fn parseFor(p : Parser, out node : ir.Node) Status
+fn parseFor(p: Parser, out node: ir.Node) Status
 {
 	// Check for {%
 	p.matchAssert(tk.OpenStatement);
 
 	// This is a for.
-	ident : string;
-	exp : ir.Exp;
-	nodes : ir.Node[];
+	ident: string;
+	exp: ir.Exp;
+	nodes: ir.Node[];
 
 	// 'for' ident in something.exp
 	assert(p.front == "for");
@@ -424,14 +424,14 @@ fn parseFor(p : Parser, out node : ir.Node) Status
 	return Status.Ok;
 }
 
-fn parseAssign(p : Parser, out node : ir.Node) Status
+fn parseAssign(p: Parser, out node: ir.Node) Status
 {
 	// Check for {%
 	p.matchAssert(tk.OpenStatement);
 
 	// This is a assign.
-	ident : string;
-	exp : ir.Exp;
+	ident: string;
+	exp: ir.Exp;
 
 	// 'assign' ident = exp
 	if (err := p.match("assign")) {
@@ -462,9 +462,9 @@ fn parseAssign(p : Parser, out node : ir.Node) Status
 	return Status.Ok;
 }
 
-fn parseExp(p : Parser, out exp : ir.Exp) Status
+fn parseExp(p: Parser, out exp: ir.Exp) Status
 {
-	v : string;
+	v: string;
 	if (err := p.matchAndGet(out v)) {
 		return err;
 	}
@@ -489,7 +489,7 @@ fn parseExp(p : Parser, out exp : ir.Exp) Status
 }
 
 /// Returns true if any hyphen was found.
-fn stripAnyHyphen(p : Parser) bool
+fn stripAnyHyphen(p: Parser) bool
 {
 	hyphen := false;
 	while (p.front == tk.Hyphen) {

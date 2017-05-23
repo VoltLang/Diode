@@ -11,18 +11,18 @@ import watt.text.source : Location;
 final class Token
 {
 public:
-	loc : Location;
-	kind : TokenKind;
-	value : string;
+	loc: Location;
+	kind: TokenKind;
+	value: string;
 
 
 public:
-	final fn opEquals(kind : TokenKind) bool
+	final fn opEquals(kind: TokenKind) bool
 	{
 		return this.kind == kind;
 	}
 
-	final fn opEquals(str : string) bool
+	final fn opEquals(str: string) bool
 	{
 		return kind == TokenKind.Identifier && value == str;
 	}
@@ -57,7 +57,7 @@ enum TokenKind
 	Identifier,
 }
 
-fn identifierKind(ident : string) TokenKind
+fn identifierKind(ident: string) TokenKind
 {
 	switch (ident) with (TokenKind) {
 	case "nil":   return Nil;

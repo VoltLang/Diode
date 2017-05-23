@@ -12,7 +12,7 @@ public import watt.text.sink : Sink;
 abstract class Node
 {
 public:
-	abstract fn accept(v : Visitor, sink : Sink) Status;
+	abstract fn accept(v: Visitor, sink: Sink) Status;
 }
 
 /**
@@ -21,11 +21,11 @@ public:
 class File : Node
 {
 public:
-	nodes : Node[];
+	nodes: Node[];
 
 
 public:
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
@@ -49,17 +49,17 @@ public:
 class Text : Node
 {
 public:
-	text : string;
+	text: string;
 
 
 public:
-	this(text : string)
+	this(text: string)
 	{
 		assert(text.length > 0);
 		this.text = text;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		return filterParent(v.visit(this, sink));
 	}
@@ -71,17 +71,17 @@ public:
 class Print : Node
 {
 public:
-	exp : Exp;
+	exp: Exp;
 
 
 public:
-	this(exp : Exp)
+	this(exp: Exp)
 	{
 		assert(exp !is null);
 		this.exp = exp;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
@@ -111,17 +111,17 @@ abstract class Exp : Node
 class Ident : Exp
 {
 public:
-	ident : string;
+	ident: string;
 
 
 public:
-	this(ident : string)
+	this(ident: string)
 	{
 		assert(ident !is null);
 		this.ident = ident;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		return filterParent(v.visit(this, sink));
 	}
@@ -133,12 +133,12 @@ public:
 class Access : Exp
 {
 public:
-	child : Exp;
-	ident : string;
+	child: Exp;
+	ident: string;
 
 
 public:
-	this(child : Exp, ident : string)
+	this(child: Exp, ident: string)
 	{
 		assert(child !is null);
 		assert(ident !is null);
@@ -146,7 +146,7 @@ public:
 		this.ident = ident;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
@@ -169,14 +169,14 @@ public:
 class If : Node
 {
 public:
-	thenNodes : Node[];
-	elseNodes : Node[];
-	exp : Exp;
-	invert : bool;
+	thenNodes: Node[];
+	elseNodes: Node[];
+	exp: Exp;
+	invert: bool;
 
 
 public:
-	this(invert : bool, exp : Exp, thenNodes : Node[], elseNodes : Node[])
+	this(invert: bool, exp: Exp, thenNodes: Node[], elseNodes: Node[])
 	{
 		assert(exp !is null);
 		this.invert = invert;
@@ -185,7 +185,7 @@ public:
 		this.elseNodes = elseNodes;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
@@ -222,13 +222,13 @@ public:
 class For : Node
 {
 public:
-	var : string;
-	nodes : Node[];
-	exp : Exp;
+	var: string;
+	nodes: Node[];
+	exp: Exp;
 
 
 public:
-	this(var : string, exp : Exp, nodes : Node[])
+	this(var: string, exp: Exp, nodes: Node[])
 	{
 		assert(var !is null);
 		assert(exp !is null);
@@ -237,7 +237,7 @@ public:
 		this.nodes = nodes;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
@@ -264,12 +264,12 @@ public:
 class Assign : Node
 {
 public:
-	ident : string;
-	exp : Exp;
+	ident: string;
+	exp: Exp;
 
 
 public:
-	this(ident : string, exp : Exp)
+	this(ident: string, exp: Exp)
 	{
 		assert(ident !is null);
 		assert(exp !is null);
@@ -277,7 +277,7 @@ public:
 		this.exp = exp;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		s1 := v.enter(this, sink);
 		if (s1 != Status.Continue) {
@@ -297,19 +297,19 @@ public:
 class Include : Node
 {
 public:
-	filename : string;
-	assigns : Assign[];
+	filename: string;
+	assigns: Assign[];
 
 
 public:
-	this(filename : string, assigns : Assign[])
+	this(filename: string, assigns: Assign[])
 	{
 		assert(filename !is null);
 		this.filename = filename;
 		this.assigns = assigns;
 	}
 
-	override fn accept(v : Visitor, sink : Sink) Status
+	override fn accept(v: Visitor, sink: Sink) Status
 	{
 		return filterParent(v.visit(this, sink));
 	}
@@ -365,7 +365,7 @@ abstract class Visitor
 /**
  * Filter out continue parent and turn that into a continue.
  */
-fn filterParent(s : Status) Status
+fn filterParent(s: Status) Status
 {
 	return s == Status.ContinueParent ? Status.Continue : s;
 }

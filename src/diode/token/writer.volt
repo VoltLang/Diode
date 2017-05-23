@@ -9,11 +9,11 @@ import diode.token.token;
 final class Writer
 {
 protected:
-	mTokens : Token[];
+	mTokens: Token[];
 
 
 public:
-	fn pushToken(ref loc : const Location, kind : TokenKind, value : string)
+	fn pushToken(ref loc: const Location, kind: TokenKind, value: string)
 	{
 		t := new Token();
 		t.kind = kind;

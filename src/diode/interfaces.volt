@@ -11,19 +11,19 @@ import watt.path : removeTrailingSlashes, dirSeparator;
 abstract class Driver
 {
 public:
-	settings : Settings;
+	settings: Settings;
 
 
 public:
-	this(settings : Settings)
+	this(settings: Settings)
 	{
 		this.settings = settings;
 	}
 
-	abstract fn addLayout(source : string, filename : string);
-	abstract fn addInclude(source : string, filename : string);
-	abstract fn addDoc(source : string, filename : string);
-	abstract fn renderFile(source : string, filename : string) string;
+	abstract fn addLayout(source: string, filename: string);
+	abstract fn addInclude(source: string, filename: string);
+	abstract fn addDoc(source: string, filename: string);
+	abstract fn renderFile(source: string, filename: string) string;
 
 	abstract fn info(fmt: string, ...);
 }
@@ -34,13 +34,13 @@ public:
 class Settings
 {
 public:
-	sourceDir : string;
-	vdocDir : string;
-	outputDir : string;
-	layoutDir : string;
-	includeDir : string;
+	sourceDir: string;
+	vdocDir: string;
+	outputDir: string;
+	layoutDir: string;
+	includeDir: string;
 
-	url : string = "http://example.com";
+	url: string = "http://example.com";
 
 	// These depend on workDir and are set with fillInDefaults.
 	enum string vdocDirDefault = "_vdoc";
@@ -68,7 +68,7 @@ public:
 		}
 	}
 
-	fn processPath(ref val : string, def : string)
+	fn processPath(ref val: string, def: string)
 	{
 		if (val is null) {
 			val = def;

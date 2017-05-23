@@ -12,63 +12,63 @@ alias Sink = ir.Sink;
 abstract class Value
 {
 public:
-	fn ident(n : ir.Node, key : string) Value
+	fn ident(n: ir.Node, key: string) Value
 	{
 		return new Nil();
 	}
 
-	fn toText(n : ir.Node, sink : Sink)
+	fn toText(n: ir.Node, sink: Sink)
 	{
 
 	}
 
-	fn toArray(n : ir.Node) Value[]
+	fn toArray(n: ir.Node) Value[]
 	{
 		return null;
 	}
 
-	fn toBool(n : ir.Node) bool
+	fn toBool(n: ir.Node) bool
 	{
 		return true;
 	}
 }
 
-class Nil : Value
+class Nil: Value
 {
 public:
-	override fn toBool(n : ir.Node) bool
+	override fn toBool(n: ir.Node) bool
 	{
 		return false;
 	}
 }
 
-class Bool : Value
+class Bool: Value
 {
 public:
-	value : bool;
+	value: bool;
 
 
 public:
-	this(value : bool)
+	this(value: bool)
 	{
 		this.value = value;
 	}
 
-	override fn toText(n : ir.Node, sink : Sink)
+	override fn toText(n: ir.Node, sink: Sink)
 	{
 		sink(value ? "true" : "false");
 	}
 
-	override fn toBool(n : ir.Node) bool
+	override fn toBool(n: ir.Node) bool
 	{
 		return value;
 	}
 }
 
-class Text : Value
+class Text: Value
 {
 public:
-	text : string;
+	text: string;
 
 
 public:
@@ -77,35 +77,35 @@ public:
 		this.text = text;
 	}
 
-	override fn toText(n : ir.Node, sink : Sink)
+	override fn toText(n: ir.Node, sink: Sink)
 	{
 		sink(text);
 	}
 }
 
-class Array : Value
+class Array: Value
 {
 public:
-	vals : Value[];
+	vals: Value[];
 
 
 public:
-	this(vals : Value[]...)
+	this(vals: Value[]...)
 	{
 		this.vals = vals;
 	}
 
-	override fn toArray(n : ir.Node) Value[]
+	override fn toArray(n: ir.Node) Value[]
 	{
 		return vals;
 	}
 }
 
-class Set : Value
+class Set: Value
 {
 public:
-	parent : Set;
-	ctx : Value[string];
+	parent: Set;
+	ctx: Value[string];
 
 
 public:
@@ -113,12 +113,12 @@ public:
 	{
 	}
 
-	this(parent : Set)
+	this(parent: Set)
 	{
 		this.parent = parent;
 	}
 
-	override fn ident(n : ir.Node, key : string) Value
+	override fn ident(n: ir.Node, key: string) Value
 	{
 		ret := key in ctx;
 		if (ret !is null) {
