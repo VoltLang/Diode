@@ -1,0 +1,9 @@
+{
+	"pattern": "test.liquid",
+	"testCommandPrefix": "//T ",
+	"macros": {
+		"default": [
+			"//T run:diode --test %s %S/result.txt",
+		]
+	}
+}
