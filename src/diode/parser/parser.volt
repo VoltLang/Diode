@@ -6,7 +6,8 @@ import watt.text.source;
 import watt.text.string : stripLeft, stripRight;
 
 import ir = diode.ir;
-import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude, bAccess, bIdent;
+import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
+	bAccess, bIdent, bFilter;
 
 import diode.errors;
 import diode.token.lexer : lex;
@@ -481,6 +482,21 @@ fn parseExp(p: Parser, out exp: ir.Exp) Status
 			}
 			exp = bAccess(exp, v);
 			break;
+		case Pipe:
+			p.popFront();
+
+			if (err := p.matchAndGet(out v)) {
+				return err;
+			}
+
+			exp = bFilter(exp, v, null);
+
+			if (p.front != tk.Colon) {
+				break;
+			}
+
+			// TODO filter arguments.
+			return p.error();
 		default:
 			return Status.Ok;
 		}
