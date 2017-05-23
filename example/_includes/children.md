@@ -9,6 +9,14 @@ else
 	%}
 {
 {%
+	for v in p.variables
+		%}	{{ v.name }}: {{ v.type }};
+{%
+		if forloop.last %}
+{%
+		endif -%}{%-
+	endfor -%}{%-
+
 	for m in p.methods
 		%}	{%
 		include function.md function=m -%}{%-
@@ -20,5 +28,4 @@ else
 	endfor
 	%}}
 {%
-endif
--%}
+endif -%}
