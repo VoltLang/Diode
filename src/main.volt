@@ -5,12 +5,16 @@
  */
 module main;
 
+import diode.tester;
 import diode.license;
 import diode.interfaces;
 
 
 fn main(args : string[]) i32
 {
+	if (args.length > 1 && args[1] == "--test") {
+		return runTest(args);
+	}
 	test();
 	return 0;
 }
@@ -29,9 +33,7 @@ import watt.path : dirSeparator;
 import watt.text.string : endsWith;
 import watt.text.sink;
 
-import diode.eval;
 import diode.driver;
-import diode.parser : parse;
 import diode.interfaces;
 
 
