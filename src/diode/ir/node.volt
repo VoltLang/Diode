@@ -164,6 +164,51 @@ public:
 }
 
 /**
+ * Filter expression.
+ */
+class Filter : Exp
+{
+public:
+	child: Exp;
+	ident: string;
+	args: Exp[];
+
+
+public:
+	this(child: Exp, ident: string, args: Exp[])
+	{
+		assert(child !is null);
+		assert(ident !is null);
+		this.child = child;
+		this.ident = ident;
+		this.args = args;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		s1 := v.enter(this, sink);
+		if (s1 != Status.Continue) {
+			return filterParent(s1);
+		}
+
+		assert(child !is null);
+		s2 := child.accept(v, sink);
+		if (s2 == Status.Stop) {
+			return s2;
+		}
+
+		foreach (arg; args) {
+			s3 := arg.accept(v, sink);
+			if (s3 == Status.Stop) {
+				return s3;
+			}
+		}
+
+		return filterParent(v.leave(this, sink));
+	}
+}
+
+/**
  * If control statement.
  */
 class If : Node
@@ -359,6 +404,8 @@ abstract class Visitor
 
 	abstract fn enter(Access, Sink) Status;
 	abstract fn leave(Access, Sink) Status;
+	abstract fn enter(Filter, Sink) Status;
+	abstract fn leave(Filter, Sink) Status;
 	abstract fn visit(Ident, Sink) Status;
 }
 

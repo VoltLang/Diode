@@ -45,6 +45,11 @@ fn bAccess(exp: ir.Exp, key: string) ir.Access
 	return new ir.Access(exp, key);
 }
 
+fn bFilter(exp: ir.Exp, key: string, args: ir.Exp[]) ir.Filter
+{
+	return new ir.Filter(exp, key, args);
+}
+
 fn bIdent(ident: string) ir.Ident
 {
 	return new ir.Ident(ident);

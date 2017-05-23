@@ -2,6 +2,11 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.eval.engine;
 
+import core.exception;
+
+import watt.conv : toUpper;
+import watt.text.sink;
+
 import ir = diode.ir;
 import diode.eval.value;
 
@@ -17,6 +22,20 @@ public:
 		assert(env !is null);
 		this.env = env;
 	}
+
+
+public:
+	fn handleFilter(n: ir.Node, ident: string, child: Value, args: Value[], sink: Sink)
+	{
+		s: StringSink;
+		child.toText(n, s.sink);
+
+		switch (ident) {
+		case "upper": v = new Text(toUpper(s.toString())); break;
+		default: throw new Exception("unknown filter " ~ ident);
+		}
+	}
+
 
 public:
 	override fn visit(t: ir.Text, sink: Sink) Status
@@ -132,6 +151,24 @@ public:
 		return Continue;
 	}
 
+	override fn enter(p: ir.Filter, sink: Sink) Status
+	{
+		// Eval expression
+		// 'exp' | filter[: arg1[, arg2]]
+		v = null;
+		p.child.accept(this, sink);
+		assert(v !is null);
+
+		// Args not supported yet.
+		assert(p.args.length == 0);
+
+		// Let implimentor handle the filter.
+		handleFilter(p, p.ident, v, null, sink);
+
+		// Done.
+		return ContinueParent;
+	}
+
 	override fn visit(p: ir.Ident, sink: Sink) Status
 	{
 		v = env.ident(p, p.ident);
@@ -149,6 +186,7 @@ public:
 	override fn enter(ir.File, Sink) Status { return Continue; }
 	override fn leave(ir.File, Sink) Status { return Continue; }
 	override fn enter(ir.Access, Sink) Status { return Continue; }
+	override fn leave(ir.Filter, Sink) Status { assert(false); }
 	override fn enter(ir.Print, Sink) Status { return Continue; }
 	override fn leave(ir.If, Sink) Status { assert(false); }
 	override fn leave(ir.For, Sink) Status { assert(false); }
