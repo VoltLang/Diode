@@ -431,9 +431,10 @@ fn getKindFromString(str: string) Kind
 fn parse(data: string) Value[]
 {
 	root := json.parse(data);
+	moduleRoot := root.lookupObjectKey("modules");
 
 	mods: Value[];
-	mods.fromArray(ref root);
+	mods.fromArray(ref moduleRoot);
 
 	return mods;
 }
