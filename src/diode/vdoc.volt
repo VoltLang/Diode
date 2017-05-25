@@ -24,6 +24,7 @@ enum Kind
 	Alias,
 	Class,
 	Union,
+	Import,
 	Return,
 	Struct,
 	Module,
@@ -297,10 +298,21 @@ public:
 			case "type": this.type = v.str(); break;
 			case "kind": this.kind = getKindFromString(v.str()); break;
 			case "value": this.value = v.str(); break;
+			case "access": break; // TODO
+			case "aliases": break; // TODO
+			case "storage": break; // TODO
+			case "isScope": break; // TODO
+			case "isFinal": break; // TODO
 			case "linkage": this.linkage = v.str(); break;
 			case "hasBody": this.hasBody = v.boolean(); break;
 			case "typeFull": this.typeFull = v.str(); break;
 			case "children": children.fromArray(ref v); break;
+			case "isExtern": break; // TODO
+			case "isStatic": break; // TODO
+			case "isProperty": break; // TODO
+			case "isAbstract": break; // TODO
+			case "forceLabel": break; // TODO
+			case "isMarkedOverride": break; // TODO
 			default: io.writefln("unknown key '" ~ k ~ "'");
 			}
 		}
@@ -397,6 +409,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case EnumDecl: arr ~= info.toNamed(); break;
 		case Class: arr ~= info.toParent(); break;
 		case Union: arr ~= info.toParent(); break;
+		case Import: break; // TODO Add import
 		case Return: arr ~= info.toReturn(); break;
 		case Struct: arr ~= info.toParent(); break;
 		case Module: arr ~= info.toParent(); break;
@@ -421,6 +434,7 @@ fn getKindFromString(str: string) Kind
 	case "alias": return Alias;
 	case "class": return Class;
 	case "union": return Union;
+	case "import": return Import;
 	case "struct": return Struct;
 	case "module": return Module;
 	case "member": return Member;
