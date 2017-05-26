@@ -75,6 +75,7 @@ fn testChildren(tests: bool[string], children: json.VVValue[])
 			assert(interfacesFull.length == 2);
 			assert(interfacesFull[0].str() == "test.A");
 			assert(interfacesFull[1].str() == "test.C");
+			assert(child.lookupObjectKey("mangledName").str() == "C4test2CB");
 			break;
 		case "C":
 			parents := child.lookupObjectKey("parents").array();
