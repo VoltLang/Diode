@@ -35,6 +35,22 @@ enum Kind
 	Constructor,
 }
 
+/// Access of a symbool.
+enum Access
+{
+	Public,
+	Protected,
+	Private,
+}
+
+/// Storage of a variable.
+enum Storage
+{
+	Field,
+	Global,
+	Local,
+}
+
 /**
  * Base class for all doc objects.
  */
@@ -49,9 +65,13 @@ class Base : Value
 class Named : Base
 {
 public:
+	/// Name of this object.
 	name: string;
+	/// Access of this named object.
+	access: Access;
 	/// Raw doccomment string.
 	raw: string;
+
 
 
 public:
@@ -61,6 +81,7 @@ public:
 		case "name": return new Text(name);
 		case "doc": return makeNilOrText(rawToFull(raw));
 		case "brief": return makeNilOrText(rawToBrief(raw));
+		case "access": return new Text(accessToString(access));
 		default: throw makeNoField(n, key);
 		}
 	}
@@ -162,6 +183,13 @@ public:
 	rets: Value[];
 	linkage: string;
 	hasBody: bool;
+	forceLabel: bool;
+
+	isFinal: bool;
+	isScope: bool;
+	isAbstract: bool;
+	isProperty: bool;
+	isOverride: bool;
 
 
 public:
@@ -172,6 +200,11 @@ public:
 		case "rets": return makeNilOrArray(rets);
 		case "linkage": return makeNilOrText(linkage);
 		case "hasBody": return new Bool(hasBody);
+		case "isFinal": return new Bool(isFinal);
+		case "isScope": return new Bool(isScope);
+		case "isAbstract": return new Bool(isAbstract);
+		case "isProperty": return new Bool(isProperty);
+		case "isOverride": return new Bool(isOverride);
 		default: return super.ident(n, key);
 		}
 	}
@@ -283,6 +316,15 @@ public:
 	children: Value[];
 	rets: Value[];
 	args: Value[];
+	access: Access;
+	storage: Storage;
+	isScope: bool;
+	isFinal: bool;
+	isStatic: bool;
+	isExtern: bool;
+	isProperty: bool;
+	isAbstract: bool;
+	isOverride: bool;
 
 
 public:
@@ -298,21 +340,21 @@ public:
 			case "type": this.type = v.str(); break;
 			case "kind": this.kind = getKindFromString(v.str()); break;
 			case "value": this.value = v.str(); break;
-			case "access": break; // TODO
+			case "access": this.access = getAccessFromString(v.str()); break;
 			case "aliases": break; // TODO
-			case "storage": break; // TODO
-			case "isScope": break; // TODO
-			case "isFinal": break; // TODO
+			case "storage": this.storage = getStorageFromString(v.str()); break;
+			case "isScope": this.isScope = v.boolean(); break;
+			case "isFinal": this.isFinal = v.boolean(); break;
 			case "linkage": this.linkage = v.str(); break;
 			case "hasBody": this.hasBody = v.boolean(); break;
 			case "typeFull": this.typeFull = v.str(); break;
 			case "children": children.fromArray(ref v); break;
-			case "isExtern": break; // TODO
-			case "isStatic": break; // TODO
-			case "isProperty": break; // TODO
-			case "isAbstract": break; // TODO
+			case "isExtern": this.isExtern = v.boolean(); break;
+			case "isStatic": this.isStatic = v.boolean(); break;
+			case "isProperty": this.isProperty = v.boolean(); break;
+			case "isAbstract": this.isAbstract = v.boolean(); break;
 			case "forceLabel": break; // TODO
-			case "isMarkedOverride": break; // TODO
+			case "isMarkedOverride": this.isOverride = v.boolean(); break;
 			default: io.writefln("unknown key '" ~ k ~ "'");
 			}
 		}
@@ -422,6 +464,15 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 	}
 }
 
+fn accessToString(access: Access) string
+{
+	final switch (access) with (Access) {
+	case Public: return "public";
+	case Protected: return "protected";
+	case Private: return "private";
+	}
+}
+
 fn getKindFromString(str: string) Kind
 {
 	switch (str) with (Kind) {
@@ -439,6 +490,33 @@ fn getKindFromString(str: string) Kind
 	case "module": return Module;
 	case "member": return Member;
 	default: throw new Exception("unknown kind '" ~ str ~ "'");
+	}
+}
+
+fn getAccessFromString(str: string) Access
+{
+	switch (str) with (Access) {
+	case "public": return Public;
+	case "protected": return Protected;
+	case "private": return Private;
+	case "(invalid)": return Public; // Temporary work-around.
+	default:
+		io.error.writefln("unknown access '%s'", str);
+		io.error.flush();
+		return Public;
+	}
+}
+
+fn getStorageFromString(str: string) Storage
+{
+	switch (str) with (Storage) {
+	case "field": return Field;
+	case "global": return Global;
+	case "local": return Local;
+	default:
+		io.error.writefln("unknown storage '%s'", str);
+		io.error.flush();
+		return Global;
 	}
 }
 
