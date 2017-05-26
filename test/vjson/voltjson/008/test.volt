@@ -71,11 +71,18 @@ fn testChildren(tests: bool[string], children: json.VVValue[])
 			assert(interfaces.length == 2);
 			assert(interfaces[0].str() == "A");
 			assert(interfaces[1].str() == "C");
+			interfacesFull := child.lookupObjectKey("interfacesFull").array();
+			assert(interfacesFull.length == 2);
+			assert(interfacesFull[0].str() == "test.A");
+			assert(interfacesFull[1].str() == "test.C");
 			break;
 		case "C":
 			parents := child.lookupObjectKey("parents").array();
 			assert(parents.length == 1);
 			assert(parents[0].str() == "B");
+			parentsFull := child.lookupObjectKey("parentsFull").array();
+			assert(parentsFull.length == 1);
+			assert(parentsFull[0].str() == "test.B");
 			break;
 		default: assert(false);
 		}
