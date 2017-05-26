@@ -44,7 +44,7 @@ The target is the system that is being compiled for. This does not have to match
     `"osx"`: Mac OS X.
     `"metal"`: A Swedish progrock OS. You've probably never heard of it.
 
-`isP64` is a boolean value that is `true` if pointers are 64 bits in size.
+`isP64` is a boolean value that if present means pointers are 64 bits in size.
 
 `ptrSize` is the size of a pointer, in bytes.
 
@@ -103,7 +103,7 @@ If `children` is present, it is a list of child language structures. A Modules `
         "doc": "...",
         "access": "...",
         "isAbstract": true,
-        "isFinal": false,
+        "isFinal": true,
         "children": [{...}]
     }
 
@@ -111,9 +111,9 @@ If present, `parent` is a string containing the name of this classes parent clas
 
 If present, `interfaces` is an array of strings of interfaces this class implements.
 
-`isAbstract` is a `boolean` value that is `true` when the given class is an `abstract` class.
+`isAbstract` is a `boolean` value that is present when the given class is an `abstract` class.
 
-`isFinal` is a `boolean` value that is `true` when the given class is an `final` class.
+`isFinal` is a `boolean` value that is present when the given class is an `final` class.
 
 ## Interface
 
@@ -144,7 +144,7 @@ If present, `parents` is a list string containing the name of this interface's p
     {
         "kind": "import",
         "access": "...",
-        "isStatic": false,
+        "isStatic": true,
         "name": "...",
         "bind": "...",
         "aliases" [[...]]
@@ -154,7 +154,7 @@ This object corresponds to an `import` statement.
 
 A `public` import will have its access value set to `"public"`.
 
-`isStatic` is a `boolean` value that is `true` if the given import is a static import.
+`isStatic` is a `boolean` value that is present if the given import is a static import.
 
 `bind` is a string that corresponds to the left-hand-side of an import bind:
     import <bind> = package.mod;
@@ -177,11 +177,11 @@ would result in the following `aliases` array:
         "args": [{...}],
         "hasBody": true,
         "access": "...",
-        "isScope": false,
-        "isOverride": false,
-        "isAbstract": false,
-        "isFinal": false,
-        "forceLabel": false
+        "isScope": true,
+        "isOverride": true,
+        "isAbstract": true,
+        "isFinal": true,
+        "forceLabel": true
     }
 
 `kind` is either `"fn"` for a regular function, `"member"` for a member function, `"ctor"` for a constructor, or `"dtor"` for a destructor.
@@ -190,17 +190,17 @@ would result in the following `aliases` array:
 
 `args` is a list of objects that document the types and names of the arguments to this function.
 
-`isScope` is `true` if this function is scoped.
+`isScope` is present if this function is scoped.
 
-`isOverride` is `true` if this function is overriding another function.
+`isOverride` is present if this function is overriding another function.
 
-`isAbstract` is `true` if this function is marked as an abstract function.
+`isAbstract` is present if this function is marked as an abstract function.
 
-`isFinal` is `true` if this function marked as final.
+`isFinal` is present if this function marked as final.
 
-`forceLabel` is `true` if this function must be called with explicit parameter labels.
+`forceLabel` is present if this function must be called with explicit parameter labels.
 
-`hasBody` is `true` if this function has a defined body.
+`hasBody` is present if this function has a defined body.
 
 ## Variable
 
@@ -212,7 +212,7 @@ would result in the following `aliases` array:
         "access": "...",
         "linkage": "...",
         "storage": "...",
-        "isExtern": false
+        "isExtern": true
     }
 
 `type` is a string with the type of this variable.
@@ -221,7 +221,7 @@ would result in the following `aliases` array:
 
 `storage` is either `"field"`, `"function"`, `"nested"`, `"local"`, or `"global"`, depending on where this variable exists.
 
-`isExtern` is `true` if the variable is marked as `extern`.
+`isExtern` is present if the variable is marked as `extern`.
 
 ## Enum
 
@@ -247,5 +247,5 @@ would result in the following `aliases` array:
     
 `value`, if present, contains a string containing the value of this enum.
 
-`isStandalone` is `true` if this is a standalone enum, and not the child of a regular enum. (e.g., it is of the form `enum Name = 32;`)
+`isStandalone` is present if this is a standalone enum, and not the child of a regular enum. (e.g., it is of the form `enum Name = 32;`)
     
