@@ -354,7 +354,7 @@ public:
 			case "isProperty": this.isProperty = v.boolean(); break;
 			case "isAbstract": this.isAbstract = v.boolean(); break;
 			case "forceLabel": break; // TODO
-			case "isMarkedOverride": this.isOverride = v.boolean(); break;
+			case "isOverride": this.isOverride = v.boolean(); break;
 			default: io.writefln("unknown key '" ~ k ~ "'");
 			}
 		}

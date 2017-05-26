@@ -17,7 +17,7 @@ fn runTests(jsonFile: string)
 	tests := [
 		// name: bool
 		"a": "isProperty",
-		"toString": "isMarkedOverride",
+		"toString": "isOverride",
 		"c": "isAbstract",
 		"d": "isAbstract",
 		"e": "isFinal",
