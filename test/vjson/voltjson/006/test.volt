@@ -55,7 +55,7 @@ fn testChildren(tests: bool[string], children: Value[])
 			assert(child.lookupObjectKey("access").str() == "public");
 			break;
 		case "A":
-			assert(!child.lookupObjectKey("isStandalone").boolean());
+			assert(!child.hasObjectKey("isStandalone"));
 			assert(!child.hasObjectKey("access"));
 			break;
 		case "E":
