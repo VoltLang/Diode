@@ -59,6 +59,8 @@ These fields appear in most objects, and serve the same purpose in each. If thes
 
 `name` is the user displayable name of the given object. For user defined types, it will be the name of that type, etc.
 
+`mangledName` is the 'mangled' name that is used in object files and the like.
+
 If `doc` is present, it contains a string with the raw doccomment attached to that language structure. This string will contain comment notation, newlines, etc, and will need to be cleaned if it is to be displayed.
 
 If `children` is present, it is a list of child language structures. A Modules `children` would contain a struct that was in that module, and that struct's `children` would contain the variables that make up its fields, and so on.
@@ -78,6 +80,7 @@ If `children` is present, it is a list of child language structures. A Modules `
     {
         "kind": "struct",
         "name": "...",
+        "mangledName": "...",
         "doc": "...",
         "access": "...",
         "children": [{...}]
@@ -88,6 +91,7 @@ If `children` is present, it is a list of child language structures. A Modules `
     {
         "kind": "union",
         "name": "...",
+        "mangledName": "...",
         "doc": "...",
         "access": "...",
         "children": [{...}]
@@ -98,6 +102,7 @@ If `children` is present, it is a list of child language structures. A Modules `
     {
         "kind": "class",
         "name": "...",
+        "mangledName": "...",
         "parent": "...",
         "parentFull": "...",
         "interfaces": ["..."],
@@ -122,6 +127,7 @@ If present, `interfaces` is an array of strings of interfaces this class impleme
     {
         "kind": "interface",
         "name": "...",
+        "mangledName": "...",
         "parents": ["..."],
         "parentsFull": ["..."],
         "doc": "...",
@@ -175,6 +181,7 @@ would result in the following `aliases` array:
     {
         "kind": "...",  // See comments below.
         "name": "...",
+        "mangledName": "...",
         "doc": "...",
         "linkage": "...",
         "args": [{...}],
@@ -210,6 +217,7 @@ would result in the following `aliases` array:
     {
         "kind": "var",
         "name": "...",
+        "mangledName": "...",
         "type": "...",
         "doc": "...",
         "access": "...",
@@ -231,6 +239,7 @@ would result in the following `aliases` array:
     {
         "kind": "enum",
         "name": "...",
+        "mangledName": "...",
         "doc": "...",
         "access": "...",
         "children": [{...}]
