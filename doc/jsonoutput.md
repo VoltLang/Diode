@@ -99,7 +99,9 @@ If `children` is present, it is a list of child language structures. A Modules `
         "kind": "class",
         "name": "...",
         "parent": "...",
+        "parentFull": "...",
         "interfaces": ["..."],
+        "interfacesFull": ["..."],
         "doc": "...",
         "access": "...",
         "isAbstract": true,
@@ -107,9 +109,9 @@ If `children` is present, it is a list of child language structures. A Modules `
         "children": [{...}]
     }
 
-If present, `parent` is a string containing the name of this classes parent class.
+If present, `parent` is a string containing the name of this classes parent class. `parentFull` is the same, but the fully qualified name.
 
-If present, `interfaces` is an array of strings of interfaces this class implements.
+If present, `interfaces` is an array of strings of interfaces this class implements. `interfacesFull` is the same, but the fully qualified names.
 
 `isAbstract` is a `boolean` value that is present when the given class is an `abstract` class.
 
@@ -121,12 +123,13 @@ If present, `interfaces` is an array of strings of interfaces this class impleme
         "kind": "interface",
         "name": "...",
         "parents": ["..."],
+        "parentsFull": ["..."],
         "doc": "...",
         "access": "...",
         "children": [{...}]
     }
 
-If present, `parents` is a list string containing the name of this interface's parent interfaces.
+If present, `parents` is a list string containing the name of this interface's parent interfaces. `parentsFull` is the same, but the fully qualified names.
 
 ## Alias
 
