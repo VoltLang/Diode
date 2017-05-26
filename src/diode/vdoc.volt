@@ -74,7 +74,6 @@ public:
 	raw: string;
 
 
-
 public:
 	override fn ident(n: ir.Node, key: string) Value
 	{
@@ -84,6 +83,26 @@ public:
 		case "brief": return makeNilOrText(rawToBrief(raw));
 		case "access": return new Text(accessToString(access));
 		default: throw makeNoField(n, key);
+		}
+	}
+}
+
+/**
+ * A single freestanding enum or value part of a enum.
+ */
+class EnumDecl : Named
+{
+public:
+	/// Is this a enum 
+	isStandalone: bool;
+
+
+public:
+	override fn ident(n: ir.Node, key: string) Value
+	{
+		switch (key) {
+		case "isStandalone": return new Bool(isStandalone);
+		default: return super.ident(n, key);
 		}
 	}
 }
@@ -319,6 +338,7 @@ public:
 	args: Value[];
 	access: Access;
 	storage: Storage;
+	mangledName: string;
 	isScope: bool;
 	isFinal: bool;
 	isStatic: bool;
@@ -326,6 +346,7 @@ public:
 	isProperty: bool;
 	isAbstract: bool;
 	isOverride: bool;
+	isStandalone: bool;
 
 
 public:
@@ -342,6 +363,7 @@ public:
 			case "kind": this.kind = getKindFromString(v.str()); break;
 			case "value": this.value = v.str(); break;
 			case "access": this.access = getAccessFromString(v.str()); break;
+			case "parent": break; // TODO
 			case "aliases": break; // TODO
 			case "storage": this.storage = getStorageFromString(v.str()); break;
 			case "isScope": this.isScope = v.boolean(); break;
@@ -354,8 +376,11 @@ public:
 			case "isStatic": this.isStatic = v.boolean(); break;
 			case "isProperty": this.isProperty = v.boolean(); break;
 			case "isAbstract": this.isAbstract = v.boolean(); break;
+			case "parentFull": break; // TODO
 			case "forceLabel": break; // TODO
 			case "isOverride": this.isOverride = v.boolean(); break;
+			case "mangledName": this.mangledName = v.str(); break;
+			case "isStandalone": this.isStandalone = v.boolean(); break;
 			default: io.writefln("unknown key '" ~ k ~ "'");
 			}
 		}
@@ -379,6 +404,13 @@ public:
 		b.children = children;
 	}
 
+	fn toNamed() Named
+	{
+		b := new Named();
+		copyToNamed(b);
+		return b;
+	}
+
 	fn toParent() Parent
 	{
 		b := new Parent();
@@ -386,11 +418,19 @@ public:
 		return b;
 	}
 
-	fn toNamed() Named
+	fn toEnum() Parent
 	{
-		b := new Named();
-		copyToNamed(b);
-		return b;
+		e := new Parent();
+		copyToParent(e);
+		return e;
+	}
+
+	fn toEnumDecl() EnumDecl
+	{
+		ed := new EnumDecl();
+		copyToNamed(ed);
+		ed.isStandalone = isStandalone;
+		return ed;
 	}
 
 	fn toArg() Arg
@@ -447,9 +487,9 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		final switch (info.kind) with (Kind) {
 		case Invalid: throw new Exception("kind not specified");
 		case Arg: arr ~= info.toArg(); break;
-		case Enum: arr ~= info.toParent(); break;
+		case Enum: arr ~= info.toEnum(); break;
 		case Alias: break; // TODO Add alias
-		case EnumDecl: arr ~= info.toNamed(); break;
+		case EnumDecl: arr ~= info.toEnumDecl(); break;
 		case Class: arr ~= info.toParent(); break;
 		case Union: arr ~= info.toParent(); break;
 		case Import: break; // TODO Add import
