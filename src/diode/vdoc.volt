@@ -31,6 +31,7 @@ enum Kind
 	Member,
 	Function,
 	Variable,
+	Interface,
 	Destructor,
 	Constructor,
 }
@@ -458,6 +459,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case Member: arr ~= info.toFunction(); break;
 		case Variable: arr ~= info.toVariable(); break;
 		case Function: arr ~= info.toFunction(); break;
+		case Interface: break; // TODO Add interface
 		case Destructor: arr ~= info.toFunction(); break;
 		case Constructor: arr ~= info.toFunction(); break;
 		}
@@ -489,6 +491,7 @@ fn getKindFromString(str: string) Kind
 	case "struct": return Struct;
 	case "module": return Module;
 	case "member": return Member;
+	case "interface": return Interface;
 	default: throw new Exception("unknown kind '" ~ str ~ "'");
 	}
 }
