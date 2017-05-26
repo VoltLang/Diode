@@ -14,13 +14,15 @@ enum Enum
 }
 
 enum D = 32;
+private enum E = 33;
 
 fn runTests(jsonFile: string)
 {
 	tests := [
 		// name: we're testing it
 		"D": true,
-		"A": true
+		"A": true,
+		"E": true
 	];
 
 	jsonSrc := cast(string)read(jsonFile);
@@ -55,6 +57,9 @@ fn testChildren(tests: bool[string], children: Value[])
 		case "A":
 			assert(!child.lookupObjectKey("isStandalone").boolean());
 			assert(!child.hasObjectKey("access"));
+			break;
+		case "E":
+			assert(child.lookupObjectKey("access").str() == "private");
 			break;
 		default: assert(false);
 		}
