@@ -109,8 +109,6 @@ fn addFiles(d: DiodeDriver, files: string[])
 			continue;
 		}
 
-		d.info("added doc file '%s'", file);
-
 		str := cast(string)read(file);
 		d.addDoc(str, file);
 	}
@@ -142,10 +140,12 @@ fn renderFiles(d: Driver)
 			outPath = outPath[0 .. $ - 3] ~ ".html";
 		}
 
-		d.info("rendering '%s' to '%s'", srcPath, outPath);
 
 		str := cast(string)read(srcPath);
 		str = d.renderFile(str, srcPath);
+
+		d.info("writing '%s' to '%s'", srcPath, outPath);
+
 		o := new OutputFileStream(outPath);
 		o.writefln("%s", str);
 		o.flush();
@@ -169,9 +169,7 @@ fn addLayouts(d: Driver)
 		}
 		fullpath := dir ~ dirSeparator ~ file;
 		str := cast(string)read(fullpath);
-		d.addLayout(str, file);
-
-		d.info("added layout '%s'", fullpath);
+		d.addLayout(str, fullpath);
 	}
 
 	searchDir(dir, "*.html", hit);
@@ -191,9 +189,7 @@ fn addIncludes(d: Driver)
 		}
 		fullpath := dir ~ dirSeparator ~ file;
 		str := cast(string)read(fullpath);
-		d.addInclude(str, file);
-
-		d.info("added include '%s'", fullpath);
+		d.addInclude(str, fullpath);
 	}
 
 	searchDir(dir, "*", hit);
@@ -213,9 +209,7 @@ fn addVdocTemplates(d: Driver)
 		}
 		fullpath := dir ~ dirSeparator ~ file;
 		str := cast(string)read(fullpath);
-		d.addDocTemplate(str, file);
-
-		d.info("added vdoc template '%s'", fullpath);
+		d.addDocTemplate(str, fullpath);
 	}
 
 	searchDir(dir, "*.md", hit);

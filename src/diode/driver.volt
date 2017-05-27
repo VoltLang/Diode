@@ -70,17 +70,23 @@ public:
 
 	override fn addLayout(source: string, filename: string)
 	{
+		info("adding layout '%s'", filename);
+
 		f := createFile(source, filename);
 		mLayouts[f.filename] = f;
 	}
 
 	override fn addInclude(source: string, filename: string)
 	{
+		info("adding include '%s'", filename);
+
 		mEngine.addInclude(createFile(source, filename), filename);
 	}
 
 	override fn renderFile(source: string, filename: string) string
 	{
+		info("renderingFile '%s'", filename);
+
 		s: StringSink;
 		f := createFile(source, filename);
 		mEngine.renderFile(f, s.sink);
@@ -89,11 +95,15 @@ public:
 
 	override fn addDoc(source: string, filename: string)
 	{
+		info("adding vdoc source '%s'", filename);
+
 		parse(mDoc, source);
 	}
 
 	override fn addDocTemplate(source: string, filename: string)
 	{
+		info("adding vdoc template '%s'", filename);
+
 		f := createFile(source, filename);
 		switch (f.filename) {
 		case "module": mDocModule = f; break;
