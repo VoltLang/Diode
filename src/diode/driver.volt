@@ -3,11 +3,13 @@
 module diode.driver;
 
 import watt.io;
+import watt.io.streams;
 import watt.path;
 import watt.conv;
 import watt.text.sink;
 import watt.text.source;
 import watt.text.markdown;
+import watt.text.format : format;
 
 import ir = diode.ir;
 import diode.eval;
@@ -30,6 +32,7 @@ protected:
 	mDoc: VdocRoot;
 	mModules: Array;
 	mEngine: DriverEngine;
+	mDocModule: File;
 
 
 public:
@@ -39,6 +42,30 @@ public:
 		buildRootEnv();
 
 		mEngine = new DriverEngine(this, mRoot);
+	}
+
+	override fn processDoc()
+	{
+		if (mDocModule is null) {
+			return;
+		}
+
+		mods := mDoc.getModules();
+		foreach (mod; mods) {
+			mod.url = format("mod_%s.html", mod.name);
+		}
+
+		s: StringSink;
+		foreach (mod; mods) {
+			filename := format("%s%s%s", settings.outputDir, dirSeparator, mod.url);
+			s.reset();
+			mDoc.current = mod;
+			mEngine.renderFile(mDocModule, s.sink);
+			o := new OutputFileStream(filename);
+			o.writefln("%s", s.toString());
+			o.flush();
+			o.close();
+		}
 	}
 
 	override fn addLayout(source: string, filename: string)
@@ -63,6 +90,15 @@ public:
 	override fn addDoc(source: string, filename: string)
 	{
 		parse(mDoc, source);
+	}
+
+	override fn addDocTemplate(source: string, filename: string)
+	{
+		f := createFile(source, filename);
+		switch (f.filename) {
+		case "module": mDocModule = f; break;
+		default: info("unknown vdoc template '%s' from file '%s'", f.filename, filename);
+		}
 	}
 
 	override fn info(fmt: string, ...)

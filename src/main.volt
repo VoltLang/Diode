@@ -87,9 +87,8 @@ fn test(args: string[]) i32
 	d.addLayouts();
 	d.addIncludes();
 	d.addVdocTemplates();
-
 	d.addFiles(files);
-
+	d.processDoc();
 	d.renderFiles();
 
 	return 0;
@@ -208,7 +207,6 @@ fn addVdocTemplates(d: Driver)
 		return;
 	}
 
-/*
 	fn hit(file: string) {
 		if (isDir(file)) {
 			return;
@@ -221,5 +219,4 @@ fn addVdocTemplates(d: Driver)
 	}
 
 	searchDir(dir, "*.md", hit);
-*/
 }
