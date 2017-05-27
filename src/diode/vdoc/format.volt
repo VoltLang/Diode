@@ -42,7 +42,11 @@ class VodcModuleBrief : ir.File
 		sink("```volt\n");
 
 		s.drawBrief(s.mod, sink);
-		format(sink, "module %s;\n\n\n", s.mod.name);
+		format(sink, "module %s;\n\n", s.mod.name);
+
+		s.drawImports(Access.Public, sink);
+
+		sink("\n");
 
 		s.drawChildren(sink);
 
@@ -136,6 +140,30 @@ fn drawBrief(ref s: State, n: Named, sink: Sink)
 
 	foreach (line; splitLines(b)) {
 		format(sink, "%s/// %s\n", s.tabs, line);
+	}
+}
+
+fn drawImports(ref s: State, access: Access, sink: Sink)
+{
+	prefix: string;
+	final switch(access) with (Access) {
+	case Public: prefix = "public "; break;
+	case Protected: prefix = "protected "; break;
+	case Private: prefix = ""; break;
+	}
+
+	foreach (child; s.parent.children) {
+		c := cast(Import)child;
+		if (c is null || c.kind != Kind.Import ||
+		    c.access != access) {
+			continue;
+		}
+		if (c.bind !is null) {
+			format(sink, "%simport %s = %s;\n", prefix, c.bind, c.name);
+		} else {
+			format(sink, "%simport %s;\n", prefix, c.name);
+		}
+		s.hasPrinted = true;
 	}
 }
 

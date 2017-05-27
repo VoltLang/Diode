@@ -17,6 +17,7 @@ struct Info
 public:
 	kind: Kind;
 	name: string;
+	bind: string;
 	doc: string;
 	type: string;
 	typeFull: string;
@@ -50,7 +51,7 @@ public:
 			case "rets": rets.fromArray(ref v, Kind.Arg); break;
 			case "name": this.name = v.str(); break;
 			case "type": this.type = v.str(); break;
-			case "bind": break; // TODO
+			case "bind": this.bind = v.str(); break;
 			case "kind": this.kind = getKindFromString(v.str()); break;
 			case "value": this.value = v.str(); break;
 			case "access": this.access = getAccessFromString(v.str()); break;
@@ -104,6 +105,14 @@ public:
 	{
 		b := new Named();
 		copyToNamed(b);
+		return b;
+	}
+
+	fn toImport() Import
+	{
+		b := new Import();
+		copyToNamed(b);
+		b.bind = bind;
 		return b;
 	}
 
@@ -192,7 +201,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case EnumDecl: arr ~= info.toEnumDecl(); break;
 		case Class: arr ~= info.toParent(); break;
 		case Union: arr ~= info.toParent(); break;
-		case Import: break; // TODO Add import
+		case Import: arr ~= info.toImport(); break;
 		case Return: arr ~= info.toReturn(); break;
 		case Struct: arr ~= info.toParent(); break;
 		case Module: arr ~= info.toParent(); break;

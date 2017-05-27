@@ -144,6 +144,26 @@ public:
 }
 
 /**
+ * Regular imports and bound imports.
+ */
+class Import : Named
+{
+public:
+	/// Is this import bound to a name.
+	bind: string;
+
+
+public:
+	override fn ident(n: ir.Node,  key: string) Value
+	{
+		switch (key) {
+		case "bind": return makeNilOrText(bind);
+		default: return super.ident(n, key);
+		}
+	}
+}
+
+/**
  * A single freestanding enum or value part of a enum.
  */
 class EnumDecl : Named
@@ -311,6 +331,7 @@ public:
 			}
 		case "enums": kind = Enum; break;
 		case "classes": kind = Class; break;
+		case "imports": kind = Import; break;
 		case "unions": kind = Union; break;
 		case "structs": kind = Struct; break;
 		case "modules": kind = Module; break;
