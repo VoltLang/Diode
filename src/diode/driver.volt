@@ -18,6 +18,7 @@ import diode.interfaces;
 import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;
+import diode.vdoc.format;
 
 
 /**
@@ -46,6 +47,12 @@ public:
 
 	override fn addBuiltins()
 	{
+		file := new File();
+		file.file = new VodcModuleBrief();
+		file.ext = File.Ext.Markdown;
+		info("adding include '%s'", "vdoc_module_brief.md");
+		mEngine.addInclude(file, "vdoc_module_brief.md");
+
 		addBuiltinInclude("vdoc_children_brief.md",
 			import("_include/vdoc_children_brief.md"));
 		addBuiltinInclude("vdoc_doc_brief.md",
@@ -54,8 +61,10 @@ public:
 			import("_include/vdoc_enumdecls.md"));
 		addBuiltinInclude("vdoc_function_brief.md",
 			import("_include/vdoc_function_brief.md"));
+/*
 		addBuiltinInclude("vdoc_module_brief.md",
 			import("_include/vdoc_module_brief.md"));
+*/
 	}
 
 	override fn processDoc()
@@ -70,8 +79,12 @@ public:
 		}
 
 		s: StringSink;
+
 		foreach (mod; mods) {
 			filename := format("%s%s%s", settings.outputDir, dirSeparator, mod.url);
+
+			info("renderingFile '%s'", filename);
+
 			s.reset();
 			mDoc.current = mod;
 			mEngine.renderFile(mDocModule, s.sink);

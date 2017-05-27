@@ -231,6 +231,7 @@ class Variable : Named
 public:
 	type: string;
 	typeFull: string;
+	storage: Storage;
 
 
 public:
@@ -447,6 +448,7 @@ public:
 		copyToBase(b);
 		b.name = name;
 		b.raw = doc;
+		b.access = access;
 	}
 
 	fn copyToParent(b: Parent)
@@ -509,6 +511,7 @@ public:
 		copyToNamed(b);
 		b.type = type;
 		b.typeFull = typeFull;
+		b.storage = storage;
 		return b;
 	}
 

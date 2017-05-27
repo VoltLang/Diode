@@ -92,6 +92,7 @@ fn test(args: string[]) i32
 	d.addFiles(files);
 	d.processDoc();
 	d.renderFiles();
+	d.info("done");
 
 	return 0;
 }
