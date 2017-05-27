@@ -12,6 +12,7 @@ import watt.text.format;
 import diode.errors;
 import diode.eval;
 import diode.vdoc;
+import diode.vdoc.parser;
 
 
 class VodcModuleBrief : ir.File

@@ -19,6 +19,7 @@ import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;
 import diode.vdoc.format;
+import diode.vdoc.parser;
 
 
 /**
