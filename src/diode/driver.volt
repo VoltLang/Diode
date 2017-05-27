@@ -274,36 +274,23 @@ public:
 		content.toText(f.file, sink);
 	}
 
-	override fn visit(p: ir.Include, sink: Sink) Status
+	override fn handleInclude(p: ir.Include, e: Set, sink: Sink)
 	{
 		ret := p.filename in mIncludes;
 		if (ret is null) {
 			mDrv.info("no such include '%s'", p.filename);
-			return Continue;
+			return;
 		}
 
 		f := *ret;
 
-		include := new Set();
-		foreach (a; p.assigns) {
-			a.exp.accept(this, sink);
-			include.ctx[a.ident] = this.v;
-			v = null;
-		}
-
-		// Setup a new environment.
-		e := new Set();
 		e.parent = mRoot;
-		e.ctx["include"] = include;
-
 		// Get content to do any conversion needed.
 		content := mDrv.selectType(file, f);
 		content.env = e;
 		content.file = f;
 		content.engine = this;
 		content.toText(p, sink);
-
-		return Continue;
 	}
 }
 

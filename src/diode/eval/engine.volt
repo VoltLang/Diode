@@ -36,6 +36,11 @@ public:
 		}
 	}
 
+	fn handleInclude(i: ir.Include, env: Set, sink: Sink)
+	{
+		// Noop.
+	}
+
 
 public:
 	override fn visit(t: ir.Text, sink: Sink) Status
@@ -137,6 +142,24 @@ public:
 		return Continue;
 	}
 
+	override fn visit(p: ir.Include, sink: Sink) Status
+	{
+		include := new Set();
+		foreach (a; p.assigns) {
+			a.exp.accept(this, sink);
+			include.ctx[a.ident] = this.v;
+			v = null;
+		}
+
+		// Setup a new environment.
+		e := new Set();
+		e.ctx["include"] = include;
+
+		handleInclude(p, e, sink);
+
+		return Continue;
+	}
+
 
 	/*
 	 *
@@ -190,5 +213,4 @@ public:
 	override fn enter(ir.Print, Sink) Status { return Continue; }
 	override fn leave(ir.If, Sink) Status { assert(false); }
 	override fn leave(ir.For, Sink) Status { assert(false); }
-	override fn visit(ir.Include, Sink) Status { return Continue; }
 }
