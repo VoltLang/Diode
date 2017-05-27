@@ -53,6 +53,27 @@ enum Storage
 }
 
 /**
+ * The object that templates accesses the rest of the documentation nodes from.
+ */
+class VdocRoot : Value
+{
+public:
+	modules: Value[];
+
+
+public:
+	override fn ident(n: ir.Node, key: string) Value
+	{
+		c := Collection.make(modules, key);
+		if (c !is null) {
+			return c;
+		}
+
+		return super.ident(n, key);
+	}
+}
+
+/**
  * Base class for all doc objects.
  */
 class Base : Value
@@ -563,13 +584,10 @@ fn getStorageFromString(str: string) Storage
 	}
 }
 
-fn parse(data: string) Value[]
+fn parse(vdocRoot: VdocRoot, data: string)
 {
 	root := json.parse(data);
 	moduleRoot := root.lookupObjectKey("modules");
 
-	mods: Value[];
-	mods.fromArray(ref moduleRoot);
-
-	return mods;
+	fromArray(ref vdocRoot.modules, ref moduleRoot);
 }

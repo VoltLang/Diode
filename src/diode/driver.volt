@@ -27,7 +27,7 @@ protected:
 	mLayouts: File[string];
 	mRoot: Set;
 	mSite: Set;
-	mDoc: Set;
+	mDoc: VdocRoot;
 	mModules: Array;
 	mEngine: DriverEngine;
 
@@ -62,7 +62,7 @@ public:
 
 	override fn addDoc(source: string, filename: string)
 	{
-		mModules.vals ~= parse(source);
+		parse(mDoc, source);
 	}
 
 	override fn info(fmt: string, ...)
@@ -161,16 +161,13 @@ protected:
 
 	fn buildRootEnv()
 	{
-		mDoc = new Set();
+		mDoc = new VdocRoot();
 		mRoot = new Set();
 		mSite = new Set();
 		mModules = new Array(null);
 
 		mRoot.ctx["doc"] = mDoc;
 		mRoot.ctx["site"] = mSite;
-
-		mDoc.ctx["modules"] = mModules;
-
 		mSite.ctx["baseurl"] = new Text(settings.url);
 	}
 }
