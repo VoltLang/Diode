@@ -6,8 +6,7 @@ title: Test
 
 Some text here
 
-{% for mod in doc.modules %}
-
-{% include module.md mod=mod %}
-
-{% endfor %}
+{% for mod in doc.modules -%}
+[{{ mod.name }}]({{ mod.url }})  
+{% include module.md mod=mod -%}
+{%- endfor -%}
