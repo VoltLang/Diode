@@ -50,6 +50,7 @@ public:
 			case "rets": rets.fromArray(ref v, Kind.Arg); break;
 			case "name": this.name = v.str(); break;
 			case "type": this.type = v.str(); break;
+			case "bind": break; // TODO
 			case "kind": this.kind = getKindFromString(v.str()); break;
 			case "value": this.value = v.str(); break;
 			case "access": this.access = getAccessFromString(v.str()); break;
@@ -68,9 +69,11 @@ public:
 			case "isAbstract": this.isAbstract = v.boolean(); break;
 			case "parentFull": break; // TODO
 			case "forceLabel": break; // TODO
+			case "interfaces": break; // TODO
 			case "isOverride": this.isOverride = v.boolean(); break;
 			case "mangledName": this.mangledName = v.str(); break;
 			case "isStandalone": this.isStandalone = v.boolean(); break;
+			case "interfacesFull": break; // TODO
 			default:
 				io.error.writefln("unknown key '" ~ k ~ "'");
 				io.error.flush();
