@@ -1,7 +1,7 @@
 {% assign mod = include.mod %}
 
 ```
-{% include brief.md doc=mod -%}
+{% include vdoc_doc_brief.md doc=mod -%}
 module {{ mod.name }};
 
 {%
@@ -10,7 +10,7 @@ for e in mod.enumdecls -%}{%-
 	if forloop.first %}
 {%
 	endif -%}{%-
-	include brief.md doc=e
+	include vdoc_doc_brief.md doc=e
 	%}enum {{ e.name }};
 {%
 endfor -%}{%-
@@ -20,7 +20,7 @@ for e in mod.enums -%}{%-
 	if forloop.first %}
 {%
 	endif -%}{%-
-	include brief.md doc=e
+	include vdoc_doc_brief.md doc=e
 	%}enum {{ e.name -}}{%-
 	include enumdecls.md decls=e.all -%}{%-
 	unless forloop.last %}
@@ -33,9 +33,9 @@ for u in mod.unions -%}{%-
 	if forloop.first %}
 {%
 	endif -%}{%-
-	include brief.md doc=u
+	include vdoc_doc_brief.md doc=u
 	%}union {{ u.name -}}{%-
-	include children.md parent=u -%}{%-
+	include vdoc_children_brief.md parent=u -%}{%-
 	unless forloop.last %}
 {%
 	endif -%}{%-
@@ -46,9 +46,9 @@ for s in mod.structs -%}{%-
 	if forloop.first %}
 {%
 	endif -%}{%-
-	include brief.md doc=s
+	include vdoc_doc_brief.md doc=s
 	%}struct {{ s.name -}}{%-
-	include children.md parent=s -%}{%-
+	include vdoc_children_brief.md parent=s -%}{%-
 	unless forloop.last %}
 {%
 	endif -%}{%-
@@ -60,7 +60,7 @@ for c in mod.classes -%}{%-
 {%
 	endif
 	%}class {{ c.name -}}{%-
-	include children.md parent=c -%}{%
+	include vdoc_children_brief.md parent=c -%}{%
 	unless forloop.last %}
 {%
 	endif -%}{%-
@@ -80,7 +80,7 @@ for f in mod.constructors -%}{%-
 	if forloop.first %}
 {%
 	endif -%}{%-
-	include brief.md doc=f
+	include vdoc_doc_brief.md doc=f
 	%}global this();
 {%
 endfor -%}{%-
@@ -97,7 +97,7 @@ for f in mod.functions -%}{%-
 	if forloop.first %}
 {%
 	endif -%}{%-
-	include brief.md doc=f
+	include vdoc_doc_brief.md doc=f
 	%}fn {{ f.name }}({%
 	for arg in f.args
 		%}{{ arg.type }}{%
@@ -113,4 +113,3 @@ for f in mod.functions -%}{%-
 {%
 endfor -%}
 ```
-

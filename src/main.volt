@@ -40,6 +40,7 @@ import watt.io.file : read, exists, searchDir, isDir, isFile;
 import watt.path : dirSeparator;
 import watt.text.string : endsWith;
 import watt.text.sink;
+import watt.text.format;
 
 import diode.driver;
 import diode.interfaces;
@@ -192,6 +193,19 @@ fn addIncludes(d: Driver)
 		d.addInclude(str, fullpath);
 	}
 
+	// Add builtin includes first.
+	d.addInclude(import("_include/vdoc_children_brief.md"),
+		format("<builtin>%s_include%svdoc_children_brief.md", dirSeparator, dirSeparator));
+	d.addInclude(import("_include/vdoc_doc_brief.md"),
+		format("<builtin>%s_include%svdoc_doc_brief.md", dirSeparator, dirSeparator));
+	d.addInclude(import("_include/vdoc_enumdecls.md"),
+		format("<builtin>%s_include%svdoc_enumdecls.md", dirSeparator, dirSeparator));
+	d.addInclude(import("_include/vdoc_function_brief.md"),
+		format("<builtin>%s_include%svdoc_function_brief.md", dirSeparator, dirSeparator));
+	d.addInclude(import("_include/vdoc_module_brief.md"),
+		format("<builtin>%s_include%svdoc_module_brief.md", dirSeparator, dirSeparator));
+
+	// Add user provided includes, these can overwite the builtin ones.
 	searchDir(dir, "*", hit);
 }
 
@@ -213,4 +227,5 @@ fn addVdocTemplates(d: Driver)
 	}
 
 	searchDir(dir, "*.md", hit);
+	searchDir(dir, "*.html", hit);
 }

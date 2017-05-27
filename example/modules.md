@@ -8,5 +8,5 @@ Some text here
 
 {% for mod in doc.modules -%}
 [{{ mod.name }}]({{ mod.url }})  
-{% include module.md mod=mod -%}
+{% include vdoc_module_brief.md mod=mod -%}
 {%- endfor -%}

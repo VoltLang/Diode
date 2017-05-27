@@ -19,12 +19,12 @@ else
 
 	for m in p.methods
 		%}	{%
-		include function.md function=m -%}{%-
+		include vdoc_function_brief.md function=m -%}{%-
 	endfor -%}{%-
 
 	for f in p.functions
 		%}	static {%
-		include function.md function=f -%}{%-
+		include vdoc_function_brief.md function=f -%}{%-
 	endfor
 	%}}
 {%
