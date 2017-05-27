@@ -58,7 +58,10 @@ enum Storage
 class VdocRoot : Value
 {
 public:
+	/// All loaded modules.
 	modules: Value[];
+	/// Current thing that a vdoc template is rendering.
+	current: Value;
 
 
 public:
@@ -69,7 +72,30 @@ public:
 			return c;
 		}
 
-		return super.ident(n, key);
+		switch (key) {
+		case "current": return current is null ? new Nil() : current;
+		default: return super.ident(n, key);
+		}
+	}
+
+	fn getModules() Parent[]
+	{
+		num := 0u;
+		ret := new Parent[](modules.length);
+		foreach (v; modules) {
+			p := cast(Parent)v;
+			if (p is null || p.kind != Kind.Module) {
+				continue;
+			}
+
+			ret[num++] = p;
+		}
+
+		if (num > 0) {
+			return ret[0 .. num];
+		} else {
+			return null;
+		}
 	}
 }
 
@@ -93,6 +119,8 @@ public:
 	access: Access;
 	/// Raw doccomment string.
 	raw: string;
+	/// Where to find the per thing documentation page, if any.
+	url: string;
 
 
 public:
@@ -100,6 +128,7 @@ public:
 	{
 		switch (key) {
 		case "name": return new Text(name);
+		case "url": return makeNilOrText(url);
 		case "doc": return makeNilOrText(rawToFull(raw));
 		case "brief": return makeNilOrText(rawToBrief(raw));
 		case "access": return new Text(accessToString(access));
@@ -134,6 +163,7 @@ public:
 class Parent : Named
 {
 public:
+	/// The children of this Named thing.
 	children: Value[];
 
 
