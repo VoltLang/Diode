@@ -85,6 +85,7 @@ fn test(args: string[]) i32
 	s.fillInDefaults();
 
 	d := new DiodeDriver(s);
+	d.addBuiltins();
 	d.addLayouts();
 	d.addIncludes();
 	d.addVdocTemplates();
@@ -192,18 +193,6 @@ fn addIncludes(d: Driver)
 		str := cast(string)read(fullpath);
 		d.addInclude(str, fullpath);
 	}
-
-	// Add builtin includes first.
-	d.addInclude(import("_include/vdoc_children_brief.md"),
-		format("<builtin>%s_include%svdoc_children_brief.md", dirSeparator, dirSeparator));
-	d.addInclude(import("_include/vdoc_doc_brief.md"),
-		format("<builtin>%s_include%svdoc_doc_brief.md", dirSeparator, dirSeparator));
-	d.addInclude(import("_include/vdoc_enumdecls.md"),
-		format("<builtin>%s_include%svdoc_enumdecls.md", dirSeparator, dirSeparator));
-	d.addInclude(import("_include/vdoc_function_brief.md"),
-		format("<builtin>%s_include%svdoc_function_brief.md", dirSeparator, dirSeparator));
-	d.addInclude(import("_include/vdoc_module_brief.md"),
-		format("<builtin>%s_include%svdoc_module_brief.md", dirSeparator, dirSeparator));
 
 	// Add user provided includes, these can overwite the builtin ones.
 	searchDir(dir, "*", hit);

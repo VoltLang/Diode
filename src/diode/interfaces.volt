@@ -20,6 +20,7 @@ public:
 		this.settings = settings;
 	}
 
+	abstract fn addBuiltins();
 	abstract fn processDoc();
 	abstract fn addLayout(source: string, filename: string);
 	abstract fn addInclude(source: string, filename: string);

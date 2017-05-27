@@ -44,6 +44,20 @@ public:
 		mEngine = new DriverEngine(this, mRoot);
 	}
 
+	override fn addBuiltins()
+	{
+		addBuiltinInclude("vdoc_children_brief.md",
+			import("_include/vdoc_children_brief.md"));
+		addBuiltinInclude("vdoc_doc_brief.md",
+			import("_include/vdoc_doc_brief.md"));
+		addBuiltinInclude("vdoc_enumdecls.md",
+			import("_include/vdoc_enumdecls.md"));
+		addBuiltinInclude("vdoc_function_brief.md",
+			import("_include/vdoc_function_brief.md"));
+		addBuiltinInclude("vdoc_module_brief.md",
+			import("_include/vdoc_module_brief.md"));
+	}
+
 	override fn processDoc()
 	{
 		if (mDocModule is null) {
@@ -122,6 +136,13 @@ public:
 
 
 protected:
+	fn addBuiltinInclude(base: string, source: string)
+	{
+		f := format("<builtin>%s_include%s%s",
+			dirSeparator, dirSeparator, base);
+		addInclude(source, f);
+	}
+
 	fn createFile(source: string, filename: string) File
 	{
 		base := baseName(filename);
