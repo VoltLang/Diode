@@ -213,6 +213,10 @@ protected:
  */
 class DriverEngine : Engine
 {
+public:
+	file: File;
+
+
 private:
 	mDrv: DiodeDriver;
 	mRoot: Set;
@@ -243,7 +247,7 @@ public:
 		while (f.layout !is null) {
 			c := mDrv.selectType(f.layout, f);
 			c.engine = this;
-			c.file = f.file;
+			c.file = f;
 			c.env = env;
 
 			env = new Set();
@@ -253,10 +257,11 @@ public:
 			f = f.layout;
 		}
 
-		// Update the enviroment.
-		this.env = env;
-
-		f.file.accept(this, sink);
+		content := new Contents();
+		content.env = env;
+		content.file = f;
+		content.engine = this;
+		content.toText(f.file, sink);
 	}
 
 	override fn visit(p: ir.Include, sink: Sink) Status
@@ -269,7 +274,6 @@ public:
 
 		f := *ret;
 
-
 		include := new Set();
 		foreach (a; p.assigns) {
 			a.exp.accept(this, sink);
@@ -277,15 +281,18 @@ public:
 			v = null;
 		}
 
-		old := env;
+		// Setup a new environment.
+		e := new Set();
+		e.parent = mRoot;
+		e.ctx["include"] = include;
 
-		env = new Set();
-		env.parent = mRoot;
-		env.ctx["include"] = include;
+		// Get content to do any conversion needed.
+		content := mDrv.selectType(file, f);
+		content.env = e;
+		content.file = f;
+		content.engine = this;
+		content.toText(p, sink);
 
-		f.file.accept(this, sink);
-
-		env = old;
 		return Continue;
 	}
 }
@@ -331,22 +338,27 @@ public:
 class Contents: Value
 {
 public:
-	engine: Engine;
-	file: ir.File;
+	engine: DriverEngine;
+	file: File;
 	env: Set;
 
 
 public:
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		// Save the old enviroment.
-		old := engine.env;
+		// Save the old enviroment and file.
+		oldEnv := engine.env;
+		oldFile := engine.file;
+
+		// Set new enviroment and file.
 		engine.env = env;
+		engine.file = file;
 
-		file.accept(engine, sink);
+		file.file.accept(engine, sink);
 
-		// Restore old enviroment.
-		engine.env = old;
+		// Restore old enviroment and file.
+		engine.file = oldFile;
+		engine.env = oldEnv;
 	}
 }
 
@@ -358,16 +370,8 @@ class MarkdownContents : Contents
 public:
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		// Save the old enviroment.
-		old := engine.env;
-		engine.env = env;
-
 		dst: StringSink;
-		file.accept(engine, dst.sink);
-
-		// Restor old enviroment.
-		engine.env = old;
-
+		super.toText(n, dst.sink);
 		filterMarkdown(sink, dst.toString());
 	}
 }
