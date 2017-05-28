@@ -141,6 +141,9 @@ fn renderFiles(d: Driver)
 
 		if (endsWith(outPath, ".md")) {
 			outPath = outPath[0 .. $ - 3] ~ ".html";
+		} else if (!endsWith(outPath, ".html")) {
+			d.info("skipping file '%s'", outPath);
+			return;
 		}
 
 
