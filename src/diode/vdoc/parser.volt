@@ -9,7 +9,7 @@ import diode.eval;
 import diode.vdoc;
 
 
-/**
+/*!
  * Used to collect information during parsing.
  */
 struct Info

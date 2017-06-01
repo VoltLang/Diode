@@ -9,7 +9,7 @@ import diode.errors;
 import diode.eval;
 
 
-/**
+/*!
  * Type of doc object.
  */
 enum Kind
@@ -33,7 +33,7 @@ enum Kind
 	Constructor,
 }
 
-/// Access of a symbool.
+//! Access of a symbool.
 enum Access
 {
 	Public,
@@ -50,7 +50,7 @@ fn accessToString(access: Access) string
 	}
 }
 
-/// Storage of a variable.
+//! Storage of a variable.
 enum Storage
 {
 	Field,
@@ -58,15 +58,15 @@ enum Storage
 	Local,
 }
 
-/**
+/*!
  * The object that templates accesses the rest of the documentation nodes from.
  */
 class VdocRoot : Value
 {
 public:
-	/// All loaded modules.
+	//! All loaded modules.
 	modules: Value[];
-	/// Current thing that a vdoc template is rendering.
+	//! Current thing that a vdoc template is rendering.
 	current: Value;
 
 
@@ -105,7 +105,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Base class for all doc objects.
  */
 class Base : Value
@@ -113,19 +113,19 @@ class Base : Value
 	kind: Kind;
 }
 
-/**
+/*!
  * Base class for all doc objects that can have names.
  */
 class Named : Base
 {
 public:
-	/// Name of this object.
+	//! Name of this object.
 	name: string;
-	/// Access of this named object.
+	//! Access of this named object.
 	access: Access;
-	/// Raw doccomment string.
+	//! Raw doccomment string.
 	raw: string;
-	/// Where to find the per thing documentation page, if any.
+	//! Where to find the per thing documentation page, if any.
 	url: string;
 
 
@@ -143,13 +143,13 @@ public:
 	}
 }
 
-/**
+/*!
  * Regular imports and bound imports.
  */
 class Import : Named
 {
 public:
-	/// Is this import bound to a name.
+	//! Is this import bound to a name.
 	bind: string;
 
 
@@ -163,13 +163,13 @@ public:
 	}
 }
 
-/**
+/*!
  * A single freestanding enum or value part of a enum.
  */
 class EnumDecl : Named
 {
 public:
-	/// Is this a enum 
+	//! Is this a enum 
 	isStandalone: bool;
 
 
@@ -183,13 +183,13 @@ public:
 	}
 }
 
-/**
+/*!
  * Base class for things with children, like Module, Class, Structs.
  */
 class Parent : Named
 {
 public:
-	/// The children of this Named thing.
+	//! The children of this Named thing.
 	children: Value[];
 
 
@@ -205,7 +205,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Argument to a function.
  */
 class Arg : Base
@@ -228,7 +228,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Return from a function.
  */
 class Return : Base
@@ -249,7 +249,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A variable or field on a aggregate.
  */
 class Variable : Named
@@ -271,7 +271,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A function or constructor, destructor or method on a aggreegate.
  */
 class Function : Named
@@ -308,7 +308,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A special array that you can access fields on to filter the members.
  */
 class Collection : Array
@@ -373,7 +373,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Create a text Value, nil if string is empty.
  */
 fn makeNilOrText(text: string) Value
@@ -385,7 +385,7 @@ fn makeNilOrText(text: string) Value
 	}
 }
 
-/**
+/*!
  * Create a array Value, nil if string is empty.
  */
 fn makeNilOrArray(array: Value[]) Value

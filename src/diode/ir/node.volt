@@ -6,7 +6,7 @@ module diode.ir.node;
 public import watt.text.sink : Sink;
 
 
-/**
+/*!
  * Base class for all nodes.
  */
 abstract class Node
@@ -15,7 +15,7 @@ public:
 	abstract fn accept(v: Visitor, sink: Sink) Status;
 }
 
-/**
+/*!
  * Top level container node.
  */
 class File : Node
@@ -43,7 +43,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A string of text to be printed out directly.
  */
 class Text : Node
@@ -65,7 +65,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A expression to be evaluated and printed.
  */
 class Print : Node
@@ -98,14 +98,14 @@ public:
 	}
 }
 
-/**
+/*!
  * Base class for all expressions.
  */
 abstract class Exp : Node
 {
 }
 
-/**
+/*!
  * A single identifier to be looked up in the global scope.
  */
 class Ident : Exp
@@ -127,7 +127,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Lookup symbol into child expression.
  */
 class Access : Exp
@@ -163,7 +163,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Filter expression.
  */
 class Filter : Exp
@@ -208,7 +208,7 @@ public:
 	}
 }
 
-/**
+/*!
  * If control statement.
  */
 class If : Node
@@ -261,7 +261,7 @@ public:
 	}
 }
 
-/**
+/*!
  * For loop control statement.
  */
 class For : Node
@@ -368,7 +368,7 @@ public:
  */
 
 
-/**
+/*!
  * Control the flow of the visitor.
  */
 enum Status
@@ -378,7 +378,7 @@ enum Status
 	ContinueParent,
 }
 
-/**
+/*!
  * Base visitor class.
  */
 abstract class Visitor
@@ -409,7 +409,7 @@ abstract class Visitor
 	abstract fn visit(Ident, Sink) Status;
 }
 
-/**
+/*!
  * Filter out continue parent and turn that into a continue.
  */
 fn filterParent(s: Status) Status

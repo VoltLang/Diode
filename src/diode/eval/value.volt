@@ -6,7 +6,7 @@ import ir = diode.ir;
 import diode.errors;
 
 
-/// Use the IR visitor Sink.
+//! Use the IR visitor Sink.
 alias Sink = ir.Sink;
 
 abstract class Value

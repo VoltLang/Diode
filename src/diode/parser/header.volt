@@ -50,7 +50,7 @@ fn parse(src: Source) Header
 	return header;
 }
 
-/**
+/*!
  * Does not advance the source, just check if the next 3 chars are dashes.
  */
 fn isTripleDash(src: Source) bool
@@ -62,7 +62,7 @@ fn isTripleDash(src: Source) bool
 	       src.lookahead(2, out eof) == '-';
 }
 
-/**
+/*!
  * Does what it says on the tin, yes I felt bad naming this function.
  */
 fn skipWhiteAndCheckIfEmptyLine(src: Source) bool

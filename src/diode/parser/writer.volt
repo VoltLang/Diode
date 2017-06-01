@@ -19,7 +19,7 @@ public:
 		mTokens = tokens;
 	}
 
-	/**
+	/*!
 	 * Returns the current token.
 	 *
 	 * Side-effects:
@@ -30,7 +30,7 @@ public:
 		return mTokens[mIndex];
 	}
 
-	/**
+	/*!
 	 * Returns the following token.
 	 *
 	 * Side-effects:
@@ -41,7 +41,7 @@ public:
 		return lookahead(1);
 	}
 
-	/**
+	/*!
 	 * Advances the stream by one, will clamp to the last token.
 	 *
 	 * Side-effects:
@@ -55,7 +55,7 @@ public:
 		}
 	}
 
-	/**
+	/*!
 	 * Returns the token n steps into the stream, will clamp to length.
 	 *
 	 * Side-effects:

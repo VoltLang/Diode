@@ -3,7 +3,7 @@
 module diode.license;
 
 
-/**
+/*!
  * This is the license for the diode.
  */
 enum string license = `

@@ -22,7 +22,7 @@ import diode.vdoc.format;
 import diode.vdoc.parser;
 
 
-/**
+/*!
  * Main focal point of Diode.
  */
 class DiodeDriver : Driver
@@ -253,7 +253,7 @@ protected:
 	}
 }
 
-/**
+/*!
  *
  */
 class DriverEngine : Engine
@@ -329,7 +329,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A file to be rendered. Used for includes and layouts as well.
  */
 class File
@@ -364,7 +364,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Special Value for the contents value.
  */
 class Contents: Value
@@ -394,7 +394,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Special Value for Markdown to HTML contents.
  */
 class MarkdownContents : Contents

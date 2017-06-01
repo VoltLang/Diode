@@ -5,7 +5,7 @@ module diode.interfaces;
 import watt.path : removeTrailingSlashes, dirSeparator;
 
 
-/**
+/*!
  * Main class driving everything.
  */
 abstract class Driver
@@ -31,7 +31,7 @@ public:
 	abstract fn info(fmt: string, ...);
 }
 
-/**
+/*!
  * Holds settings for Diode.
  */
 class Settings

@@ -32,7 +32,7 @@ fn parse(src: Source) ir.File
 
 private:
 
-/// Helper alias to make typing easier.
+//! Helper alias to make typing easier.
 alias tk = TokenKind;
 
 enum Status
@@ -504,7 +504,7 @@ fn parseExp(p: Parser, out exp: ir.Exp) Status
 	return Status.Ok;
 }
 
-/// Returns true if any hyphen was found.
+//! Returns true if any hyphen was found.
 fn stripAnyHyphen(p: Parser) bool
 {
 	hyphen := false;

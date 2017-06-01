@@ -5,7 +5,7 @@ module diode.token.token;
 import watt.text.source : Location;
 
 
-/**
+/*!
  * Holds the kind, the actual string and location within the source file.
  */
 final class Token
