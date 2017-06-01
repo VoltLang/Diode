@@ -51,21 +51,20 @@ public:
 		file := new File();
 		file.file = new VodcModuleBrief();
 		file.ext = File.Ext.Markdown;
-		info("adding include '%s'", "vdoc_module_brief.md");
-		mEngine.addInclude(file, "vdoc_module_brief.md");
+		f := getName("_include", "vdoc_module_brief.md");
+		addInclude(file, f);
 
-		addBuiltinInclude("vdoc_children_brief.md",
-			import("_include/vdoc_children_brief.md"));
-		addBuiltinInclude("vdoc_doc_brief.md",
-			import("_include/vdoc_doc_brief.md"));
-		addBuiltinInclude("vdoc_enumdecls.md",
-			import("_include/vdoc_enumdecls.md"));
-		addBuiltinInclude("vdoc_function_brief.md",
-			import("_include/vdoc_function_brief.md"));
-/*
-		addBuiltinInclude("vdoc_module_brief.md",
-			import("_include/vdoc_module_brief.md"));
-*/
+		f = getName("_include", "vdoc_children_brief.md");
+		addInclude(import("_include/vdoc_children_brief.md"), f);
+
+		f = getName("_include", "vdoc_doc_brief.md");
+		addInclude(import("_include/vdoc_doc_brief.md"), f);
+
+		f = getName("_include", "vdoc_enumdecls.md");
+		addInclude(import("_include/vdoc_enumdecls.md"), f);
+
+		f = getName("_include", "vdoc_function_brief.md");
+		addInclude(import("_include/vdoc_function_brief.md"), f);
 	}
 
 	override fn processDoc()
@@ -108,7 +107,8 @@ public:
 	{
 		info("adding include '%s'", filename);
 
-		mEngine.addInclude(createFile(source, filename), filename);
+		file := createFile(source, filename);
+		mEngine.addInclude(file, filename);
 	}
 
 	override fn renderFile(source: string, filename: string) string
@@ -149,12 +149,30 @@ public:
 	}
 
 
-protected:
-	fn addBuiltinInclude(base: string, source: string)
+	/*
+	 *
+	 * Additional helpers.
+	 *
+	 */
+
+	fn addInclude(file: File, filename: string)
 	{
-		f := format("<builtin>%s_include%s%s",
-			dirSeparator, dirSeparator, base);
-		addInclude(source, f);
+		info("adding include '%s'", filename);
+		mEngine.addInclude(file, filename);
+	}
+
+	fn addLayout(file: File, filename: string)
+	{
+		info("adding layout '%s'", filename);
+		addLayout(file, filename);
+	}
+
+
+protected:
+	fn getName(dir: string, base: string) string
+	{
+		return format("<builtin>%s%s%s%s",
+			dirSeparator, dir, dirSeparator, base);
 	}
 
 	fn createFile(source: string, filename: string) File
