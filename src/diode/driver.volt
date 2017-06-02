@@ -54,6 +54,28 @@ public:
 		f := getName("_include", "vdoc_module_brief.md");
 		addInclude(file, f);
 
+		// Add default includes.
+		f = getName("_include", "footer.html");
+		addInclude(import("_include/footer.html"), f);
+
+		f = getName("_include", "head.html");
+		addInclude(import("_include/head.html"), f);
+
+		f = getName("_include", "header.html");
+		addInclude(import("_include/header.html"), f);
+
+		// Add default layouts.
+		f = getName("_layout", "page.html");
+		addLayout(import("_layout/page.html"), f);
+
+		f = getName("_layout", "default.html");
+		addLayout(import("_layout/default.html"), f);
+
+		// Add default vdoc template.
+		f = getName("_vdoc", "module.html");
+		addDocTemplate(import("_vdoc/module.html"), f);
+
+		// Add temporary hack includes.
 		f = getName("_include", "vdoc_children_brief.md");
 		addInclude(import("_include/vdoc_children_brief.md"), f);
 
@@ -65,9 +87,6 @@ public:
 
 		f = getName("_include", "vdoc_function_brief.md");
 		addInclude(import("_include/vdoc_function_brief.md"), f);
-
-		f = getName("_vdoc", "module.html");
-		addDocTemplate(import("_vdoc/module.html"), f);
 	}
 
 	override fn processDoc()
