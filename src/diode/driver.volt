@@ -182,35 +182,22 @@ protected:
 
 		src := new Source(source, filename);
 		f := new File();
+		f.fullName = filename;
 		f.ext = ext;
 		f.filename = base;
 		f.header = parseHeader(src);
 		f.file = parseFile(src);
-		f.layout = getLayoutForFile(f);
+		f.layout = f.getOption("layout");
 
 		return f;
 	}
 
-	fn getLayoutForFile(f: File) File
-	{
-		assert(f !is null);
-
-		l: File;
-		key := f.getOption("layout");
-		if (key is null) {
-			return null;
-		}
-
-		l = getLayout(key);
-		if (l is null) {
-			throw makeLayoutNotFound(f.filename, key);
-		}
-
-		return l;
-	}
-
 	fn selectType(layout: File, contents: File) Contents
 	{
+		if (layout is null) {
+			return new Contents();
+		}
+
 		if (layout.ext == File.Ext.HTML &&
 		    contents.ext == File.Ext.Markdown) {
 			return new MarkdownContents();
@@ -256,6 +243,23 @@ protected:
 		} else {
 			return *ret;
 		}
+	}
+
+	fn getNeededLayout(file: File) File
+	{
+		// No need to warn on null.
+		if (file.layout is null) {
+			return null;
+		}
+
+		l := getLayout(file.layout);
+		if (l !is null) {
+			return l;
+		}
+
+		info("can not find layout '%s' for file '%s'");
+
+		return null;
 	}
 
 	fn buildRootEnv()
@@ -307,24 +311,29 @@ public:
 		env := new Set();
 		env.parent = mRoot;
 
-		while (f.layout !is null) {
-			c := mDrv.selectType(f.layout, f);
+		do {
+			// getNeededLayout might return null, but those
+			// functions where is used handles that.
+			l := mDrv.getNeededLayout(f);
+
+			// Create the contents for this layout.
+			c := mDrv.selectType(l, f);
 			c.engine = this;
 			c.file = f;
 			c.env = env;
 
+			// We are done here.
+			if (l is null) {
+				c.toText(f.file, sink);
+				return;
+			}
+
+			// Setup the new env for the layout file.
 			env = new Set();
 			env.parent = mRoot;
 			env.ctx["content"] = c;
-
-			f = f.layout;
-		}
-
-		content := new Contents();
-		content.env = env;
-		content.file = f;
-		content.engine = this;
-		content.toText(f.file, sink);
+			f = l;
+		} while (true);
 	}
 
 	override fn handleInclude(p: ir.Include, e: Set, sink: Sink)
@@ -360,7 +369,8 @@ public:
 	}
 
 	filename: string;
-	layout: File;
+	fullName: string;
+	layout: string;
 	header: Header;
 	file: ir.File;
 	ext: Ext;
