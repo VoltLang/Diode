@@ -42,8 +42,7 @@ public:
 	outputDir: string;
 	layoutDir: string;
 	includeDir: string;
-
-	url: string = "http://example.com";
+	baseurl: string = "http://example.com";
 
 	// These depend on workDir and are set with fillInDefaults.
 	enum string vdocDirDefault = "_vdoc";

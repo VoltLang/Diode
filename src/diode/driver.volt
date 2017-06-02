@@ -279,7 +279,7 @@ protected:
 
 		mRoot.ctx["doc"] = mDoc;
 		mRoot.ctx["site"] = mSite;
-		mSite.ctx["baseurl"] = new Text(settings.url);
+		mSite.ctx["baseurl"] = new Text(settings.baseurl);
 	}
 }
 

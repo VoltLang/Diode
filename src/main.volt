@@ -14,9 +14,10 @@ fn main(args: string[]) i32
 {
 	if (args.length == 1) {
 		io.error.writefln("Usage:");
-		io.error.writefln("\t--test   <source.liquid> <result.txt>");
-		io.error.writefln("\t--src    <sourceDir>");
-		io.error.writefln("\t--out    <outputDir>");
+		io.error.writefln("\t--test    <source.liquid> <result.txt>");
+		io.error.writefln("\t-s        <sourceDir>");
+		io.error.writefln("\t-d        <outputDir>");
+		io.error.writefln("\t--baseurl <URL>");
 		io.error.flush();
 		return 0;
 	}
@@ -48,8 +49,10 @@ import diode.interfaces;
 enum ParseState
 {
 	Normal,
+	Skip,
 	OutputDir,
 	SourceDir,
+	Baseurl,
 }
 
 fn parseArgs(args: string[], s: Settings) string[]
@@ -59,16 +62,36 @@ fn parseArgs(args: string[], s: Settings) string[]
 
 	foreach (arg; args[1 .. $]) {
 		final switch (state) with (ParseState) {
+		case Skip: break;
 		case Normal:
 			switch (arg) {
-			case "--src": state = SourceDir; break;
-			case "--out": state = OutputDir; break;
+			case "-s", "--source": state = SourceDir; break;
+			case "-d", "--destination": state = OutputDir; break;
+			case "--baseurl": state = Baseurl; break;
+			case "--limit_posts", "--port", "--host":
+				state = Skip;
+				goto case;
+			case "--safe", "-w", "--drafts", "--future",
+			     "--unpublished", "--lsi", "--force_polling",
+			     "-V",  "--verbose", "-q", "--quiet", "-I",
+			     "--incremental", "--profile",
+			     "--strict_front_matter", "-B", "--detach",
+			     "--skip-initial-build", "--ssl-key", "--ssl-cert":
+				io.error.writefln("skipping jekyll arg '%s'",arg);
+				io.error.flush();
+			     	break;
 			default:
+				if (arg.length > 0 && arg[0] == '-') {
+					io.error.writefln("skipping unknown arg '%s'",arg);
+					io.error.flush();
+					break;
+				}
 				files ~= arg;
 			}
 			continue;
 		case SourceDir: s.sourceDir = arg; break;
 		case OutputDir: s.outputDir = arg; break;
+		case Baseurl: s.baseurl = arg; break;
 		}
 		state = ParseState.Normal;
 	}
