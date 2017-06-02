@@ -164,7 +164,7 @@ public:
 	fn addLayout(file: File, filename: string)
 	{
 		info("adding layout '%s'", filename);
-		addLayout(file, filename);
+		mLayouts[file.filename] = file;
 	}
 
 
