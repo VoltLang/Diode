@@ -130,13 +130,8 @@ public:
 
 	override fn addDocTemplate(source: string, filename: string)
 	{
-		info("adding vdoc template '%s'", filename);
-
-		f := createFile(source, filename);
-		switch (f.filename) {
-		case "module": mDocModule = f; break;
-		default: info("unknown vdoc template '%s' from file '%s'", f.filename, filename);
-		}
+		file := createFile(source, filename);
+		addDocTemplate(file, filename);
 	}
 
 	override fn info(fmt: string, ...)
@@ -165,6 +160,16 @@ public:
 	{
 		info("adding layout '%s'", filename);
 		mLayouts[file.filename] = file;
+	}
+
+	fn addDocTemplate(file: File, filename: string)
+	{
+		info("adding vdoc template '%s'", filename);
+
+		switch (file.filename) {
+		case "module": mDocModule = file; break;
+		default: info("unknown vdoc template '%s' from file '%s'", file.filename, filename);
+		}
 	}
 
 
