@@ -65,6 +65,9 @@ public:
 
 		f = getName("_include", "vdoc_function_brief.md");
 		addInclude(import("_include/vdoc_function_brief.md"), f);
+
+		f = getName("_vdoc", "module.html");
+		addDocTemplate(import("_vdoc/module.html"), f);
 	}
 
 	override fn processDoc()
