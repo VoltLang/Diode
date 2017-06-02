@@ -97,13 +97,19 @@ public:
 
 		mods := mDoc.getModules();
 		foreach (mod; mods) {
-			mod.url = format("mod_%s.html", mod.name);
+			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
 		}
 
 		s: StringSink;
 
+		dir := format("%s%svdoc%s", settings.outputDir,
+			dirSeparator, dirSeparator);
+
+		// Make sure the directory excists.
+		mkdirP(dir);
+
 		foreach (mod; mods) {
-			filename := format("%s%s%s", settings.outputDir, dirSeparator, mod.url);
+			filename := format("%smod_%s.html", dir, mod.name);
 
 			info("renderingFile '%s'", filename);
 
