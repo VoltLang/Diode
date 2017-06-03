@@ -4,6 +4,7 @@ module diode.token.lexer;
 
 import watt.text.ascii : isAlpha, isDigit;
 import watt.text.source : Source;
+import watt.text.format : format;
 import watt.io;
 
 import diode.errors;
@@ -27,8 +28,9 @@ fn lex(src: Source) Token[]
 			s = lexToken(src, tw, s);
 			break;
 		case End:
+			throw new DiodeException("lexer unexpected end");
 		case Error:
-			throw new DiodeException("lexer error");
+			throw new DiodeException(format("lexer error: %s", tw.errorMessage));
 		}
 	}
 
@@ -68,11 +70,13 @@ fn lexToken(src: Source, tw: Writer, status: Status) Status
 			hyphen = true;
 			goto case '%';
 		} else {
+			tw.errorMessage = "expected } or % after -";
 			return Status.Error;
 		}
 		assert(false);
 	case '}':
 		if (src.following != '}') {
+			tw.errorMessage = "expected } after }";
 			return Status.Error;
 		}
 		tw.pushToken(ref src.loc, TokenKind.ClosePrint, "}}");
@@ -85,6 +89,7 @@ fn lexToken(src: Source, tw: Writer, status: Status) Status
 		return Status.Text;
 	case '%':
 		if (src.following != '}') {
+			tw.errorMessage = "expected } after %";
 			return Status.Error;
 		}
 		tw.pushToken(ref src.loc, TokenKind.CloseStatement, "%}");
@@ -119,6 +124,7 @@ fn lexToken(src: Source, tw: Writer, status: Status) Status
 		return lexIdent(src, tw, status);
 	default:
 		if (!isAlpha(src.front)) {
+			tw.errorMessage = format("expected letter, not '%c'", src.front);
 			return Status.Error;
 		}
 		return lexIdent(src, tw, status);

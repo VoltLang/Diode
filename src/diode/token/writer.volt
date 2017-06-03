@@ -10,6 +10,7 @@ final class Writer
 {
 protected:
 	mTokens: Token[];
+	mError: string;
 
 
 public:
@@ -29,5 +30,19 @@ public:
 		ret := mTokens;
 		mTokens = null;
 		return ret;
+	}
+
+	@property fn errorMessage(msg: string)
+	{
+		mError = msg;
+	}
+
+	@property fn errorMessage() string
+	{
+		if (mError == "") {
+			return "unknown error";
+		} else {
+			return mError;
+		}
 	}
 }
