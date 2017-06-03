@@ -1,0 +1,10 @@
+//T default:no
+//T macro:expectfailure
+######
+{% raw %}
+  In Handlebars, {{ this }} will be HTML-escaped, but
+  {{{ that }}} will not.
+{% endraw %}
+######
+In Handlebars, {{ this }} will be HTML-escaped, but {{{ that }}} will not.
+######

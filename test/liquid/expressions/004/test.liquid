@@ -1,0 +1,15 @@
+//T default:no
+//T macro:expectfailure
+#####
+{% assign name = "Sam" %}
+{% assign age = 0 %}
+{% if name %}
+Hello World
+{% endif %}
+{% if age %}
+Hello World
+{% endif %}
+#####
+Hello World
+Hello World
+#####
