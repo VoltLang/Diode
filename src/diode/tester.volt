@@ -7,6 +7,8 @@
  */
 module diode.tester;
 
+import core.c.stdlib : exit;
+
 import watt.text.sink : StringSink;
 import watt.text.source : Source;
 import watt.io.file : read, isFile;
@@ -15,6 +17,20 @@ import io = watt.io;
 import diode.eval;
 import diode.parser : parse;
 
+class Tester : Engine
+{
+	this(env: Set)
+	{
+		super(env);
+	}
+
+	override fn handleError(str: string)
+	{
+		io.error.writefln("%s", str);
+		io.error.flush();
+		exit(2);
+	}
+}
 
 fn runTest(args: string[]) i32
 {
@@ -43,9 +59,9 @@ fn runTest(args: string[]) i32
 	cmpText := cast(string)read(cmpFile);
 
 	src := new Source(srcText, srcFile);
-	file := parse(src);
 	root := getTestEnv();
-	e := new Engine(root);
+	e := new Tester(root);
+	file := parse(src, e);
 
 	s: StringSink;
 	file.accept(e, s.sink);
