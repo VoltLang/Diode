@@ -402,6 +402,32 @@ public:
 	}
 }
 
+/*
+ * Utility Nodes
+ */
+
+/*!
+ * Not actually output by the parser. Used for things like %endif%,
+ * which mark the end of a list of nodes.
+ */
+class ClosingTagNode : Node
+{
+public:
+	name: string;
+
+public:
+	this(name: string)
+	{
+		assert(name !is null);
+		this.name = name;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		assert(false);
+	}
+}
+
 
 /*
  *

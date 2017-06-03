@@ -1,41 +1,100 @@
-// Copyright © 2015, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2015-2017, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.parser.parser;
 
-import watt.text.source;
-import watt.text.string : stripLeft, stripRight;
+import watt.text.source : Source;
+import watt.text.utf : encode;
+import watt.text.sink : StringSink;
+import watt.text.ascii : isAlpha, isWhite;
+import watt.text.string : stripRight;
+import watt.text.format;
 
 import ir = diode.ir;
 import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
-	bAccess, bIdent, bFilter;
+	bAccess, bIdent, bFilter, bStringLiteral, bBoolLiteral, bClosingTagNode;
+import diode.ir.sink : NodeSink;
 
 import diode.errors;
-import diode.token.lexer : lex;
-import diode.token.token : Token, TokenKind;
 import diode.eval.engine;
-import diode.parser.writer;
 import diode.parser.header;
+import diode.parser.errors;
 
 
-fn parse(src: Source, e: Engine) ir.File
+class Parser
 {
-	tokens := lex(src);
-	p := new Parser(tokens);
-	file: ir.File;
-	s := parseFile(p, out file);
-
-	if (s != Status.Ok) {
-		exc := p.makeException();
-		e.handleError(exc.msg);
+public:
+	enum State
+	{
+		Text,
+		Print,
+		Statement,
+		End,
 	}
 
-	return file;
+
+public:
+	state: State;
+	src: Source;
+	sink: StringSink;
+	/*! A description of an error for the user's consumption.
+	 *  This should only be set if the function in question
+	 *  is actually encountering the error in question.
+	 *  That is to say, parseStatement should say if it sees
+	 *  'four' instead of 'for', but a function calling parseStatement
+	 *  should not set the error message if parseStatement fails.
+	 *
+	 *  Just a field for now, but in the future this could
+	 *  become a property that adds to a list of messages.
+	 */
+	errorMessage: string;
+
+
+public:
+	this(src: Source)
+	{
+		this.state = State.Text;
+		this.src = src;
+	}
+
+	//! Parse a word (a chain of letters) into sink.
+	fn eatWord()
+	{
+		while (!src.eof && (isAlpha(src.front) || src.front == '_')) {
+			dchar c = src.front;
+			src.popFront();
+			sink.sink(encode(c));
+		}
+	}
+
+	//! Given a state in which we expect a two char string, skip it.
+	fn eatSequence(s: string) Status
+	{
+		assert(s.length == 2);
+		if (src.front != s[0] && src.following != s[1]) {
+			return this.errorExpected(s, format("%s%s", src.front, src.following));
+		}
+		src.popFrontN(2);
+		return Status.Ok;
+	}
+
+	//! Parse a include name into sink.
+	fn eatIncludeName()
+	{
+		while (!src.eof && isIncludeName(src.front)) {
+			dchar c = src.front;
+			src.popFront();
+			sink.sink(encode(c));
+		}
+	}
+
+	//! Get the contents of the sink, and then reset it.
+	fn getSink() string
+	{
+		s := sink.toString();
+		sink.reset();
+		return s;
+	}
 }
-
-private:
-
-//! Helper alias to make typing easier.
-alias tk = TokenKind;
 
 enum Status
 {
@@ -43,323 +102,456 @@ enum Status
 	Error = -1,
 }
 
-class LexerError : DiodeException
+fn parse(src: Source, e: Engine) ir.File
 {
-public:
-	this(Token t, string msg)
-	{
-		msg = t.loc.toString() ~ " error: " ~ msg;
-		super(msg);
+	// This is a file.
+	file: ir.File;
+
+	p := new Parser(src);
+	if (err := p.parseFile(out file)) {
+		str := format("%s: syntax error%s", p.src.loc.toString(),
+			p.errorMessage.length > 0 ? ": " ~ p.errorMessage : "");
+		e.handleError(str);  //!< @todo Actual errors.
 	}
+
+	return file;
 }
 
-class Parser : Writer
-{
-protected:
-	mErrorToken: Token;
-
-public:
-	this(tokens: Token[])
-	{
-		super(tokens);
-	}
-
-	fn error() Status
-	{
-		mErrorToken = front;
-		return Status.Error;
-	}
-
-	fn makeException() LexerError
-	{
-		return new LexerError(mErrorToken, "syntax error");
-	}
-}
-
+//! Parse a liquid file.
 fn parseFile(p: Parser, out file: ir.File) Status
 {
-	if (p.front != tk.Begin) {
-		return p.error();
-	}
-	p.popFront();
-
-	s: Status;
-	nodes: ir.Node[];
-	while (p.front != tk.End) {
-		s = parseNode(p, ref nodes);
-		if (s != Status.Ok) {
-			return s;
-		}
-	}
-
+	dummy: string;
 	file = bFile();
-	file.nodes = nodes;
-	return s;
+	return p.parseNodesUntilTag(out file.nodes, out dummy, null);
 }
 
-fn parseNode(p: Parser, ref nodes: ir.Node[]) Status
+//! Parse nodes until we hit a {% <name> %}.
+fn parseNodesUntilTag(p: Parser, out nodes: ir.Node[], out nameThatEnded: string, names: string[]...) Status
 {
-	s: Status;
-	node: ir.Node;
-	t := p.front;
-	switch (t.kind) with (TokenKind) {
-	case Text:
-	case Hyphen:
-		s = parseText(p, out node); break;
-	case OpenPrint:
-		s = parsePrint(p, out node); break;
-	case OpenStatement:
-		s = parseStatement(p, out node); break;
-	default:
-		s = p.error();
+	ns: NodeSink;
+
+	while (!p.src.eof) {
+		// Try to parse a node.
+		node: ir.Node;
+		if (err := p.parseNode(out node)) {
+			return err;
+		}
+
+		// Text might return null on empty text.
+		if (node is null) {
+			continue;
+		}
+
+		// Is this a closing tag.
+		ctn := cast(ir.ClosingTagNode)node;
+		if (ctn is null) {
+			ns.push(node);
+			continue;
+		}
+
+		// Is the closing tag in the names we are looking for?
+		foreach (name; names) {
+			if (name != ctn.name) {
+				continue;
+			}
+
+			nameThatEnded = name;
+			nodes = ns.takeArray();
+			return Status.Ok;
+		}
+
+		// A stray closing tag node, error.
+		return p.errorUnmatchedClosingTag(ctn.name);
 	}
 
-	if (node !is null) {
-		nodes ~= node;
-	}
-	return s;
-}
-
-fn match(p: Parser, t: TokenKind) Status
-{
-	if (p.front != t) {
-		return p.error();
-	}
-	p.popFront();
-	return Status.Ok;
-}
-
-fn match(p: Parser, str: string) Status
-{
-	if (p.front.value != str) {
-		return p.error();
-	}
-	p.popFront();
-	return Status.Ok;
-}
-
-fn matchAndGet(p: Parser, out str: string) Status
-{
-	if (p.front != tk.Identifier) {
-		return p.error();
-	}
-	str = p.front.value;
-	p.popFront();
-	return Status.Ok;
-}
-
-fn matchAssert(p: Parser, t: TokenKind)
-{
-	assert(p.front == t);
-	p.popFront();
-}
-
-import watt.io : error;
-
-fn parseText(p: Parser, out node: ir.Node) Status
-{
-	hyphen := stripAnyHyphen(p);
-
-	// Handle {{ bar -}}{{- foo }}
-	if (p.front != tk.Text) {
-		assert(hyphen);
+	// Not looking for end tags.
+	if (names.length == 0) {
+		nodes = ns.takeArray();
 		return Status.Ok;
 	}
 
-	// Get the text.
-	assert(p.front == tk.Text);
-	text := p.front.value;
+	// We are now at end of file and have not found the end node, error.
+	return p.errorMissingTagEOF(names);
+}
 
-	// Strip whitespace if there was a preceding hyphen.
-	if (hyphen) {
-		text = stripLeft(text);
+//! Parse the individual elements of the file until we run out of file.
+fn parseNode(p: Parser, out node: ir.Node) Status
+{
+	final switch (p.state) with (Parser.State) {
+	case Text:
+		return p.parseText(out node);
+	case Print:
+		return p.parsePrint(out node);
+	case Statement:
+		return p.parseStatement(out node);
+	case End:
+		break;
 	}
 
-	p.popFront();
-
-	hyphen = stripAnyHyphen(p);
-
-	// Strip whitespace if there was a following hyphen.
-	if (hyphen) {
-		text = stripRight(text);
-	}
-
-	if (text.length > 0) {
-		node = bText(text);
-	}
 	return Status.Ok;
 }
 
-fn parsePrint(p: Parser, out node: ir.Node) Status
+//! Parse regular text until we find a tag, or run out of text.
+fn parseText(p: Parser, out text: ir.Node) Status
 {
-	// Check for {{
-	p.matchAssert(tk.OpenPrint);
+	while (!p.src.eof) {
+		dchar c = p.src.front;
+		p.src.popFront();
 
-	// {{ <exp> }}
-	exp: ir.Exp;
-	if (err := parseExp(p, out exp)) {
-		return err;
+		// Keep consuming text until we find a '{'.
+		if (c != '{') {
+			p.sink.sink(encode(c));
+			continue;
+		}
+
+		// Consume.
+		c = p.src.front;
+		p.src.popFront();
+
+		// Is this really a directive.
+		switch (c) {
+		case '{':
+			p.state = Parser.State.Print;
+			break;
+		case '%':
+			p.state = Parser.State.Statement;
+			break;
+		default:
+			p.sink.sink(encode(c));
+			continue;
+		}
+
+		bool hyphen;
+		// Does this end with a hyphen, like '{{-' and '{%-'?
+		if (p.src.front == '-') {
+			p.src.popFront();
+			hyphen = true;
+		}
+
+		txt := p.getSink();
+		if (hyphen) {
+			txt = stripRight(txt);
+		}
+
+		// If there is no text no need to create a text node.
+		if (txt.length > 0) {
+			text = bText(txt);
+		}
+
+		return Status.Ok;
 	}
 
-	// Check for }}
-	if (err := p.match(tk.ClosePrint)) {
-		return err;
-	}
-
-	node = bPrint(exp);
+	text = bText(p.getSink());
+	p.state = Parser.State.End;
 	return Status.Ok;
 }
 
-fn parseStatement(p: Parser, out node: ir.Node) Status
+//! Parse {{ ... }}.
+fn parsePrint(p: Parser, out print: ir.Node) Status
 {
-	// We use identifiers instead of special tokens for statements.
-	switch (p.following.value) {
-	case "for": return parseFor(p, out node);
-	case "assign": return parseAssign(p, out node);
-	case "include": return parseInclude(p, out node);
-	case "unless", "if": return parseIfUnless(p, out node);
-	default: return p.error();
-	}
-}
-
-fn parseInclude(p: Parser, out node: ir.Node) Status
-{
-	// Check for {%
-	p.matchAssert(tk.OpenStatement);
-
-	// This is a for.
-	base: string;
-	ext: string;
+	// This is a print.
 	exp: ir.Exp;
-	assigns: ir.Assign[];
 
-	// 'include' base.ext
-	assert(p.front == "include");
-	p.popFront();
-
-	// include 'base'.ext
-	if (err := p.matchAndGet(out base)) {
-		return err;
-	}
-
-	// include base'.'ext
-	if (err := p.match(tk.Dot)) {
-		return err;
-	}
-
-	// include base.'ext'
-	if (err := p.matchAndGet(out ext)) {
-		return err;
-	}
-
-	while (p.front == tk.Identifier) {
-		ident: string;
-
-		// assign 'ident' = exp
-		if (err := p.matchAndGet(out ident)) {
-			return err;
-		}
-
-		// assign ident '=' exp
-		if (err := p.match(tk.Assign)) {
-			return err;
-		}
-
-		// assign ident = 'exp'
-		if (err := parseExp(p, out exp)) {
-			return err;
-		}
-
-		assigns ~= bAssign(ident, exp);
-	}
-
-	// Check for %}
-	if (err := p.match(tk.CloseStatement)) {
-		return err;
-	}
-
-	node = bInclude(base ~ "." ~ ext, assigns);
-	return Status.Ok;
-}
-
-fn parseIfUnless(p: Parser, out node: ir.Node, elsif: bool = false) Status
-{
-	// Check for {%
-	p.matchAssert(tk.OpenStatement);
-
-	// This is a if or unless.
-	invert: bool;
-	exp: ir.Exp;
-	thenNodes: ir.Node[];
-	elseNodes: ir.Node[];
-
-	// ['if'|'unless'] something.ident
-	if (elsif) {
-		assert(p.front == "elsif");
-	} else {
-		assert(p.front == "if" || p.front == "unless");
-	}
-	invert = p.front == "unless";
-	p.popFront();
-
+	// {{ 'exp' }}
 	if (err := p.parseExp(out exp)) {
 		return err;
 	}
 
-	// Check the end.
-	if (err := p.match(tk.CloseStatement)) {
+	// We're done with the expression, parse the closing }}, and hyphen.
+	if (err := p.parseClosePrint()) {
 		return err;
 	}
 
-	elseBlock := false;
-	while (p.front != tk.End) {
-		if (p.front == tk.OpenStatement &&
-		    p.following == "endif") {
-			break;
-		}
-		if (p.front == tk.OpenStatement &&
-			p.following == "else") {
-			// Pop {% else %}
-			p.popFront();
-			p.popFront();
-			// Check for %}
-			if (p.front != tk.CloseStatement) {
-				return p.error();
-			}
-			p.popFront();
-			elseBlock = true;
-		}
-		s2: Status;
-		if (p.front == tk.OpenStatement &&
-			p.following == "elsif") {
-			elsifNode: ir.Node;
-			s2 = parseIfUnless(p, out elsifNode, true);
-			if (elsifNode !is null) {
-				elseNodes ~= elsifNode;
-			}
-		} else if (!elseBlock) {
-			s2 = parseNode(p, ref thenNodes);
-		} else {
-			s2 = parseNode(p, ref elseNodes);
-		}
-		if (s2 != Status.Ok) {
-			return s2;
-		}
-	}
+	print = bPrint(exp);
+	return Status.Ok;
+}
 
-	if (!elsif) {
-		if (p.front == tk.End) {
-			return p.error();
-		}
 
-		// Pop {% endif
-		p.popFront();
-		p.popFront();
+/*
+ *
+ * Expression parsing functions.
+ *
+ */
 
-		// Check for %}
-		if (err := p.match(tk.CloseStatement)) {
+//! Parse an entire Exp expression.
+fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
+{
+	p.src.skipWhitespace();
+
+	if (p.src.front == '"') {
+		if (err := p.parseStringLiteral(out exp)) {
 			return err;
 		}
+	} else {
+		p.eatWord();
+		word := p.getSink();
+		if (word.length == 0) {
+			return p.errorExpectedIdentifier();
+		}
+
+		// This is a ident or a BoolLiteral.
+		exp = word.makeIdentOrBool();
+	}
+
+	// Advance to the next character.
+	p.src.skipWhitespace();
+
+	inExp := true;
+	while (inExp && !p.src.eof) {
+		switch (p.src.front) {
+		case '.':
+			// Eat the character and parse a expression.
+			p.src.popFront();
+			if (err := p.parseAccess(exp, out exp)) {
+				return err;
+			}
+			break;
+		case '|':
+			// Filter matches to outer most expression.
+			if (doNotParseFilters) {
+				inExp = false;
+				break;
+			}
+
+			// Eat the character and parse a expression.
+			p.src.popFront();
+			if (err := p.parseFilter(exp, out exp)) {
+				return err;
+			}
+			break;
+		default:
+			inExp = false;
+			break;
+		}
+
+		// Advance to the next character for the while loop.
+		p.src.skipWhitespace();
+	}
+
+	return Status.Ok;
+}
+
+fn parseStringLiteral(p: Parser, out exp: ir.Exp) Status
+{
+	p.src.popFront();
+	while (!p.src.eof && p.src.front != '"') {
+		p.sink.sink(encode(p.src.front));
+		p.src.popFront();
+	}
+	p.src.popFront();
+
+	// Zero length string literals are okay, no need to check.
+	exp = bStringLiteral(p.getSink());
+	return Status.Ok;
+}
+
+//! Parse an Access expression.
+fn parseAccess(p: Parser, child: ir.Exp, out exp: ir.Exp) Status
+{
+	// This is a ident expression.
+	ident: string;
+
+	// 'ident'
+	if (err := p.parseIdent(out ident)) {
+		return err;
+	}
+
+	exp = bAccess(child, ident);
+	return Status.Ok;
+}
+
+//! Parse a Filter expression.
+fn parseFilter(p: Parser, child: ir.Exp, out exp: ir.Exp) Status
+{
+	// This is a filter expression.
+	ident: string;
+	args: ir.Exp[];
+
+	// | 'ident': args
+	if (err := p.parseIdent(out ident)) {
+		return err;
+	}
+
+	// | ident': args'
+	if (err := p.parseFilterArgs(out args)) {
+		return err;
+	}
+
+	exp = bFilter(child, ident, args);
+	return Status.Ok;
+}
+
+//! Parse Filter arguments (if any).
+fn parseFilterArgs(p: Parser, out args: ir.Exp[]) Status
+{
+	p.src.skipWhitespace();
+
+	if (!p.ifAndSkip(':')) {
+		return Status.Ok;
+	}
+
+	do {
+		exp: ir.Exp;
+		if (err := parseExp(p:p, exp:out exp, doNotParseFilters:true)) {
+			return err;
+		}
+		args ~= exp;
+
+		p.src.skipWhitespace();
+	} while (p.ifAndSkip(','));
+
+	return Status.Ok;
+}
+
+
+/*
+ *
+ * Statement parsing functions.
+ *
+ */
+
+//! Parse a statement.
+fn parseStatement(p: Parser, out node: ir.Node) Status
+{
+	name: string;
+
+	// Parse the starting ident.
+	if (err := p.parseIdent(out name)) {
+		return err;
+	}
+
+	switch (name) {
+	case "assign":
+		return p.parseAssign(out node);
+	case "include":
+		return p.parseInclude(out node);
+	case "comment":
+		return parseComment(p);
+	case "if":
+		return parseIf(p:p, invert:false, node:out node);
+	case "unless":
+		return parseIf(p:p, invert:true, node:out node);
+	case "for":
+		return p.parseFor(out node);
+	case "endif", "else", "endfor":
+		node = bClosingTagNode(name);
+		return p.parseCloseStatement();
+	default:
+		return p.errorUnknownStatement(name);
+	}
+}
+
+fn parseAssign(p: Parser, out node: ir.Node) Status
+{
+	// This is Assign.
+	ident: string;
+	exp: ir.Exp;
+
+	// assign 'ident' = exp
+	if (err := p.parseIdent(out ident)) {
+		return err;
+	}
+
+	// assign ident '=' exp
+	if (err := p.matchAndSkip('=')) {
+		return err;
+	}
+
+	// assign ident = 'exp'
+	if (err := p.parseExp(out exp)) {
+		return err;
+	}
+
+	// Parse the close bracket, also handles hyphen.
+	if (err := p.parseCloseStatement()) {
+		return err;
+	}
+
+	node = bAssign(ident, exp);
+	return Status.Ok;
+}
+
+fn parseInclude(p: Parser, out node: ir.Node) Status
+{
+	// This is a include.
+	name: string;
+	assigns: ir.Assign[];
+
+	// include 'file.html' var=exp
+	if (err := p.parseIncludeName(out name)) {
+		return err;
+	}
+
+	// Advance to the next none whitespace char.
+	p.src.skipWhitespace();
+
+	// include file.html 'var=exp'
+	while (isAlpha(p.src.front)) {
+		exp: ir.Exp;
+		ident: string;
+
+		// assign 'ident' = exp
+		if (err := p.parseIdent(out ident)) {
+			return err;
+		}
+
+		// assign ident '=' exp
+		if (err := p.matchAndSkip('=')) {
+			return err;
+		}
+
+		// assign ident = 'exp'
+		if (err := p.parseExp(out exp)) {
+			return err;
+		}
+
+		assigns ~= bAssign(ident, exp);
+
+		// Need to advance to the next none whitespace char.
+		p.src.skipWhitespace();
+	}
+
+	// Parse the close bracket, also handles hyphen.
+	if (err := p.parseCloseStatement()) {
+		return err;
+	}
+
+	node = bInclude(name, assigns);
+	return Status.Ok;
+}
+
+fn parseIf(p: Parser, invert: bool, out node: ir.Node) Status
+{
+	// This is a if.
+	exp: ir.Exp;
+	thenNodes: ir.Node[];
+	elseNodes: ir.Node[];
+
+	// if 'exp'
+	if (err := p.parseExp(out exp)) {
+		return err;
+	}
+
+	// Parse the close bracket, also handles hyphen.
+	if (err := p.parseCloseStatement()) {
+		return err;
+	}
+
+	// Parse the nodes in the else body.
+	nameThatEnded: string;
+	if (err := p.parseNodesUntilTag(out thenNodes, out nameThatEnded, "endif", "else")) {
+		return err;
+	}
+
+	// If endif, we are done.
+	if (nameThatEnded == "endif") {
+		node = bIf(invert, exp, thenNodes, elseNodes);
+		return Status.Ok;
+	}
+
+	// If the then nodes was closed with 'else' also parse else nodes.
+	if (err := p.parseNodesUntilTag(out elseNodes, out nameThatEnded, "endif")) {
+		return err;
 	}
 
 	node = bIf(invert, exp, thenNodes, elseNodes);
@@ -368,151 +560,229 @@ fn parseIfUnless(p: Parser, out node: ir.Node, elsif: bool = false) Status
 
 fn parseFor(p: Parser, out node: ir.Node) Status
 {
-	// Check for {%
-	p.matchAssert(tk.OpenStatement);
-
-	// This is a for.
-	ident: string;
+	// This is a for loop.
+	name: string;
 	exp: ir.Exp;
 	nodes: ir.Node[];
 
-	// 'for' ident in something.exp
-	assert(p.front == "for");
-	p.popFront();
-
-	// for 'ident' in something.exp
-	if (err := p.matchAndGet(out ident)) {
+	// for 'name' in exp
+	if (err := p.parseIdent(out name)) {
 		return err;
 	}
 
-	// for ident 'in' something.exp
-	if (p.front != "in") {
-		return p.error();
+	// for name 'in' exp
+	p.src.skipWhitespace();
+	p.eatWord();
+	inWord := p.getSink();
+	if (inWord != "in") {
+		return p.errorExpected("in", inWord);
 	}
-	p.popFront();
 
-	if (err := parseExp(p, out exp)) {
+	// for name in 'exp'
+	if (err := p.parseExp(out exp)) {
 		return err;
 	}
 
-	// Check the end.
-	if (err := p.match(tk.CloseStatement)) {
+	// Parse the close bracket, also handles hyphen.
+	if (err := p.parseCloseStatement()) {
 		return err;
 	}
 
-	while (p.front != tk.End) {
-		if (p.front == tk.OpenStatement &&
-		    p.following == "endfor") {
-			break;
-		}
-		if (err := parseNode(p, ref nodes)) {
-			return err;
-		}
+	// Parse children nodes.
+	nameThatEnded: string;
+	if (err := p.parseNodesUntilTag(out nodes, out nameThatEnded, "endfor")) {
+		return err;
 	}
 
-	if (p.front == tk.End) {
-		return p.error();
-	}
-
-	// Pop {% endfor
-	p.popFront();
-	p.popFront();
-
-	// Check for %}
-	if (p.match(tk.CloseStatement)) {
-		return p.error();
-	}
-
-	node = bFor(ident, exp, nodes);
+	node = bFor(name, exp, nodes);
 	return Status.Ok;
 }
 
-fn parseAssign(p: Parser, out node: ir.Node) Status
+fn parseComment(p: Parser) Status
 {
-	// Check for {%
-	p.matchAssert(tk.OpenStatement);
+	p.src.skipWhitespace();
 
-	// This is a assign.
-	ident: string;
-	exp: ir.Exp;
+	// No effect, but allowed.
+	p.ifAndSkip('-');
 
-	// 'assign' ident = exp
-	if (err := p.match("assign")) {
+	// Close the bracket.
+	if (err := p.eatSequence("%}")) {
 		return err;
 	}
 
-	// assign 'ident' = exp
-	if (err := p.matchAndGet(out ident)) {
-		return err;
-	}
-
-	// assign ident '=' exp
-	if (err := p.match(tk.Assign)) {
-		return err;
-	}
-
-	// assign ident = 'exp'
-	if (err := parseExp(p, out exp)) {
-		return err;
-	}
-
-	// Check the end.
-	if (err := p.match(tk.CloseStatement)) {
-		return err;
-	}
-
-	node = bAssign(ident, exp);
-	return Status.Ok;
-}
-
-fn parseExp(p: Parser, out exp: ir.Exp) Status
-{
-	v: string;
-	if (err := p.matchAndGet(out v)) {
-		return err;
-	}
-
-	exp = bIdent(v);
-
-	while (true) {
-		switch (p.front.kind) with (TokenKind) {
-		case Dot:
-			p.popFront();
-
-			if (err := p.matchAndGet(out v)) {
-				return err;
-			}
-			exp = bAccess(exp, v);
-			break;
-		case Pipe:
-			p.popFront();
-
-			if (err := p.matchAndGet(out v)) {
-				return err;
-			}
-
-			exp = bFilter(exp, v, null);
-
-			if (p.front != tk.Colon) {
-				break;
-			}
-
-			// TODO filter arguments.
-			return p.error();
-		default:
-			return Status.Ok;
+	while (!p.src.eof) {
+		if (!p.ifAndSkip('{')) {
+			// Need to advance.
+			p.src.popFront();
+			continue;
 		}
+
+		if (!p.ifAndSkip('%')) {
+			// Should not advance, consider '{{%'.
+			continue;
+		}
+
+		// No effect, but allowed.
+		p.ifAndSkip('-');
+
+		// We are very generous here with what we allow.
+		p.src.skipWhitespace();
+		p.eatWord();
+		word := p.getSink();
+		if (word != "endcomment") {
+			continue;
+		}
+
+		// Parse the close bracket, also handles hyphen.
+		return p.parseCloseStatement();
 	}
+
+	// Ran out of file but the comment wasn't closed, error.
+	return p.errorExpectedEndComment();
+}
+
+
+/*
+ *
+ * Small parser helpers.
+ *
+ */
+
+/*!
+ * This function parses a ident.
+ *
+ * Include name must start with a alpha or '_' and may contain alpha and '_'.
+ */
+fn parseIdent(p: Parser, out name: string) Status
+{
+	p.src.skipWhitespace();
+
+	p.eatWord();
+	name = p.getSink();
+	if (name.length == 0) {
+		return p.errorExpectedIdentifier();
+	}
+
 	return Status.Ok;
 }
 
-//! Returns true if any hyphen was found.
-fn stripAnyHyphen(p: Parser) bool
+/*!
+ * This function parser a include name.
+ *
+ * Include name must start with a ident or number, may contain alpha numerical,
+ * '.' and '/'.
+ */
+fn parseIncludeName(p: Parser, out name: string) Status
 {
-	hyphen := false;
-	while (p.front == tk.Hyphen) {
-		hyphen = true;
-		p.popFront();
+	p.src.skipWhitespace();
+
+	p.eatIncludeName();
+	name = p.getSink();
+	if (name.length == 0) {
+		return p.errorExpectedIncludeName();
 	}
-	return hyphen;
+
+	return Status.Ok;
+}
+
+/*!
+ * Parses close statements '%}', handles hyphens.
+ */
+fn parseCloseStatement(p: Parser) Status
+{
+	p.src.skipWhitespace();
+
+	// Skip any hyphen.
+	hyphen := p.ifAndSkip('-');
+
+	// Check for the closing brackets.
+	if (err := p.eatSequence("%}")) {
+		return err;
+	}
+
+	// If hyphen skip whitespace.
+	if (hyphen) {
+		p.src.skipWhitespace();
+	}
+
+	// Setup state.
+	p.state = p.src.eof ? Parser.State.End : Parser.State.Text;
+	return Status.Ok;
+}
+
+/*!
+ * Parses close statements '%}', handles hyphens.
+ */
+fn parseClosePrint(p: Parser) Status
+{
+	p.src.skipWhitespace();
+
+	// Skip any hyphen.
+	hyphen := p.ifAndSkip('-');
+
+	// Check for the closing brackets.
+	if (err := p.eatSequence("}}")) {
+		return err;
+	}
+
+	// If hyphen skip whitespace.
+	if (hyphen) {
+		p.src.skipWhitespace();
+	}
+
+	// Setup state.
+	p.state = p.src.eof ? Parser.State.End : Parser.State.Text;
+	return Status.Ok;
+}
+
+
+/*
+ *
+ * Error raising helpers.
+ *
+ */
+
+//! Matches and skips a single char from the source, sets error msg.
+fn matchAndSkip(p: Parser, c: dchar) Status
+{
+	p.src.skipWhitespace();
+
+	if (p.ifAndSkip(c)) {
+		return Status.Ok;
+	}
+
+	return p.errorExpected(c, p.src.front);
+}
+
+
+/*
+ *
+ * Misc helpers.
+ *
+ */
+
+//! Returns either a ir.Ident or ir.BoolLiteral.
+fn makeIdentOrBool(word: string) ir.Exp
+{
+	switch (word) {
+	case "true": return bBoolLiteral(true);
+	case "false": return bBoolLiteral(false);
+	default: return bIdent(word);
+	}
+}
+
+//! Returns true if current character is c and skip it.
+fn ifAndSkip(p: Parser, c: dchar) bool
+{
+	if (p.src.front == c) {
+		p.src.popFront();
+		return true;
+	}
+	return false;
+}
+
+//! Is the given char a valid character for a include name.
+fn isIncludeName(c: dchar) bool
+{
+	return isAlpha(c) || c == '_' || c == '/' || c == '.';
 }

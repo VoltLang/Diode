@@ -78,3 +78,8 @@ fn bChain(start: string, idents: string[]...) ir.Exp
 	}
 	return exp;
 }
+
+fn bClosingTagNode(name: string) ir.ClosingTagNode
+{
+	return new ir.ClosingTagNode(name);
+}
