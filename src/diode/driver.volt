@@ -219,7 +219,7 @@ protected:
 		f.ext = ext;
 		f.filename = base;
 		f.header = parseHeader(src);
-		f.file = parseFile(src);
+		f.file = parseFile(src, mEngine);
 		f.layout = f.getOption("layout");
 
 		return f;

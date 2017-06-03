@@ -32,8 +32,13 @@ public:
 
 		switch (ident) {
 		case "upper": v = new Text(toUpper(s.toString())); break;
-		default: throw new Exception("unknown filter " ~ ident);
+		default: handleError("unknown filter " ~ ident);
 		}
+	}
+
+	fn handleError(str: string)
+	{
+		throw new Exception(str);
 	}
 
 	fn handleInclude(i: ir.Include, env: Set, sink: Sink)

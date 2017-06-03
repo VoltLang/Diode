@@ -12,11 +12,12 @@ import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
 import diode.errors;
 import diode.token.lexer : lex;
 import diode.token.token : Token, TokenKind;
+import diode.eval.engine;
 import diode.parser.writer;
 import diode.parser.header;
 
 
-fn parse(src: Source) ir.File
+fn parse(src: Source, e: Engine) ir.File
 {
 	tokens := lex(src);
 	p := new Parser(tokens);
@@ -24,7 +25,8 @@ fn parse(src: Source) ir.File
 	s := parseFile(p, out file);
 
 	if (s != Status.Ok) {
-		throw p.makeException();
+		exc := p.makeException();
+		e.handleError(exc.msg);
 	}
 
 	return file;
