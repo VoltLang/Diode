@@ -1,0 +1,10 @@
+---
+layout: page
+title: Modules
+---
+{% for mod in doc.modules -%}
+<p>
+<a href="{{ mod.url }}">{{ mod.name }}</a>
+<p>
+{% include vdoc_module_brief.md mod=mod -%}
+{%- endfor -%}

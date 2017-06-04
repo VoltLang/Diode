@@ -35,6 +35,7 @@ protected:
 	mModules: Array;
 	mEngine: DriverEngine;
 	mDocModule: File;
+	mDocModules: File;
 
 
 public:
@@ -71,9 +72,12 @@ public:
 		f = getName("_layout", "default.html");
 		addLayout(import("_layout/default.html"), f);
 
-		// Add default vdoc template.
+		// Add default vdoc templates.
 		f = getName("_vdoc", "module.html");
 		addDocTemplate(import("_vdoc/module.html"), f);
+
+		f = getName("_vdoc", "modules.html");
+		addDocTemplate(import("_vdoc/modules.html"), f);
 
 		// Add temporary hack includes.
 		f = getName("_include", "vdoc_children_brief.md");
@@ -91,6 +95,7 @@ public:
 
 	override fn processDoc()
 	{
+		// If modules are processed skip mDocModules as well.
 		if (mDocModule is null) {
 			return;
 		}
@@ -107,6 +112,23 @@ public:
 
 		// Make sure the directory excists.
 		mkdirP(dir);
+
+		if (mDocModules !is null) {
+			filename := format("%s%s", dir, "modules.html");
+			info("renderingFile '%s'", filename);
+
+			s.reset();
+			mDoc.current = null;
+			mEngine.renderFile(mDocModules, s.sink);
+			o := new OutputFileStream(filename);
+			o.writefln("%s", s.toString());
+			o.flush();
+			o.close();
+		}
+
+		if (mDocModule is null) {
+			return;
+		}
 
 		foreach (mod; mods) {
 			filename := format("%smod_%s.html", dir, mod.name);
@@ -196,6 +218,7 @@ public:
 
 		switch (file.filename) {
 		case "module": mDocModule = file; break;
+		case "modules": mDocModules = file; break;
 		default: info("unknown vdoc template '%s' from file '%s'", file.filename, filename);
 		}
 	}
