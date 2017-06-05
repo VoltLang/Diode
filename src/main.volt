@@ -124,14 +124,12 @@ fn addFiles(d: DiodeDriver, files: string[])
 {
 	foreach (file; files) {
 		if (!file.endsWith(".json")) {
-			io.error.writefln("unknown file type '%s'", file);
-			io.error.flush();
+			d.warning("unknown file type '%s'", file);
 			continue;
 		}
 
 		if (!isFile(file)) {
-			io.error.writefln("file not found '%s'", file);
-			io.error.flush();
+			d.warning("file not found '%s'", file);
 			continue;
 		}
 
@@ -146,11 +144,11 @@ fn renderFiles(d: Driver)
 	outDir := d.settings.outputDir;
 
 	if (!isDir(srcDir)) {
-		d.info("source dir not found '%s'", srcDir);
+		d.warning("source dir not found '%s'", srcDir);
 		return;
 	}
 	if (!isDir(outDir)) {
-		d.info("output dir not found '%s'", outDir);
+		d.warning("output dir not found '%s'", outDir);
 		return;
 	}
 
@@ -180,7 +178,7 @@ fn addLayouts(d: Driver)
 {
 	dir := d.settings.layoutDir;
 	if (!isDir(dir)) {
-		d.info("dir not found '%s'", dir);
+		d.warning("dir not found '%s'", dir);
 		return;
 	}
 
@@ -200,7 +198,7 @@ fn addIncludes(d: Driver)
 {
 	dir := d.settings.includeDir;
 	if (!isDir(dir)) {
-		d.info("dir not found '%s'", dir);
+		d.warning("dir not found '%s'", dir);
 		return;
 	}
 
@@ -221,7 +219,7 @@ fn addVdocTemplates(d: Driver)
 {
 	dir := d.settings.vdocDir;
 	if (!isDir(dir)) {
-		d.info("dir not found '%s'", dir);
+		d.warning("dir not found '%s'", dir);
 		return;
 	}
 

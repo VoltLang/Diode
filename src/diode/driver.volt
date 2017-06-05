@@ -36,6 +36,7 @@ protected:
 	mEngine: DriverEngine;
 	mDocModule: File;
 	mDocModules: File;
+	mVerbose: bool;
 
 
 public:
@@ -134,7 +135,7 @@ public:
 
 	override fn addLayout(source: string, filename: string)
 	{
-		info("adding layout '%s'", filename);
+		verbose("adding layout '%s'", filename);
 
 		f := createFile(source, filename);
 		mLayouts[f.filename] = f;
@@ -142,7 +143,7 @@ public:
 
 	override fn addInclude(source: string, filename: string)
 	{
-		info("adding include '%s'", filename);
+		verbose("adding include '%s'", filename);
 
 		file := createFile(source, filename);
 		mEngine.addInclude(file, filename);
@@ -155,7 +156,7 @@ public:
 
 	override fn addDoc(source: string, filename: string)
 	{
-		info("adding vdoc source '%s'", filename);
+		verbose("adding vdoc source '%s'", filename);
 
 		parse(mDoc, source);
 	}
@@ -166,7 +167,29 @@ public:
 		addDocTemplate(file, filename);
 	}
 
+	override fn verbose(fmt: string, ...)
+	{
+		if (!mVerbose) {
+			return;
+		}
+
+		vl: va_list;
+		va_start(vl);
+		error.vwritefln(fmt, ref _typeids, ref vl);
+		error.flush();
+		va_end(vl);
+	}
+
 	override fn info(fmt: string, ...)
+	{
+		vl: va_list;
+		va_start(vl);
+		error.vwritefln(fmt, ref _typeids, ref vl);
+		error.flush();
+		va_end(vl);
+	}
+
+	override fn warning(fmt: string, ...)
 	{
 		vl: va_list;
 		va_start(vl);
@@ -184,30 +207,30 @@ public:
 
 	fn addInclude(file: File, filename: string)
 	{
-		info("adding include '%s'", filename);
+		verbose("adding include '%s'", filename);
 		mEngine.addInclude(file, filename);
 	}
 
 	fn addLayout(file: File, filename: string)
 	{
-		info("adding layout '%s'", filename);
+		verbose("adding layout '%s'", filename);
 		mLayouts[file.filename] = file;
 	}
 
 	fn addDocTemplate(file: File, filename: string)
 	{
-		info("adding vdoc template '%s'", filename);
+		verbose("adding vdoc template '%s'", filename);
 
 		switch (file.filename) {
 		case "module": mDocModule = file; break;
 		case "modules": mDocModules = file; break;
-		default: info("unknown vdoc template '%s' from file '%s'", file.filename, filename);
+		default: warning("unknown vdoc template '%s' from file '%s'", file.filename, filename);
 		}
 	}
 
 	fn renderFileTo(file: File, output: string)
 	{
-		info("rendering '%s' to '%s'", file.fullName, output);
+		verbose("rendering '%s' to '%s'", file.fullName, output);
 
 		o := new OutputFileStream(output);
 		mEngine.renderFile(file, o.write);
@@ -305,7 +328,7 @@ protected:
 			return l;
 		}
 
-		info("can not find layout '%s' for file '%s'");
+		warning("can not find layout '%s' for file '%s'");
 
 		return null;
 	}
@@ -388,7 +411,7 @@ public:
 	{
 		ret := p.filename in mIncludes;
 		if (ret is null) {
-			mDrv.info("no such include '%s'", p.filename);
+			mDrv.warning("no such include '%s'", p.filename);
 			return;
 		}
 

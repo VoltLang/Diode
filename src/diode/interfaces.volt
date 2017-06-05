@@ -28,7 +28,9 @@ public:
 	abstract fn addDocTemplate(source: string, filename: string);
 	abstract fn renderFile(source: string, filename: string, output: string);
 
+	abstract fn verbose(fmt: string, ...);
 	abstract fn info(fmt: string, ...);
+	abstract fn warning(fmt: string, ...);
 }
 
 /*!
