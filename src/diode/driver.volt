@@ -115,15 +115,8 @@ public:
 
 		if (mDocModules !is null) {
 			filename := format("%s%s", dir, "modules.html");
-			info("renderingFile '%s'", filename);
-
-			s.reset();
 			mDoc.current = null;
-			mEngine.renderFile(mDocModules, s.sink);
-			o := new OutputFileStream(filename);
-			o.writefln("%s", s.toString());
-			o.flush();
-			o.close();
+			renderFileTo(mDocModules, filename);
 		}
 
 		if (mDocModule is null) {
@@ -132,17 +125,11 @@ public:
 
 		foreach (mod; mods) {
 			filename := format("%smod_%s.html", dir, mod.name);
-
-			info("renderingFile '%s'", filename);
-
-			s.reset();
 			mDoc.current = mod;
-			mEngine.renderFile(mDocModule, s.sink);
-			o := new OutputFileStream(filename);
-			o.writefln("%s", s.toString());
-			o.flush();
-			o.close();
+			renderFileTo(mDocModule, filename);
 		}
+
+		mDoc.current = null;
 	}
 
 	override fn addLayout(source: string, filename: string)
@@ -161,14 +148,9 @@ public:
 		mEngine.addInclude(file, filename);
 	}
 
-	override fn renderFile(source: string, filename: string) string
+	override fn renderFile(source: string, filename: string, output: string)
 	{
-		info("renderingFile '%s'", filename);
-
-		s: StringSink;
-		f := createFile(source, filename);
-		mEngine.renderFile(f, s.sink);
-		return s.toString();
+		renderFileTo(createFile(source, filename), output);
 	}
 
 	override fn addDoc(source: string, filename: string)
@@ -221,6 +203,16 @@ public:
 		case "modules": mDocModules = file; break;
 		default: info("unknown vdoc template '%s' from file '%s'", file.filename, filename);
 		}
+	}
+
+	fn renderFileTo(file: File, output: string)
+	{
+		info("rendering '%s' to '%s'", file.fullName, output);
+
+		o := new OutputFileStream(output);
+		mEngine.renderFile(file, o.write);
+		o.flush();
+		o.close();
 	}
 
 

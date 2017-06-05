@@ -169,16 +169,8 @@ fn renderFiles(d: Driver)
 			return;
 		}
 
-
 		str := cast(string)read(srcPath);
-		str = d.renderFile(str, srcPath);
-
-		d.info("writing '%s' to '%s'", srcPath, outPath);
-
-		o := new OutputFileStream(outPath);
-		o.writefln("%s", str);
-		o.flush();
-		o.close();
+		d.renderFile(str, srcPath, outPath);
 	}
 
 	searchDir(srcDir, "*", hit);

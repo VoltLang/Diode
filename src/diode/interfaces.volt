@@ -26,7 +26,7 @@ public:
 	abstract fn addInclude(source: string, filename: string);
 	abstract fn addDoc(source: string, filename: string);
 	abstract fn addDocTemplate(source: string, filename: string);
-	abstract fn renderFile(source: string, filename: string) string;
+	abstract fn renderFile(source: string, filename: string, output: string);
 
 	abstract fn info(fmt: string, ...);
 }
