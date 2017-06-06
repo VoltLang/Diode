@@ -1,14 +1,21 @@
+---
+layout: page
+title: JSON Output
+---
+
+# JSON Output
+
 The Volt compiler can be instructed to output info about the modules it compiled. Simply use the `-jo` switch when invoking the compiler:
 
     volt -jo outputfile.json main.volt
 
 The above will compile `main.volt` as usual, but will output information in the file `outputfile.json`, structured as a [JSON](http://www.json.org) object. The purpose of this document is to briefly overview the structure of the file.
 
-# Structure
+## Structure
 
 No matter how many modules (`.volt` files) are compiled, all of the information will be contained in a JSON object. This object will have two fields: `target` and `modules`. The `target` field contains an object that describes the platform that these modules were being compiled for, while the `modules` field contains an array of objects containing data about each module compiled.
 
-# Target
+## Target
 
 The target is the system that is being compiled for. This does not have to match the system that the code was compiling it (the 'host').
 
@@ -51,7 +58,7 @@ The target is the system that is being compiled for. This does not have to match
 `alignment` is an object containing [alignment information](https://en.wikipedia.org/wiki/Data_structure_alignment) for the target.
 `int1` through `int64` contain the alignment of their respective integer values. `float32` and `float64` contain the alignment of 32 bit floating point values, and 64 bit doubles, respectively. `ptr` is the alignment of pointer values, and `aggregate` is the alignment of `struct`s.
 
-# Common Fields
+## Common Fields
 
 These fields appear in most objects, and serve the same purpose in each. If these fields appear in the examples of an object, it means that they can appear in that object, and their purpose will not be documented redundantly.
 
@@ -67,7 +74,7 @@ If `children` is present, it is a list of child language structures. A Modules `
 
 `access` is the access level of the given language structure. This can be `"public"`, `"private"`, or `"protected"`.
 
-# Modules
+## Modules
 
     {
 	    "kind": "module",
@@ -75,7 +82,7 @@ If `children` is present, it is a list of child language structures. A Modules `
 		"children": [{...}]
 	}
 
-## Struct
+### Struct
 
     {
         "kind": "struct",
@@ -86,7 +93,7 @@ If `children` is present, it is a list of child language structures. A Modules `
         "children": [{...}]
     }
 
-## Union
+### Union
 
     {
         "kind": "union",
@@ -97,7 +104,7 @@ If `children` is present, it is a list of child language structures. A Modules `
         "children": [{...}]
     }
 
-## Class
+### Class
 
     {
         "kind": "class",
@@ -122,7 +129,7 @@ If present, `interfaces` is an array of strings of interfaces this class impleme
 
 `isFinal` is a `boolean` value that is present when the given class is an `final` class.
 
-## Interface
+### Interface
 
     {
         "kind": "interface",
@@ -137,7 +144,7 @@ If present, `interfaces` is an array of strings of interfaces this class impleme
 
 If present, `parents` is a list string containing the name of this interface's parent interfaces. `parentsFull` is the same, but the fully qualified names.
 
-## Alias
+### Alias
 
     {
         "kind": "alias",
@@ -148,7 +155,7 @@ If present, `parents` is a list string containing the name of this interface's p
 
 `type` is a `string` of the name of the type that this alias points to.
 
-## Import
+### Import
 
     {
         "kind": "import",
@@ -176,7 +183,7 @@ would result in the following `aliases` array:
 
     `[["a", "b"], ["c"]]`
 
-## Function
+### Function
 
     {
         "kind": "...",  // See comments below.
@@ -212,7 +219,7 @@ would result in the following `aliases` array:
 
 `hasBody` is present if this function has a defined body.
 
-## Variable
+### Variable
 
     {
         "kind": "var",
@@ -234,7 +241,7 @@ would result in the following `aliases` array:
 
 `isExtern` is present if the variable is marked as `extern`.
 
-## Enum
+### Enum
 
     {
         "kind": "enum",
@@ -245,7 +252,7 @@ would result in the following `aliases` array:
         "children": [{...}]
     }
 
-## Enum Declaration
+### Enum Declaration
 
     {
         "kind": "enumdecl",
