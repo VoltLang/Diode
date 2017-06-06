@@ -77,12 +77,17 @@ public:
 			default:
 			}
 
-			if (v.type() != json.DomType.STRING) {
-				warning("key '%s' from '%s' is not text, skipping.", k, filename);
-				continue;
+			final switch (v.type()) with (json.DomType) {
+			case STRING:
+				mSite.ctx[k] = new Text(v.str());
+				break;
+			case BOOLEAN:
+				mSite.ctx[k] = new Bool(v.boolean());
+				break;
+			case NULL, DOUBLE, LONG, ULONG, OBJECT, ARRAY:
+				warning("key '%s' from '%s' is not text or boolean, skipping.", k, filename);
+				break;
 			}
-
-			mSite.ctx[k] = new Text(v.str());
 		}
 	}
 
