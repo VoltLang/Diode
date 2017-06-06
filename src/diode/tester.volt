@@ -78,11 +78,19 @@ fn runTest(args: string[]) i32
 
 fn getTestEnv() Set
 {
+	vals: Value[] = [cast(Value)
+		new Text("One"),
+		new Text("Two"),
+		new Text("Three")
+	];
+
+
 	test := new Set();
 	test.ctx["world"] = new Text("World");
 	test.ctx["nil"] = new Nil();
 	test.ctx["true"] = new Bool(true);
 	test.ctx["false"] = new Bool(false);
+	test.ctx["arrayOneTwoThree"] = new Array(vals);
 
 	root := new Set();
 	root.ctx["test"] = test;
