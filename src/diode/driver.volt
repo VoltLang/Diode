@@ -33,7 +33,7 @@ protected:
 	mLayouts: File[string];
 	mRoot: Set;
 	mSite: Set;
-	mDoc: VdocRoot;
+	mVdoc: VdocRoot;
 	mModules: Array;
 	mEngine: DriverEngine;
 	mDocModule: File;
@@ -144,7 +144,7 @@ public:
 			return;
 		}
 
-		mods := mDoc.getModules();
+		mods := mVdoc.getModules();
 		foreach (mod; mods) {
 			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
 		}
@@ -159,7 +159,7 @@ public:
 
 		if (mDocModules !is null) {
 			filename := format("%s%s", dir, "modules.html");
-			mDoc.current = null;
+			mVdoc.current = null;
 			renderFileTo(mDocModules, filename);
 		}
 
@@ -169,11 +169,11 @@ public:
 
 		foreach (mod; mods) {
 			filename := format("%smod_%s.html", dir, mod.name);
-			mDoc.current = mod;
+			mVdoc.current = mod;
 			renderFileTo(mDocModule, filename);
 		}
 
-		mDoc.current = null;
+		mVdoc.current = null;
 	}
 
 	override fn addLayout(source: string, filename: string)
@@ -201,7 +201,7 @@ public:
 	{
 		verbose("adding vdoc source '%s'", filename);
 
-		parse(mDoc, source);
+		parse(mVdoc, source);
 	}
 
 	override fn addDocTemplate(source: string, filename: string)
@@ -378,12 +378,13 @@ protected:
 
 	fn buildRootEnv()
 	{
-		mDoc = new VdocRoot();
+		mVdoc = new VdocRoot();
 		mRoot = new Set();
 		mSite = new Set();
 		mModules = new Array(null);
 
-		mRoot.ctx["doc"] = mDoc;
+		mRoot.ctx["doc"] = mVdoc;
+		mRoot.ctx["vdoc"] = mVdoc;
 		mRoot.ctx["site"] = mSite;
 		mSite.ctx["url"] = new Text(settings.url);
 		mSite.ctx["baseurl"] = new Text(settings.baseurl);
