@@ -14,9 +14,10 @@ import watt.text.format : format;
 import json = watt.text.json;
 import ir = diode.ir;
 
-import diode.eval;
 import diode.errors;
 import diode.interfaces;
+import diode.eval;
+import diode.eval.json : jsonToValue = toValue, jsonToSet = toSet;
 import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;
@@ -77,17 +78,7 @@ public:
 			default:
 			}
 
-			final switch (v.type()) with (json.DomType) {
-			case STRING:
-				mSite.ctx[k] = new Text(v.str());
-				break;
-			case BOOLEAN:
-				mSite.ctx[k] = new Bool(v.boolean());
-				break;
-			case NULL, DOUBLE, LONG, ULONG, OBJECT, ARRAY:
-				warning("key '%s' from '%s' is not text or boolean, skipping.", k, filename);
-				break;
-			}
+			mSite.ctx[k] = v.jsonToValue();
 		}
 	}
 
