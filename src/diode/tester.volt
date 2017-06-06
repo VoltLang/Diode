@@ -88,8 +88,8 @@ fn getTestEnv() Set
 	test := new Set();
 	test.ctx["world"] = new Text("World");
 	test.ctx["nil"] = new Nil();
-	test.ctx["true"] = new Bool(true);
-	test.ctx["false"] = new Bool(false);
+	test.ctx["boolTrue"] = new Bool(true);
+	test.ctx["boolFalse"] = new Bool(false);
 	test.ctx["arrayOneTwoThree"] = new Array(vals);
 
 	root := new Set();
