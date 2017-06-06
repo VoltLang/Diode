@@ -11,7 +11,9 @@ import watt.text.source;
 import watt.text.markdown;
 import watt.text.format : format;
 
+import json = watt.text.json;
 import ir = diode.ir;
+
 import diode.eval;
 import diode.errors;
 import diode.interfaces;
@@ -37,6 +39,7 @@ protected:
 	mDocModule: File;
 	mDocModules: File;
 	mVerbose: bool;
+	mSiteSettings: json.Value;
 
 
 public:
@@ -46,6 +49,41 @@ public:
 		buildRootEnv();
 
 		mEngine = new DriverEngine(this, mRoot);
+	}
+
+	override fn setConfig(source: string, filename: string)
+	{
+		verbose("reading config from '%s'", filename);
+
+		root := json.parse(source);
+		foreach (k; root.keys()) {
+			v := root.lookupObjectKey(k);
+
+			switch (k) {
+			case "url", "baseurl":
+				// If this is already set from the command line.
+				if (settings.urlFromCommandLine) {
+					warning("key '%s' from '%s' overwritten from command line, skipping.", k, filename);
+					continue;
+				}
+				mSite.ctx["url"] = new Text(v.str());
+				mSite.ctx["baseurl"] = new Text(v.str());
+				continue;
+			case "time", "pages", "posts", "related_posts",
+			     "static_files", "html_pages", "collection",
+			     "data", "documents", "categories", "tags":
+				warning("key '%s' from '%s' is reserved, skipping.", k, filename);
+				continue;
+			default:
+			}
+
+			if (v.type() != json.DomType.STRING) {
+				warning("key '%s' from '%s' is not text, skipping.", k, filename);
+				continue;
+			}
+
+			mSite.ctx[k] = new Text(v.str());
+		}
 	}
 
 	override fn addBuiltins()
@@ -342,6 +380,7 @@ protected:
 
 		mRoot.ctx["doc"] = mDoc;
 		mRoot.ctx["site"] = mSite;
+		mSite.ctx["url"] = new Text(settings.url);
 		mSite.ctx["baseurl"] = new Text(settings.baseurl);
 	}
 }

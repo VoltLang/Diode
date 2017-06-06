@@ -91,7 +91,11 @@ fn parseArgs(args: string[], s: Settings) string[]
 			continue;
 		case SourceDir: s.sourceDir = arg; break;
 		case OutputDir: s.outputDir = arg; break;
-		case Baseurl: s.baseurl = arg; break;
+		case Baseurl:
+			s.urlFromCommandLine = true;
+			s.url = arg;
+			s.baseurl = arg;
+			break;
 		}
 		state = ParseState.Normal;
 	}
@@ -109,6 +113,7 @@ fn test(args: string[]) i32
 
 	d := new DiodeDriver(s);
 	d.addBuiltins();
+	d.findConfig();
 	d.addLayouts();
 	d.addIncludes();
 	d.addVdocTemplates();
@@ -118,6 +123,19 @@ fn test(args: string[]) i32
 	d.info("done");
 
 	return 0;
+}
+
+fn findConfig(d: DiodeDriver)
+{
+	filename := format("%s%s%s", d.settings.sourceDir,
+		dirSeparator, "_config.json");
+
+	if (!isFile(filename)) {
+		return;
+	}
+
+	str := cast(string)read(filename);
+	d.setConfig(str, filename);
 }
 
 fn addFiles(d: DiodeDriver, files: string[])

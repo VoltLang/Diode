@@ -22,6 +22,7 @@ public:
 
 	abstract fn addBuiltins();
 	abstract fn processDoc();
+	abstract fn setConfig(source: string, filename: string);
 	abstract fn addLayout(source: string, filename: string);
 	abstract fn addInclude(source: string, filename: string);
 	abstract fn addDoc(source: string, filename: string);
@@ -44,6 +45,8 @@ public:
 	outputDir: string;
 	layoutDir: string;
 	includeDir: string;
+	urlFromCommandLine: bool;
+	url: string = "http://example.com";
 	baseurl: string = "http://example.com";
 
 	// These depend on workDir and are set with fillInDefaults.
