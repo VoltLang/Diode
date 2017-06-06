@@ -68,9 +68,16 @@ public:
 	modules: Value[];
 	//! Current thing that a vdoc template is rendering.
 	current: Value;
+	//! Set holding config data.
+	set: Set;
 
 
 public:
+	this()
+	{
+		set = new Set();
+	}
+
 	override fn ident(n: ir.Node, key: string) Value
 	{
 		c := Collection.make(modules, key);
@@ -80,6 +87,7 @@ public:
 
 		switch (key) {
 		case "current": return current is null ? new Nil() : current;
+		case "name": return set.ident(n, key);
 		default: return super.ident(n, key);
 		}
 	}

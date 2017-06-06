@@ -75,6 +75,13 @@ public:
 			     "data", "documents", "categories", "tags":
 				warning("key '%s' from '%s' is reserved, skipping.", k, filename);
 				continue;
+			case "vdoc":
+				if (v.type() == json.DomType.OBJECT) {
+					mVdoc.set = v.jsonToSet();
+					continue;
+				}
+				warning("key '%s' from '%s' is not a object, skipping.", k, filename);
+				continue;
 			default:
 			}
 
