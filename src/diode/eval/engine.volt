@@ -203,6 +203,18 @@ public:
 		return Continue;
 	}
 
+	override fn visit(p: ir.StringLiteral, sink: Sink) Status
+	{
+		v = new Text(p.val);
+		return Continue;
+	}
+
+	override fn visit(p: ir.BoolLiteral, sink: Sink) Status
+	{
+		v = new Bool(p.val);
+		return Continue;
+	}
+
 
 	/*
 	 *

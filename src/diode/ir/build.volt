@@ -55,6 +55,16 @@ fn bIdent(ident: string) ir.Ident
 	return new ir.Ident(ident);
 }
 
+fn bStringLiteral(val: string) ir.StringLiteral
+{
+	return new ir.StringLiteral(val);
+}
+
+fn bBoolLiteral(val: bool) ir.BoolLiteral
+{
+	return new ir.BoolLiteral(val);
+}
+
 fn bPrintChain(start: string, idents: string[]...) ir.Print
 {
 	return new ir.Print(bChain(start, idents));

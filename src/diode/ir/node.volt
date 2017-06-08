@@ -128,6 +128,48 @@ public:
 }
 
 /*!
+ * A string literal.
+ */
+class StringLiteral : Exp
+{
+public:
+	val: string;
+
+
+public:
+	this(val: string)
+	{
+		this.val = val;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		return filterParent(v.visit(this, sink));
+	}
+}
+
+/*!
+ * A bool literal.
+ */
+class BoolLiteral : Exp
+{
+public:
+	val: bool;
+
+
+public:
+	this(val: bool)
+	{
+		this.val = val;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		return filterParent(v.visit(this, sink));
+	}
+}
+
+/*!
  * Lookup symbol into child expression.
  */
 class Access : Exp
@@ -407,6 +449,8 @@ abstract class Visitor
 	abstract fn enter(Filter, Sink) Status;
 	abstract fn leave(Filter, Sink) Status;
 	abstract fn visit(Ident, Sink) Status;
+	abstract fn visit(StringLiteral, Sink) Status;
+	abstract fn visit(BoolLiteral, Sink) Status;
 }
 
 /*!
