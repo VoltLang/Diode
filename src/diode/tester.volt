@@ -11,11 +11,16 @@ import core.c.stdlib : exit;
 
 import watt.text.sink : StringSink;
 import watt.text.source : Source;
+import watt.text.string : indexOf;
 import watt.io.file : read, isFile;
 import io = watt.io;
 
 import diode.eval;
 import diode.parser : parse;
+
+
+//! Single test files are split with this marker.
+enum Split = "#####";
 
 class Tester : Engine
 {
@@ -34,15 +39,57 @@ class Tester : Engine
 
 fn runTest(args: string[]) i32
 {
-	if (args.length != 4) {
+	if (args.length == 4) {
+		return runTest(args[2], args[3]);
+	} else if (args.length == 3) {
+		return runTest(args[2]);
+	} else {
 		io.error.writefln("invalid number of test arguments");
 		io.error.flush();
 		return 2;
 	}
+}
 
-	srcFile := args[2];
-	cmpFile := args[3];
+fn runTest(srcFile: string) i32
+{
+	if (!srcFile.isFile()) {
+		io.error.writefln("src file '%s' not found", srcFile);
+		io.error.flush();
+		return 2;
+	}
 
+	text := cast(string)read(srcFile);
+	index := text.indexOf(Split);
+	if (index < 0) {
+		io.error.writefln("malformed test in '%s'", srcFile);
+		io.error.flush();
+		return 2;
+	}
+
+	text = text[cast(size_t)index + Split.length .. $];
+	index = text.indexOf(Split);
+	if (index < 0) {
+		io.error.writefln("malformed test in '%s'", srcFile);
+		io.error.flush();
+		return 2; 
+	}
+
+	srcText := text[0 .. index];
+	text = text[cast(size_t)index + Split.length .. $];
+
+	index = text.indexOf(Split);
+	if (index < 0) {
+		io.error.writefln("malformed test in '%s'", srcFile);
+		io.error.flush();
+		return 2; 
+	}
+	cmpText := text[0 .. index];
+
+	return compileAndCompare(srcText, cmpText, srcFile);
+}
+
+fn runTest(srcFile: string, cmpFile: string) i32
+{
 	if (!srcFile.isFile()) {
 		io.error.writefln("src file '%s' not found", srcFile);
 		io.error.flush();
@@ -58,6 +105,11 @@ fn runTest(args: string[]) i32
 	srcText := cast(string)read(srcFile);
 	cmpText := cast(string)read(cmpFile);
 
+	return compileAndCompare(srcText, cmpText, srcFile);
+}
+
+fn compileAndCompare(srcText: string, cmpText: string, srcFile: string) i32
+{
 	src := new Source(srcText, srcFile);
 	root := getTestEnv();
 	e := new Tester(root);
