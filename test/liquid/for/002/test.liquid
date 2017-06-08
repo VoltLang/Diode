@@ -1,4 +1,8 @@
+######
 {% for val in test.arrayOneTwoThree -%}
   {{- val -}}
 {%- if forloop.last %}.{% else %}, {% endif -%}
 {% endfor %}
+######
+One, Two, Three.
+######

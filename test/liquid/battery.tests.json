@@ -3,11 +3,11 @@
 	"testCommandPrefix": "//T ",
 	"macros": {
 		"default": [
-			"//T run:diode --test %s %S/result.txt",
+			"//T run:diode --test %s"
 		],
 		"expectfailure": [
 			"//T retval:2",
-			"//T run:diode --test %s %S/result.txt"
+			"//T run:diode --test %s"
 		]
 	}
 }
