@@ -6,6 +6,9 @@ import core.exception;
 
 import watt.conv : toUpper;
 import watt.text.sink;
+import watt.text.string : split, join;
+import watt.text.format : format;
+import watt.text.utf : encode;
 
 import ir = diode.ir;
 import diode.eval.value;
@@ -32,6 +35,50 @@ public:
 
 		switch (ident) {
 		case "upper": v = new Text(toUpper(s.toString())); break;
+		case "split":
+			if (args.length != 1) {
+				handleError(format("expected 1 argument to 'split' filter, not %s", args.length));
+			}
+			argsink: StringSink;
+			args[0].toText(n, argsink.sink);
+			pieces: string[];
+			if (argsink.toString() == "") {
+				pieces = new string[](s.toString().length);
+				foreach (i, c: dchar; s.toString()) {
+					pieces[i] = encode(c);
+				}
+			} else {
+				pieces  = s.toString().split(argsink.toString());
+			}
+			values := new Value[](pieces.length);
+			foreach (i, piece; pieces) {
+				values[i] = new Text(pieces[i]);
+			}
+			v = new Array(values);
+			break;
+		case "reverse":
+			values := child.toArray(n);
+			newValues := new Value[](values.length);
+			foreach (i, val; values) {
+				newValues[$ - (i+1)] = val;
+			}
+			v = new Array(newValues);
+			break;
+		case "join":
+			if (args.length != 1) {
+				handleError(format("expected 1 argument to 'join' filter, not %s", args.length));
+			}
+			argsink: StringSink;
+			args[0].toText(n, argsink.sink);
+			children := child.toArray(n);
+			argStrings := new string[](children.length);
+			foreach (i, c; children) {
+				cs: StringSink;
+				c.toText(n, cs.sink);
+				argStrings[i] = cs.toString();
+			}
+			v = new Text(join(argStrings, argsink.toString()));
+			break;
 		default: handleError("unknown filter " ~ ident);
 		}
 	}
@@ -186,12 +233,18 @@ public:
 		v = null;
 		p.child.accept(this, sink);
 		assert(v !is null);
+		child := v;
 
-		// Args not supported yet.
-		assert(p.args.length == 0);
+		args := new Value[](p.args.length);
+		foreach (i, parg; p.args) {
+			v = null;
+			parg.accept(this, sink);
+			assert(v !is null);
+			args[i] = v;
+		}
 
-		// Let implimentor handle the filter.
-		handleFilter(p, p.ident, v, null, sink);
+		// Let implementor handle the filter.
+		handleFilter(p, p.ident, child, args, sink);
 
 		// Done.
 		return ContinueParent;
