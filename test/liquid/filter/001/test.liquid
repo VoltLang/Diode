@@ -1,0 +1,9 @@
+######
+{% assign my_array = "apples, oranges, peaches, plums" | split: ", " %}
+
+{{ my_array | reverse | join: ", " }}
+######
+
+
+plums, peaches, oranges, apples
+######
