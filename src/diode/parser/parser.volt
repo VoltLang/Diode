@@ -217,19 +217,17 @@ fn parseText(p: Parser, out text: ir.Node) Status
 			p.state = Parser.State.Statement;
 			break;
 		default:
+			// We didn't add this before so add it here.
+			p.sink.sink(encode('{'));
 			p.sink.sink(encode(c));
 			continue;
 		}
 
-		bool hyphen;
-		// Does this end with a hyphen, like '{{-' and '{%-'?
-		if (p.src.front == '-') {
-			p.src.popFront();
-			hyphen = true;
-		}
-
+		// Get the text we have accumulated.
 		txt := p.getSink();
-		if (hyphen) {
+
+		// Does this end with a hyphen, like '{{-' and '{%-'?
+		if (p.ifAndSkip('-')) {
 			txt = stripRight(txt);
 		}
 
@@ -241,7 +239,13 @@ fn parseText(p: Parser, out text: ir.Node) Status
 		return Status.Ok;
 	}
 
-	text = bText(p.getSink());
+	// Get the text we have accumulated.
+	txt := p.getSink();
+	if (txt.length > 0) {
+		text = bText(txt);
+	}
+
+	// Setup state.
 	p.state = Parser.State.End;
 	return Status.Ok;
 }
