@@ -11,6 +11,7 @@ import watt.text.string : split, join;
 import watt.text.format : format;
 import watt.text.utf : encode, decode;
 import watt.text.ascii : isASCII, asciiToUpper = toUpper;
+import watt.text.html : htmlEscape;
 
 import ir = diode.ir;
 import diode.eval.value;
@@ -94,6 +95,7 @@ public:
 			v = new Number(result, argNum.integer);
 			break;
 		case "downcase": v = new Text(toLower(s.toString())); break;
+		case "escape": v = new Text(htmlEscape(s.toString())); break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
