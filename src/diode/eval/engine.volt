@@ -46,6 +46,21 @@ public:
 			return argsink.toString();
 		}
 
+		//! Do a (non-divide) arithmetic operation. (plus, minus, etc).
+		fn arithmeticFilter(operation: dg(f64, f64) f64)
+		{
+			if (args.length != 1) {
+				handleError(format("expected 1 argument to '%s'", ident));
+			}
+			childNum := cast(Number)child;
+			argNum := cast(Number)args[0];
+			if (childNum is null || argNum is null) {
+				handleError(format("expected number arguments to %s filter", ident));
+			}
+			result := operation(childNum.value, argNum.value);
+			v = new Number(result, argNum.integer);
+		}
+
 		switch (ident) {
 		case "abs":
 			val := toDouble(s.toString());
@@ -121,28 +136,12 @@ public:
 			break;
 		case "lstrip": v = new Text(stripLeft(s.toString())); break;
 		case "minus":
-			if (args.length != 1) {
-				handleError("expected 1 argument to 'minus'");
-			}
-			childNum := cast(Number)child;
-			argNum := cast(Number)args[0];
-			if (childNum is null || argNum is null) {
-				handleError("expected number arguments to minus filter");
-			}
-			result := childNum.value - argNum.value;
-			v = new Number(result, argNum.integer);
+			fn doIt(a: f64, b: f64) f64 { return a - b; }
+			arithmeticFilter(doIt);
 			break;
 		case "modulo":
-			if (args.length != 1) {
-				handleError("expected 1 argument to 'modulo'");
-			}
-			childNum := cast(Number)child;
-			argNum := cast(Number)args[0];
-			if (childNum is null || argNum is null) {
-				handleError("expected number arguments to modulo filter");
-			}
-			result := childNum.value % argNum.value;
-			v = new Number(result, argNum.integer);
+			fn doIt(a: f64, b: f64) f64 { return a % b; }
+			arithmeticFilter(doIt);
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
