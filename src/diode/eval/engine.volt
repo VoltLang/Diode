@@ -67,6 +67,14 @@ public:
 			val := toDouble(s.toString());
 			v = new Number(ceil(val));
 			break;
+		case "default":
+			truthy := child.toBool(n);
+			if (!truthy) {
+				v = args[0];
+			} else {
+				v = child;
+			}
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();

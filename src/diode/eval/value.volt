@@ -130,6 +130,11 @@ public:
 	{
 		sink(text);
 	}
+
+	override fn toBool(n: ir.Node) bool
+	{
+		return text.length > 0;
+	}
 }
 
 class Array: Value
