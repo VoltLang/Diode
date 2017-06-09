@@ -158,8 +158,13 @@ public:
 
 	override fn ident(n: ir.Node, key: string) Value
 	{
-		if (key == "first" && vals.length > 0) {
+		if (vals.length == 0) {
+			return super.ident(n, key);
+		}
+		if (key == "first") {
 			return vals[0];
+		} else if (key == "last") {
+			return vals[$-1];
 		} else {
 			return super.ident(n, key);
 		}
