@@ -61,6 +61,23 @@ public:
 			v = new Number(result, argNum.integer);
 		}
 
+		fn replaceFirst(a: string, b: string)
+		{
+			str := s.toString();
+			i := str.indexOf(a);
+			if (i < 0) {
+				v = new Text(s.toString());
+			}
+			index := cast(size_t)i;
+			if (index+a.length >= str.length) {
+				index = str.length;
+			} else {
+				index = index + a.length;
+			}
+			str = replace(str[0 .. index], a, b) ~ str[index .. $];
+			v = new Text(str);
+		}
+
 		switch (ident) {
 		case "abs":
 			val := toDouble(s.toString());
@@ -157,26 +174,16 @@ public:
 			v = new Text(str.replace(arg, ""));
 			break;
 		case "remove_first":
-			arg := getArg(0);
-			str := s.toString();
-			i := str.indexOf(arg);
-			if (i < 0) {
-				v = new Text(s.toString());
-			}
-			index := cast(size_t)i;
-			if (index+arg.length >= str.length) {
-				index = str.length;
-			} else {
-				index = index + arg.length;
-			}
-			str = replace(str[0 .. index], arg, "") ~ str[index .. $];
-			v = new Text(str);
+			replaceFirst(getArg(0), "");
 			break;
 		case "replace":
 			arg1 := getArg(0);
 			arg2 := getArg(1);
 			str := s.toString();
 			v = new Text(str.replace(arg1, arg2));
+			break;
+		case "replace_first":
+			replaceFirst(getArg(0), getArg(1));
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
