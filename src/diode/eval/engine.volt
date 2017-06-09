@@ -9,7 +9,7 @@ import watt.math : ceil, floor;
 import watt.text.sink;
 import watt.text.string : split, join, replace, stripLeft, indexOf, stripRight, strip;
 import watt.text.format : format;
-import watt.text.utf : encode, decode;
+import watt.text.utf : encode, decode, count;
 import watt.text.ascii : isASCII, asciiToUpper = toUpper;
 import watt.text.html : htmlEscape;
 
@@ -201,6 +201,31 @@ public:
 		case "times":
 			fn doIt(a: f64, b: f64) f64 { return a * b; }
 			arithmeticFilter(doIt);
+			break;
+		case "truncate":
+			if (args.length < 1) {
+				handleError("expected 1 or 2 arguments to truncate");
+			}
+			num := cast(Number)args[0];
+			if (num is null) {
+				handleError("expected first argument to truncate to be a number");
+			}
+			chars := cast(size_t)num.value;
+			ellipsis := "...";
+			if (args.length > 1) {
+				ellipsis = getArg(1);
+			}
+			str := s.toString();
+			if (count(str) <= chars) {
+				v = new Text(str);
+				break;
+			}
+			chars -= ellipsis.length;
+			i: size_t;
+			while (i < chars) {
+				decode(str, ref i);
+			}
+			v = new Text(str[0 .. i] ~ ellipsis);
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
