@@ -48,6 +48,10 @@ public:
 			val := toDouble(s.toString());
 			v = new Number(val < 0 ? val * -1 : val);
 			break;
+		case "append":
+			arg := getFirstArg();
+			v = new Text(s.toString() ~ arg);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
