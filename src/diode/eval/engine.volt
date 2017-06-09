@@ -33,6 +33,16 @@ public:
 		s: StringSink;
 		child.toText(n, s.sink);
 
+		fn getFirstArg() string
+		{
+			if (args.length != 1) {
+				handleError(format("expected 1 argument to '%s' filter, not %s", ident, args.length));
+			}
+			argsink: StringSink;
+			args[0].toText(n, argsink.sink);
+			return argsink.toString();
+		}
+
 		switch (ident) {
 		case "abs":
 			val := toDouble(s.toString());
@@ -40,19 +50,15 @@ public:
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
-			if (args.length != 1) {
-				handleError(format("expected 1 argument to 'split' filter, not %s", args.length));
-			}
-			argsink: StringSink;
-			args[0].toText(n, argsink.sink);
+			arg := getFirstArg();
 			pieces: string[];
-			if (argsink.toString() == "") {
+			if (arg == "") {
 				pieces = new string[](s.toString().length);
 				foreach (i, c: dchar; s.toString()) {
 					pieces[i] = encode(c);
 				}
 			} else {
-				pieces  = s.toString().split(argsink.toString());
+				pieces  = s.toString().split(arg);
 			}
 			values := new Value[](pieces.length);
 			foreach (i, piece; pieces) {
@@ -69,11 +75,7 @@ public:
 			v = new Array(newValues);
 			break;
 		case "join":
-			if (args.length != 1) {
-				handleError(format("expected 1 argument to 'join' filter, not %s", args.length));
-			}
-			argsink: StringSink;
-			args[0].toText(n, argsink.sink);
+			arg := getFirstArg();
 			children := child.toArray(n);
 			argStrings := new string[](children.length);
 			foreach (i, c; children) {
@@ -81,7 +83,7 @@ public:
 				c.toText(n, cs.sink);
 				argStrings[i] = cs.toString();
 			}
-			v = new Text(join(argStrings, argsink.toString()));
+			v = new Text(join(argStrings, arg));
 			break;
 		default: handleError("unknown filter " ~ ident);
 		}
