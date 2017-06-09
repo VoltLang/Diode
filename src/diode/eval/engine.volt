@@ -7,7 +7,7 @@ import core.exception;
 import watt.conv : toUpper, toDouble, toLower;
 import watt.math : ceil, floor;
 import watt.text.sink;
-import watt.text.string : split, join, replace;
+import watt.text.string : split, join, replace, stripLeft;
 import watt.text.format : format;
 import watt.text.utf : encode, decode;
 import watt.text.ascii : isASCII, asciiToUpper = toUpper;
@@ -119,6 +119,7 @@ public:
 			}
 			v = new Text(join(argStrings, arg));
 			break;
+		case "lstrip": v = new Text(stripLeft(s.toString())); break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
