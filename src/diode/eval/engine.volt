@@ -151,6 +151,11 @@ public:
 			arg := getFirstArg();
 			v = new Text(arg ~ s.toString());
 			break;
+		case "remove":
+			arg := getFirstArg();
+			str := s.toString();
+			v = new Text(str.replace(arg, ""));
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
