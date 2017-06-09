@@ -2,16 +2,18 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.parser.parser;
 
+import watt.conv : toDouble;
 import watt.text.source : Source;
 import watt.text.utf : encode;
 import watt.text.sink : StringSink;
-import watt.text.ascii : isAlpha, isWhite;
+import watt.text.ascii : isAlpha, isWhite, isDigit;
 import watt.text.string : stripRight;
 import watt.text.format;
 
 import ir = diode.ir;
 import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
-	bAccess, bIdent, bFilter, bStringLiteral, bBoolLiteral, bClosingTagNode;
+	bAccess, bIdent, bFilter, bStringLiteral, bBoolLiteral, bClosingTagNode,
+	bNumberLiteral;
 import diode.ir.sink : NodeSink;
 
 import diode.errors;
@@ -286,6 +288,10 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 		if (err := p.parseStringLiteral(out exp)) {
 			return err;
 		}
+	} else if (p.src.front == '-' || p.src.front == '.' || isDigit(p.src.front)) {
+		if (err := p.parseNumberLiteral(out exp)) {
+			return err;
+		}
 	} else {
 		p.eatWord();
 		word := p.getSink();
@@ -332,6 +338,22 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 		p.src.skipWhitespace();
 	}
 
+	return Status.Ok;
+}
+
+fn parseNumberLiteral(p: Parser, out exp: ir.Exp) Status
+{
+	if (p.src.front == '-') {
+		p.sink.sink("-");
+		p.src.popFront();
+	}
+	while (!p.src.eof && (isDigit(p.src.front) || p.src.front == '.')) {
+		p.sink.sink(encode(p.src.front));
+		p.src.popFront();
+	}
+
+	val := toDouble(p.getSink());
+	exp = bNumberLiteral(val);
 	return Status.Ok;
 }
 

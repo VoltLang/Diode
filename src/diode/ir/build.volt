@@ -60,6 +60,11 @@ fn bStringLiteral(val: string) ir.StringLiteral
 	return new ir.StringLiteral(val);
 }
 
+fn bNumberLiteral(val: f64) ir.NumberLiteral
+{
+	return new ir.NumberLiteral(val);
+}
+
 fn bBoolLiteral(val: bool) ir.BoolLiteral
 {
 	return new ir.BoolLiteral(val);

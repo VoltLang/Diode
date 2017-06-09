@@ -170,6 +170,27 @@ public:
 }
 
 /*!
+ * A literal for a number.
+ */
+class NumberLiteral : Exp
+{
+public:
+	val: f64;
+
+
+public:
+	this(val: f64)
+	{
+		this.val = val;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		return filterParent(v.visit(this, sink));
+	}
+}
+
+/*!
  * Lookup symbol into child expression.
  */
 class Access : Exp
@@ -477,6 +498,7 @@ abstract class Visitor
 	abstract fn visit(Ident, Sink) Status;
 	abstract fn visit(StringLiteral, Sink) Status;
 	abstract fn visit(BoolLiteral, Sink) Status;
+	abstract fn visit(NumberLiteral, Sink) Status;
 }
 
 /*!

@@ -268,6 +268,12 @@ public:
 		return Continue;
 	}
 
+	override fn visit(p: ir.NumberLiteral, sink: Sink) Status
+	{
+		v = new Number(p.val);
+		return Continue;
+	}
+
 
 	/*
 	 *
