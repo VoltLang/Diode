@@ -120,6 +120,18 @@ public:
 			v = new Text(join(argStrings, arg));
 			break;
 		case "lstrip": v = new Text(stripLeft(s.toString())); break;
+		case "minus":
+			if (args.length != 1) {
+				handleError("expected 1 argument to 'minus'");
+			}
+			childNum := cast(Number)child;
+			argNum := cast(Number)args[0];
+			if (childNum is null || argNum is null) {
+				handleError("expected number arguments to minus filter");
+			}
+			result := childNum.value - argNum.value;
+			v = new Number(result, argNum.integer);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
