@@ -4,7 +4,7 @@ module diode.eval.engine;
 
 import core.exception;
 
-import watt.conv : toUpper, toDouble;
+import watt.conv : toUpper, toDouble, toLower;
 import watt.math : ceil, floor;
 import watt.text.sink;
 import watt.text.string : split, join;
@@ -93,6 +93,7 @@ public:
 			}
 			v = new Number(result, argNum.integer);
 			break;
+		case "downcase": v = new Text(toLower(s.toString())); break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
