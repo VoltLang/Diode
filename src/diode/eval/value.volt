@@ -155,6 +155,15 @@ public:
 	{
 		return vals;
 	}
+
+	override fn ident(n: ir.Node, key: string) Value
+	{
+		if (key == "first" && vals.length > 0) {
+			return vals[0];
+		} else {
+			return super.ident(n, key);
+		}
+	}
 }
 
 class Set: Value
