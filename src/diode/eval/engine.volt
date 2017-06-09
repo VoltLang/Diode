@@ -5,6 +5,7 @@ module diode.eval.engine;
 import core.exception;
 
 import watt.conv : toUpper, toDouble;
+import watt.math : ceil;
 import watt.text.sink;
 import watt.text.string : split, join;
 import watt.text.format : format;
@@ -61,6 +62,10 @@ public:
 				str = [cast(immutable(char))asciiToUpper(str[0])] ~ str[1 .. $];
 			}
 			v = new Text(str);
+			break;
+		case "ceil":
+			val := toDouble(s.toString());
+			v = new Number(ceil(val));
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
