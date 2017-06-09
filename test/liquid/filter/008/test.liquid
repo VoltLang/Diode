@@ -1,0 +1,13 @@
+######
+{{ product_pric | default: 2.99 }}
+{% assign product_price = 4.99 %}
+{{ product_price | default: 2.99 }}
+{% assign product_prices = "" %}
+{{ product_prices | default: 2.99 }}
+######
+2.99
+
+4.99
+
+2.99
+######
