@@ -132,6 +132,18 @@ public:
 			result := childNum.value - argNum.value;
 			v = new Number(result, argNum.integer);
 			break;
+		case "modulo":
+			if (args.length != 1) {
+				handleError("expected 1 argument to 'modulo'");
+			}
+			childNum := cast(Number)child;
+			argNum := cast(Number)args[0];
+			if (childNum is null || argNum is null) {
+				handleError("expected number arguments to modulo filter");
+			}
+			result := childNum.value % argNum.value;
+			v = new Number(result, argNum.integer);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
