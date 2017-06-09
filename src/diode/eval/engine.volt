@@ -7,7 +7,7 @@ import core.exception;
 import watt.conv : toUpper, toDouble, toLower;
 import watt.math : ceil, floor;
 import watt.text.sink;
-import watt.text.string : split, join;
+import watt.text.string : split, join, replace;
 import watt.text.format : format;
 import watt.text.utf : encode, decode;
 import watt.text.ascii : isASCII, asciiToUpper = toUpper;
@@ -96,6 +96,14 @@ public:
 			break;
 		case "downcase": v = new Text(toLower(s.toString())); break;
 		case "escape": v = new Text(htmlEscape(s.toString())); break;
+		case "escape_once": 
+			str := s.toString();
+			str = str.replace("&#39;", "\'");
+			str = str.replace("&quot;", `"`);
+			str = str.replace("&lt;", "<");
+			str = str.replace("&gt;", ">");
+			str = str.replace("&amp;", "&");
+			v = new Text(htmlEscape(str)); break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
