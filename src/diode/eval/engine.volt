@@ -4,7 +4,7 @@ module diode.eval.engine;
 
 import core.exception;
 
-import watt.conv : toUpper;
+import watt.conv : toUpper, toDouble;
 import watt.text.sink;
 import watt.text.string : split, join;
 import watt.text.format : format;
@@ -34,6 +34,10 @@ public:
 		child.toText(n, s.sink);
 
 		switch (ident) {
+		case "abs":
+			val := toDouble(s.toString());
+			v = new Number(val < 0 ? val * -1 : val);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			if (args.length != 1) {
