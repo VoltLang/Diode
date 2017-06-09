@@ -1,0 +1,9 @@
+######
+{{ "apples, oranges, and bananas" | prepend: "Some fruit: " }}
+{% assign url = "liquidmarkup.com" %}
+{{ "/index.html" | prepend: url }}
+######
+Some fruit: apples, oranges, and bananas
+
+liquidmarkup.com/index.html
+######
