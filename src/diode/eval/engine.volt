@@ -185,6 +185,14 @@ public:
 		case "replace_first":
 			replaceFirst(getArg(0), getArg(1));
 			break;
+		case "reverse":
+			values := child.toArray(n);
+			newValues := new Value[](values.length);
+			foreach (i, val; values) {
+				newValues[$ - (i+1)] = val;
+			}
+			v = new Array(newValues);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getArg(0);
@@ -202,14 +210,6 @@ public:
 				values[i] = new Text(pieces[i]);
 			}
 			v = new Array(values);
-			break;
-		case "reverse":
-			values := child.toArray(n);
-			newValues := new Value[](values.length);
-			foreach (i, val; values) {
-				newValues[$ - (i+1)] = val;
-			}
-			v = new Array(newValues);
 			break;
 		default: handleError("unknown filter " ~ ident);
 		}
