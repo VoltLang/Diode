@@ -8,7 +8,8 @@ import watt.conv : toUpper, toDouble;
 import watt.text.sink;
 import watt.text.string : split, join;
 import watt.text.format : format;
-import watt.text.utf : encode;
+import watt.text.utf : encode, decode;
+import watt.text.ascii : isASCII, asciiToUpper = toUpper;
 
 import ir = diode.ir;
 import diode.eval.value;
@@ -51,6 +52,15 @@ public:
 		case "append":
 			arg := getFirstArg();
 			v = new Text(s.toString() ~ arg);
+			break;
+		case "capitalize":
+			str := s.toString();
+			i: size_t;
+			firstc := decode(str, ref i);
+			if (isASCII(firstc)) {
+				str = [cast(immutable(char))asciiToUpper(str[0])] ~ str[1 .. $];
+			}
+			v = new Text(str);
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
