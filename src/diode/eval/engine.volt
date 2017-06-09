@@ -7,7 +7,7 @@ import core.exception;
 import watt.conv : toUpper, toDouble, toLower;
 import watt.math : ceil, floor;
 import watt.text.sink;
-import watt.text.string : split, join, replace, stripLeft;
+import watt.text.string : split, join, replace, stripLeft, indexOf;
 import watt.text.format : format;
 import watt.text.utf : encode, decode;
 import watt.text.ascii : isASCII, asciiToUpper = toUpper;
@@ -36,13 +36,13 @@ public:
 		s: StringSink;
 		child.toText(n, s.sink);
 
-		fn getFirstArg() string
+		fn getArg(i: size_t) string
 		{
-			if (args.length != 1) {
-				handleError(format("expected 1 argument to '%s' filter, not %s", ident, args.length));
+			if (args.length <= i) {
+				handleError(format("expected at least %s argument to '%s' filter.", i+1, ident));
 			}
 			argsink: StringSink;
-			args[0].toText(n, argsink.sink);
+			args[i].toText(n, argsink.sink);
 			return argsink.toString();
 		}
 
@@ -67,7 +67,7 @@ public:
 			v = new Number(val < 0 ? val * -1 : val, floor(val) == val);
 			break;
 		case "append":
-			arg := getFirstArg();
+			arg := getArg(0);
 			v = new Text(s.toString() ~ arg);
 			break;
 		case "capitalize":
@@ -124,7 +124,7 @@ public:
 			v = new Number(floor(val), true);
 			break;
 		case "join":
-			arg := getFirstArg();
+			arg := getArg(0);
 			children := child.toArray(n);
 			argStrings := new string[](children.length);
 			foreach (i, c; children) {
@@ -148,17 +148,39 @@ public:
 			arithmeticFilter(doIt);
 			break;
 		case "prepend":
-			arg := getFirstArg();
+			arg := getArg(0);
 			v = new Text(arg ~ s.toString());
 			break;
 		case "remove":
-			arg := getFirstArg();
+			arg := getArg(0);
 			str := s.toString();
 			v = new Text(str.replace(arg, ""));
 			break;
+		case "remove_first":
+			arg := getArg(0);
+			str := s.toString();
+			i := str.indexOf(arg);
+			if (i < 0) {
+				v = new Text(s.toString());
+			}
+			index := cast(size_t)i;
+			if (index+arg.length >= str.length) {
+				index = str.length;
+			} else {
+				index = index + arg.length;
+			}
+			str = replace(str[0 .. index], arg, "") ~ str[index .. $];
+			v = new Text(str);
+			break;
+		case "replace":
+			arg1 := getArg(0);
+			arg2 := getArg(1);
+			str := s.toString();
+			v = new Text(str.replace(arg1, arg2));
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
-			arg := getFirstArg();
+			arg := getArg(0);
 			pieces: string[];
 			if (arg == "") {
 				pieces = new string[](s.toString().length);
