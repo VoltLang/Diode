@@ -43,6 +43,11 @@ public:
 	{
 		return new Nil();
 	}
+
+	fn opEquals(other: Value) bool
+	{
+		return false;
+	}
 }
 
 class Nil: Value
@@ -100,6 +105,18 @@ public:
 		}
 		sink(s);
 	}
+
+	override fn opEquals(other: Value) bool
+	{
+		otherNum := cast(Number)other;
+		if (otherNum is null) {
+			return false;
+		}
+		if (integer && otherNum.integer) {
+			return cast(size_t)value == cast(size_t)otherNum.value;
+		}
+		return value == otherNum.value;
+	}
 }
 
 class Bool: Value
@@ -122,6 +139,15 @@ public:
 	override fn toBool(n: ir.Node) bool
 	{
 		return value;
+	}
+
+	override fn opEquals(other: Value) bool
+	{
+		otherBool := cast(Bool)other;
+		if (otherBool is null) {
+			return false;
+		}
+		return value == otherBool.value;
 	}
 }
 
@@ -150,6 +176,15 @@ public:
 	override fn toSize(n: ir.Node) Value
 	{
 		return new Number(cast(f64)count(text), true);
+	}
+
+	override fn opEquals(other: Value) bool
+	{
+		otherText := cast(Text)other;
+		if (otherText is null) {
+			return false;
+		}
+		return text == otherText.text;
 	}
 }
 

@@ -256,6 +256,29 @@ public:
 			outsink.sink(ellipsis);
 			v = new Text(outsink.toString());
 			break;
+		case "uniq":
+			// Not a fast way of doing this.
+			arr := cast(Array)child;
+			if (arr is null) {
+				handleError("expected array child to uniq filter");
+			}
+			outvals: Value[];
+			fn exists(v: Value) bool
+			{
+				foreach (outval; outvals) {
+					if (v == outval) {
+						return true;
+					}
+				}
+				return false;
+			}
+			foreach (val; arr.vals) {
+				if (!exists(val)) {
+					outvals ~= val;
+				}
+			}
+			v = new Array(outvals);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getArg(0);
