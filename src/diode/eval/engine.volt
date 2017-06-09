@@ -104,6 +104,10 @@ public:
 			str = str.replace("&gt;", ">");
 			str = str.replace("&amp;", "&");
 			v = new Text(htmlEscape(str)); break;
+		case "floor":
+			val := toDouble(s.toString());
+			v = new Number(floor(val), true);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
