@@ -143,6 +143,10 @@ public:
 			fn doIt(a: f64, b: f64) f64 { return a % b; }
 			arithmeticFilter(doIt);
 			break;
+		case "plus":
+			fn doIt(a: f64, b: f64) f64 { return a + b; }
+			arithmeticFilter(doIt);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
