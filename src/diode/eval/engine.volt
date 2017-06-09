@@ -108,6 +108,17 @@ public:
 			val := toDouble(s.toString());
 			v = new Number(floor(val), true);
 			break;
+		case "join":
+			arg := getFirstArg();
+			children := child.toArray(n);
+			argStrings := new string[](children.length);
+			foreach (i, c; children) {
+				cs: StringSink;
+				c.toText(n, cs.sink);
+				argStrings[i] = cs.toString();
+			}
+			v = new Text(join(argStrings, arg));
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
@@ -133,17 +144,6 @@ public:
 				newValues[$ - (i+1)] = val;
 			}
 			v = new Array(newValues);
-			break;
-		case "join":
-			arg := getFirstArg();
-			children := child.toArray(n);
-			argStrings := new string[](children.length);
-			foreach (i, c; children) {
-				cs: StringSink;
-				c.toText(n, cs.sink);
-				argStrings[i] = cs.toString();
-			}
-			v = new Text(join(argStrings, arg));
 			break;
 		default: handleError("unknown filter " ~ ident);
 		}
