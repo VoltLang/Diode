@@ -60,9 +60,9 @@ fn bStringLiteral(val: string) ir.StringLiteral
 	return new ir.StringLiteral(val);
 }
 
-fn bNumberLiteral(val: f64) ir.NumberLiteral
+fn bNumberLiteral(val: f64, integer: bool) ir.NumberLiteral
 {
-	return new ir.NumberLiteral(val);
+	return new ir.NumberLiteral(val, integer);
 }
 
 fn bBoolLiteral(val: bool) ir.BoolLiteral

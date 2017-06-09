@@ -5,7 +5,7 @@ module diode.eval.engine;
 import core.exception;
 
 import watt.conv : toUpper, toDouble;
-import watt.math : ceil;
+import watt.math : ceil, floor;
 import watt.text.sink;
 import watt.text.string : split, join;
 import watt.text.format : format;
@@ -48,7 +48,7 @@ public:
 		switch (ident) {
 		case "abs":
 			val := toDouble(s.toString());
-			v = new Number(val < 0 ? val * -1 : val);
+			v = new Number(val < 0 ? val * -1 : val, floor(val) == val);
 			break;
 		case "append":
 			arg := getFirstArg();
@@ -65,7 +65,7 @@ public:
 			break;
 		case "ceil":
 			val := toDouble(s.toString());
-			v = new Number(ceil(val));
+			v = new Number(ceil(val), true);
 			break;
 		case "default":
 			truthy := child.toBool(n);
@@ -74,6 +74,24 @@ public:
 			} else {
 				v = child;
 			}
+			break;
+		case "divided_by":
+			if (args.length != 1) {
+				handleError("expected 1 argument to 'divided_by'");
+			}
+			childNum := cast(Number)child;
+			argNum := cast(Number)args[0];
+			if (childNum is null || argNum is null) {
+				handleError("expected number arguments to divided_by filter");
+			}
+			if (argNum.integer && cast(i32)argNum.value == 0) {
+				handleError("divide by zero");
+			}
+			result := childNum.value / argNum.value;
+			if (argNum.integer) {
+				result = cast(f64)cast(i32)result;
+			}
+			v = new Number(result, argNum.integer);
 			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
@@ -303,7 +321,7 @@ public:
 
 	override fn visit(p: ir.NumberLiteral, sink: Sink) Status
 	{
-		v = new Number(p.val);
+		v = new Number(p.val, p.integer);
 		return Continue;
 	}
 

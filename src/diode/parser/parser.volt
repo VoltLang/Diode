@@ -347,13 +347,17 @@ fn parseNumberLiteral(p: Parser, out exp: ir.Exp) Status
 		p.sink.sink("-");
 		p.src.popFront();
 	}
+	integer := true;
 	while (!p.src.eof && (isDigit(p.src.front) || p.src.front == '.')) {
+		if (p.src.front == '.') {
+			integer = false;
+		}
 		p.sink.sink(encode(p.src.front));
 		p.src.popFront();
 	}
 
 	val := toDouble(p.getSink());
-	exp = bNumberLiteral(val);
+	exp = bNumberLiteral(val, integer);
 	return Status.Ok;
 }
 

@@ -49,12 +49,14 @@ class Number: Value
 {
 public:
 	value: f64;
+	integer: bool;
 
 
 public:
-	this(value: f64)
+	this(value: f64, integer: bool)
 	{
 		this.value = value;
+		this.integer = integer;
 	}
 
 	override fn toText(n: ir.Node, sink: Sink)

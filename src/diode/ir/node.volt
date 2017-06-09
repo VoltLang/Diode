@@ -176,12 +176,14 @@ class NumberLiteral : Exp
 {
 public:
 	val: f64;
+	integer: bool;
 
 
 public:
-	this(val: f64)
+	this(val: f64, integer: bool)
 	{
 		this.val = val;
+		this.integer = integer;
 	}
 
 	override fn accept(v: Visitor, sink: Sink) Status
