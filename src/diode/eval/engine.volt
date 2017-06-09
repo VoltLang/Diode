@@ -194,6 +194,9 @@ public:
 			v = new Array(newValues);
 			break;
 		case "rstrip": v = new Text(stripRight(s.toString())); break;
+		case "size":
+			v = child.toSize(n);
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getArg(0);

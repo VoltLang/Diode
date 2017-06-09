@@ -4,6 +4,7 @@ module diode.eval.value;
 
 import watt.text.format : format;
 import watt.text.string : indexOf;
+import watt.text.utf : count;
 
 import ir = diode.ir;
 import diode.errors;
@@ -17,6 +18,9 @@ abstract class Value
 public:
 	fn ident(n: ir.Node, key: string) Value
 	{
+		if (key == "size") {
+			return toSize(n);
+		}
 		return new Nil();
 	}
 
@@ -33,6 +37,11 @@ public:
 	fn toBool(n: ir.Node) bool
 	{
 		return true;
+	}
+
+	fn toSize(n: ir.Node) Value
+	{
+		return new Nil();
 	}
 }
 
@@ -137,6 +146,11 @@ public:
 	{
 		return text.length > 0;
 	}
+
+	override fn toSize(n: ir.Node) Value
+	{
+		return new Number(cast(f64)count(text), true);
+	}
 }
 
 class Array: Value
@@ -154,6 +168,11 @@ public:
 	override fn toArray(n: ir.Node) Value[]
 	{
 		return vals;
+	}
+
+	override fn toSize(n: ir.Node) Value
+	{
+		return new Number(cast(f64)vals.length, true);
 	}
 
 	override fn ident(n: ir.Node, key: string) Value
