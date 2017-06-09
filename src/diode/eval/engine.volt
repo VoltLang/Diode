@@ -227,6 +227,35 @@ public:
 			}
 			v = new Text(str[0 .. i] ~ ellipsis);
 			break;
+		case "truncatewords":
+			if (args.length < 1) {
+				handleError("expected 1 or 2 arguments to truncatewords");
+			}
+			num := cast(Number)args[0];
+			if (num is null) {
+				handleError("expected first argument to truncatewords to be a number");
+			}
+			wordcount := cast(size_t)num.value;
+			ellipsis := "...";
+			if (args.length > 1) {
+				ellipsis = getArg(1);
+			}
+			str := s.toString();
+			words := str.split(" ");
+			if (words.length <= wordcount) {
+				v = new Text(str);
+				break;
+			}
+			outsink: StringSink;
+			foreach (i, word; words[0 .. wordcount]) {
+				outsink.sink(word);
+				if (i < wordcount - 1) {
+					outsink.sink(" ");
+				}
+			}
+			outsink.sink(ellipsis);
+			v = new Text(outsink.toString());
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getArg(0);
