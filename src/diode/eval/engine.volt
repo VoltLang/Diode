@@ -147,6 +147,10 @@ public:
 			fn doIt(a: f64, b: f64) f64 { return a + b; }
 			arithmeticFilter(doIt);
 			break;
+		case "prepend":
+			arg := getFirstArg();
+			v = new Text(arg ~ s.toString());
+			break;
 		case "upper": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getFirstArg();
