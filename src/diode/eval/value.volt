@@ -41,7 +41,7 @@ public:
 
 	fn toSize(n: ir.Node) Value
 	{
-		return new Nil();
+		return new Number(0.0, true);
 	}
 
 	fn opEquals(other: Value) bool
