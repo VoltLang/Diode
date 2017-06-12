@@ -1,0 +1,11 @@
+######
+{% assign a = "1, 2, 3" | split: ", " -%}
+{{ a | size }}
+{% assign b = "" | split: ", " -%}
+{{ b | size }}
+{{ nil | size }}
+######
+3
+0
+0
+######
