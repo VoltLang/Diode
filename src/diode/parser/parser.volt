@@ -6,7 +6,7 @@ import watt.conv : toDouble;
 import watt.text.source : Source;
 import watt.text.utf : encode;
 import watt.text.sink : StringSink;
-import watt.text.ascii : isAlpha, isWhite, isDigit;
+import watt.text.ascii : isAlpha, isAlphaNum, isWhite, isDigit;
 import watt.text.string : stripRight;
 import watt.text.format;
 
@@ -58,16 +58,6 @@ public:
 		this.src = src;
 	}
 
-	//! Parse a word (a chain of letters) into sink.
-	fn eatWord()
-	{
-		while (!src.eof && (isAlpha(src.front) || src.front == '_')) {
-			dchar c = src.front;
-			src.popFront();
-			sink.sink(encode(c));
-		}
-	}
-
 	//! Given a state in which we expect a two char string, skip it.
 	fn eatSequence(s: string) Status
 	{
@@ -77,6 +67,16 @@ public:
 		}
 		src.popFrontN(2);
 		return Status.Ok;
+	}
+
+	//! Parse an identifier name into sink.
+	fn eatIdent()
+	{
+		while (!src.eof && isIdentName(src.front)) {
+			dchar c = src.front;
+			src.popFront();
+			sink.sink(encode(c));
+		}
 	}
 
 	//! Parse a include name into sink.
@@ -284,7 +284,7 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 {
 	p.src.skipWhitespace();
 
-	if (p.src.front == '"') {
+	if (p.src.front == '"' || p.src.front == '\'') {
 		if (err := p.parseStringLiteral(out exp)) {
 			return err;
 		}
@@ -293,7 +293,7 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 			return err;
 		}
 	} else {
-		p.eatWord();
+		p.eatIdent();
 		word := p.getSink();
 		if (word.length == 0) {
 			return p.errorExpectedIdentifier();
@@ -363,8 +363,9 @@ fn parseNumberLiteral(p: Parser, out exp: ir.Exp) Status
 
 fn parseStringLiteral(p: Parser, out exp: ir.Exp) Status
 {
+	terminator := p.src.front;
 	p.src.popFront();
-	while (!p.src.eof && p.src.front != '"') {
+	while (!p.src.eof && p.src.front != terminator) {
 		p.sink.sink(encode(p.src.front));
 		p.src.popFront();
 	}
@@ -602,7 +603,7 @@ fn parseFor(p: Parser, out node: ir.Node) Status
 
 	// for name 'in' exp
 	p.src.skipWhitespace();
-	p.eatWord();
+	p.eatIdent();
 	inWord := p.getSink();
 	if (inWord != "in") {
 		return p.errorExpected("in", inWord);
@@ -657,7 +658,7 @@ fn parseComment(p: Parser) Status
 
 		// We are very generous here with what we allow.
 		p.src.skipWhitespace();
-		p.eatWord();
+		p.eatIdent();
 		word := p.getSink();
 		if (word != "endcomment") {
 			continue;
@@ -681,13 +682,13 @@ fn parseComment(p: Parser) Status
 /*!
  * This function parses a ident.
  *
- * Include name must start with a alpha or '_' and may contain alpha and '_'.
+ * Include name must start with a alpha or '_' and may contain alpha, '_', or -.
  */
 fn parseIdent(p: Parser, out name: string) Status
 {
 	p.src.skipWhitespace();
 
-	p.eatWord();
+	p.eatIdent();
 	name = p.getSink();
 	if (name.length == 0) {
 		return p.errorExpectedIdentifier();
@@ -815,4 +816,10 @@ fn ifAndSkip(p: Parser, c: dchar) bool
 fn isIncludeName(c: dchar) bool
 {
 	return isAlpha(c) || c == '_' || c == '/' || c == '.';
+}
+
+//! Is the given char a valid character for a variable name.
+fn isIdentName(c: dchar) bool
+{
+	return isAlphaNum(c) || c == '_' || c == '-';
 }
