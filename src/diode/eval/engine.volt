@@ -279,7 +279,7 @@ public:
 			}
 			v = new Array(outvals);
 			break;
-		case "upper": v = new Text(toUpper(s.toString())); break;
+		case "upper", "upcase": v = new Text(toUpper(s.toString())); break;
 		case "split":
 			arg := getArg(0);
 			pieces: string[];
