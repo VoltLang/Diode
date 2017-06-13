@@ -280,27 +280,30 @@ public:
 			a, b: i32;
 			a = getIntegerArg(0);
 			if (args.length > 1) {
-				b = getIntegerArg(1) + 1;
+				b = getIntegerArg(1) + a;
 			} else {
 				b = a + 1;
 			}
 			if (a < 0) {
 				a = cast(i32)str.length + a;
-				b = cast(i32)str.length - b + 2;
+				b += cast(i32)str.length;
 			}
 			i: size_t;
 			acount := 0;
-			while (acount < a) {
+			while (acount < a && i < str.length) {
 				decode(str, ref i);
 				acount++;
 			}
 			j := i;
 			bcount := acount;
-			while (bcount < b) {
+			while (bcount < b && j < str.length) {
 				decode(str, ref j);
 				bcount++;
 			}
-			if (i >= str.length || j >/* not >= */ str.length) {
+			if (j > str.length) {
+				j = str.length;
+			}
+			if (i >= str.length) {
 				v = new Nil();
 			} else {
 				v = new Text(str[i .. j]);
