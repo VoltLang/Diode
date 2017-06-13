@@ -29,7 +29,10 @@ round
 rstrip
 size
 slice
+sort
+sort_natural
 strip
+strip_newlines
 times
 truncate
 truncatewords
@@ -38,7 +41,4 @@ uniq
 # Not Implemented Yet
 
 date ("well formatted date string" is in an unknown format)
-sort
-sort_natural
 strip_html
-strip_newlines

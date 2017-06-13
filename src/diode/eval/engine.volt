@@ -337,6 +337,12 @@ public:
 			v = new Array(arr);
 			break;
 		case "strip": v = new Text(strip(s.toString())); break;
+		case "strip_newlines":
+			str := s.toString();
+			str = str.replace("\r\n", "");
+			str = str.replace("\n", "");
+			v = new Text(str);
+			break;
 		case "times":
 			fn doIt(a: f64, b: f64) f64 { return a * b; }
 			arithmeticFilter(doIt);
@@ -452,6 +458,11 @@ public:
 				}
 			}
 			v = new Array(outvals);
+			break;
+		case "TEST_replace_NL_with_newline":
+			str := s.toString();
+			str = str.replace("NL", "\n");
+			v = new Text(str);
 			break;
 		}
 	}
