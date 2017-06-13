@@ -7,7 +7,7 @@ import core.exception;
 import core.c.time : strftime, gmtime, time_t, tm, time;
 
 import watt.conv : toUpper, toDouble, toLower, toStringz;
-import watt.math : ceil, floor;
+import watt.math : ceil, floor, round;
 import watt.text.sink;
 import watt.text.string : split, join, replace, stripLeft, indexOf, stripRight, strip;
 import watt.text.format : format;
@@ -244,6 +244,20 @@ public:
 				newValues[$ - (i+1)] = val;
 			}
 			v = new Array(newValues);
+			break;
+		case "round":
+			str := s.toString();
+			if (args.length != 1) {
+				v = new Number(round(toDouble(str)), true);
+			} else {
+				arg := cast(Number)args[0];
+				if (arg is null || !arg.integer) {
+					v = new Nil();
+					break;
+				}
+				argstr := getArg(0);
+				v = new Number(toDouble(format(format("%%.%sf", argstr), toDouble(str))), false);
+			}
 			break;
 		case "rstrip": v = new Text(stripRight(s.toString())); break;
 		case "size":
