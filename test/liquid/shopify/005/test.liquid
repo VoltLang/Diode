@@ -1,0 +1,25 @@
+######
+{{ "foobar" | slice: 1, 3 }}
+{{ "foobar" | slice: 1, 1000 }}
+.{{ "foobar" | slice: 1, 0 }}.
+{{ "foobar" | slice: 1, 1 }}
+{{ "foobar" | slice: 3, 3 }}
+{{ "foobar" | slice: -2, 2 }}
+{{ "foobar" | slice: -2, 1000 }}
+{{ "foobar" | slice: -1 }}
+.{{ nil | slice: 0 }}.
+.{{ "foobar" | slice: 100, 10 }}.
+.{{ "foobar" | slice: -100, 10 }}.
+######
+oob
+oobar
+..
+o
+bar
+ar
+ar
+r
+..
+..
+..
+######
