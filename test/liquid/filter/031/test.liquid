@@ -1,0 +1,21 @@
+######
+{% assign a = "apple, banana, peach" | split: ", " -%}
+{% for e in a -%}
+	{{ e }}
+{% endfor -%}
+{% assign b = a | map: "size" -%}
+{% for e in b -%}
+	{{ e | plus: 1 }}
+{% endfor -%}
+{% assign c = nil | map: "size" -%}
+{% for e in c -%}
+	{{ e }}
+{% endfor -%}
+######
+apple
+banana
+peach
+6
+7
+6
+######
