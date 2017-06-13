@@ -100,6 +100,18 @@ public:
 			val := toDouble(s.toString());
 			v = new Number(ceil(val), true);
 			break;
+		case "compact":
+			arr := child.toArray(n);
+			outvals: Value[];
+			foreach (val; arr) {
+				asNil := cast(Nil)val;
+				if (asNil !is null) {
+					continue;
+				}
+				outvals ~= val;
+			}
+			v = new Array(outvals);
+			break;
 		case "default":
 			truthy := child.toBool(n);
 			if (!truthy) {
@@ -306,7 +318,23 @@ public:
 			}
 			v = new Array(values);
 			break;
-		default: handleError("unknown filter " ~ ident);
+		default: handleError("unknown filter " ~ ident); assert(false);
+		/* These filters are used in testing. */
+		case "TEST_replace_empty_with_nil":
+			// A simple way of testing arrays with nil values interspersed.
+			arr := child.toArray(n);
+			outvals := new Value[](arr.length);
+			foreach (i, val; arr) {
+				ss: StringSink;
+				val.toText(n, ss.sink);
+				if (ss.toString() == "") {
+					outvals[i] = new Nil();
+				} else {
+					outvals[i] = val;
+				}
+			}
+			v = new Array(outvals);
+			break;
 		}
 	}
 
