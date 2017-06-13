@@ -311,14 +311,21 @@ public:
 				v = new Text(str[i .. j]);
 			}
 			break;
-		case "sort":
+		case "sort", "sort_natural":
 			arr := child.toArray(n);
+			natural := ident == "sort_natural";
 			fn cmp(ia: size_t, ib: size_t) bool
 			{
 				a, b: StringSink;
 				arr[ia].toText(n, a.sink);
 				arr[ib].toText(n, b.sink);
-				return strcmp(toStringz(a.toString()), toStringz(b.toString())) < 0;
+				as := a.toString();
+				bs := b.toString();
+				if (natural) {
+					as = toLower(as);
+					bs = toLower(bs);
+				}
+				return strcmp(toStringz(as), toStringz(bs)) < 0;
 			}
 			fn swap(ia: size_t, ib: size_t)
 			{
