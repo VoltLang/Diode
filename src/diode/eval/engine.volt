@@ -152,6 +152,15 @@ public:
 			v = new Text(join(argStrings, arg));
 			break;
 		case "lstrip": v = new Text(stripLeft(s.toString())); break;
+		case "map":
+			arr := child.toArray(n);
+			arg := getArg(0);
+			outvals := new Value[](arr.length);
+			foreach (i, val; arr) {
+				outvals[i] = val.ident(n, arg);
+			}
+			v = new Array(outvals);
+			break;
 		case "minus":
 			fn doIt(a: f64, b: f64) f64 { return a - b; }
 			arithmeticFilter(doIt);
