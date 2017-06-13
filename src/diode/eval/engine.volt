@@ -4,7 +4,9 @@ module diode.eval.engine;
 
 import core.exception;
 
-import watt.conv : toUpper, toDouble, toLower;
+import core.c.time : strftime, gmtime, time_t, tm, time;
+
+import watt.conv : toUpper, toDouble, toLower, toStringz;
 import watt.math : ceil, floor;
 import watt.text.sink;
 import watt.text.string : split, join, replace, stripLeft, indexOf, stripRight, strip;
@@ -78,6 +80,24 @@ public:
 			v = new Text(str);
 		}
 
+		fn getTimeVal(val: Value) tm*
+		{
+			num := cast(Number)child;
+			str := s.toString();
+			t: time_t;
+			if (num !is null) {
+				if (!num.integer) {
+					return null;
+				}
+				t = cast(time_t)num.value;
+			} else if (str == "now") {
+				t = time(null);
+			} else {
+				return null;
+			}
+			return gmtime(&t);
+		}
+
 		switch (ident) {
 		case "abs":
 			val := toDouble(s.toString());
@@ -111,6 +131,17 @@ public:
 				outvals ~= val;
 			}
 			v = new Array(outvals);
+			break;
+		case "date":
+			arg := getArg(0);
+			ts := getTimeVal(child);
+			if (ts is null) {
+				v = new Nil();
+				break;
+			}
+			buf: char[512];
+			rv := strftime(buf.ptr, buf.length, toStringz(arg), ts);
+			v = new Text(cast(string)buf[0 .. rv]);
 			break;
 		case "default":
 			truthy := child.toBool(n);
