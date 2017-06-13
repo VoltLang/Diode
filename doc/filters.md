@@ -4,6 +4,8 @@ abs
 append
 capitalize
 ceil
+compact
+date
 default
 divide_by
 downcase
@@ -14,6 +16,7 @@ floor
 join
 array.last
 lstrip
+map
 minus
 modulo
 plus
@@ -32,9 +35,7 @@ uniq
 
 # Not Implemented Yet
 
-compact
-date
-map
+date ("well formatted date string" is in an unknown format)
 round
 slice
 sort

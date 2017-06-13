@@ -90,7 +90,7 @@ public:
 					return null;
 				}
 				t = cast(time_t)num.value;
-			} else if (str == "now") {
+			} else if (str == "now" || str == "today") {
 				t = time(null);
 			} else {
 				return null;
