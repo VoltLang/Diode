@@ -5,7 +5,9 @@ module diode.eval.engine;
 import core.exception;
 
 import core.c.time : strftime, gmtime, time_t, tm, time;
+import core.c.string : strcmp;
 
+import watt.algorithm : runSort;
 import watt.conv : toUpper, toDouble, toLower, toStringz;
 import watt.math : ceil, floor, round;
 import watt.text.sink;
@@ -308,6 +310,24 @@ public:
 			} else {
 				v = new Text(str[i .. j]);
 			}
+			break;
+		case "sort":
+			arr := child.toArray(n);
+			fn cmp(ia: size_t, ib: size_t) bool
+			{
+				a, b: StringSink;
+				arr[ia].toText(n, a.sink);
+				arr[ib].toText(n, b.sink);
+				return strcmp(toStringz(a.toString()), toStringz(b.toString())) < 0;
+			}
+			fn swap(ia: size_t, ib: size_t)
+			{
+				tmp: Value = arr[ia];
+				arr[ia] = arr[ib];
+				arr[ib] = tmp;
+			}
+			runSort(arr.length, cmp, swap);
+			v = new Array(arr);
 			break;
 		case "strip": v = new Text(strip(s.toString())); break;
 		case "times":

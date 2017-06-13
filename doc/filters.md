@@ -28,6 +28,7 @@ replace_first
 round
 rstrip
 size
+slice
 strip
 times
 truncate
@@ -37,7 +38,6 @@ uniq
 # Not Implemented Yet
 
 date ("well formatted date string" is in an unknown format)
-slice
 sort
 sort_natural
 strip_html
