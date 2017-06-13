@@ -1,0 +1,24 @@
+######
+{% assign a = "a, b, c, , e, f" | split: ", " | TEST_replace_empty_with_nil -%}
+{% for e in a -%}
+  {{ e }}
+{% endfor -%}
+---
+{% assign b = a | compact -%}
+{% for e in b -%}
+  {{ e }}
+{% endfor -%}
+######
+a
+b
+c
+
+e
+f
+---
+a
+b
+c
+e
+f
+######
