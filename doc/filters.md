@@ -25,6 +25,7 @@ remove
 remove_first
 replace
 replace_first
+round
 rstrip
 size
 strip
@@ -36,7 +37,6 @@ uniq
 # Not Implemented Yet
 
 date ("well formatted date string" is in an unknown format)
-round
 slice
 sort
 sort_natural

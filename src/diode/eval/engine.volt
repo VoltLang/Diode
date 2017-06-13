@@ -48,6 +48,18 @@ public:
 			return argsink.toString();
 		}
 
+		fn getIntegerArg(i: size_t) i32
+		{
+			if (args.length <= i) {
+				handleError(format("expected at least %s argument to '%s' filter.", i+1, ident));
+			}
+			num := cast(Number)args[i];
+			if (num is null || !num.integer) {
+				handleError(format("expected integer argument to '%s' filter.", ident));
+			}
+			return cast(i32)num.value;
+		}
+
 		//! Do a (non-divide) arithmetic operation. (plus, minus, etc).
 		fn arithmeticFilter(operation: dg(f64, f64) f64)
 		{
@@ -262,6 +274,37 @@ public:
 		case "rstrip": v = new Text(stripRight(s.toString())); break;
 		case "size":
 			v = child.toSize(n);
+			break;
+		case "slice":
+			str := s.toString();
+			a, b: i32;
+			a = getIntegerArg(0);
+			if (args.length > 1) {
+				b = getIntegerArg(1) + 1;
+			} else {
+				b = a + 1;
+			}
+			if (a < 0) {
+				a = cast(i32)str.length + a;
+				b = cast(i32)str.length - b + 2;
+			}
+			i: size_t;
+			acount := 0;
+			while (acount < a) {
+				decode(str, ref i);
+				acount++;
+			}
+			j := i;
+			bcount := acount;
+			while (bcount < b) {
+				decode(str, ref j);
+				bcount++;
+			}
+			if (i >= str.length || j >/* not >= */ str.length) {
+				v = new Nil();
+			} else {
+				v = new Text(str[i .. j]);
+			}
 			break;
 		case "strip": v = new Text(strip(s.toString())); break;
 		case "times":
