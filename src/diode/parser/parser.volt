@@ -568,20 +568,22 @@ fn parseIf(p: Parser, invert: bool, out node: ir.Node) Status
 		return err;
 	}
 
+	endingTag := invert ? "endunless" : "endif";
+
 	// Parse the nodes in the else body.
 	nameThatEnded: string;
-	if (err := p.parseNodesUntilTag(out thenNodes, out nameThatEnded, "endif", "else")) {
+	if (err := p.parseNodesUntilTag(out thenNodes, out nameThatEnded, endingTag, "else")) {
 		return err;
 	}
 
 	// If endif, we are done.
-	if (nameThatEnded == "endif") {
+	if (nameThatEnded == endingTag) {
 		node = bIf(invert, exp, thenNodes, elseNodes);
 		return Status.Ok;
 	}
 
 	// If the then nodes was closed with 'else' also parse else nodes.
-	if (err := p.parseNodesUntilTag(out elseNodes, out nameThatEnded, "endif")) {
+	if (err := p.parseNodesUntilTag(out elseNodes, out nameThatEnded, endingTag)) {
 		return err;
 	}
 
