@@ -615,6 +615,9 @@ public:
 		case Equal:
 			v = new Bool(l.opEquals(r));
 			break;
+		case NotEqual:
+			v = new Bool(!l.opEquals(r));
+			break;
 		default:
 			assert(false);
 		}

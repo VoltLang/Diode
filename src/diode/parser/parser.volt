@@ -353,7 +353,8 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 				return err;
 			}
 			break;
-		case '=':
+		case '=', '!':
+			firstChar := p.src.front;
 			p.src.popFront();
 			if (p.src.front != '=') {
 				return p.errorExpected("=", encode(p.src.front));
@@ -364,7 +365,8 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 			if (err := p.parseExp(out r)) {
 				return err;
 			}
-			exp = bBinOp(ir.BinOp.Type.Equal, exp, r);
+			exp = bBinOp(firstChar == '=' ? ir.BinOp.Type.Equal : ir.BinOp.Type.NotEqual,
+				exp, r);
 			inExp = false;
 			break;
 		default:
