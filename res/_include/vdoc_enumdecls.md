@@ -5,4 +5,4 @@
 %}	{{ decl.name }},
 {% endfor -%}
 }
-{% endif -%}
+{% endunless -%}
