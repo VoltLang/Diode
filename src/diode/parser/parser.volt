@@ -49,6 +49,7 @@ public:
 	 *  become a property that adds to a list of messages.
 	 */
 	errorMessage: string;
+	raw: bool;
 
 
 public:
@@ -193,6 +194,29 @@ fn parseNode(p: Parser, out node: ir.Node) Status
 	return Status.Ok;
 }
 
+// Returns true if the next tag parsed will be {% endraw %}
+fn atEndRaw(p: Parser) bool
+{
+	if (p.src.front != '%') {
+		return false;
+	}
+	i: size_t = 1;
+	eof: bool;
+	if (p.src.lookahead(i, out eof) == '-') {
+		i++;
+	}
+	while (p.src.lookahead(i, out eof).isWhite()) {
+		i++;
+	}
+	endrawstr := "endraw";
+	foreach (c: dchar; endrawstr) {
+		if (p.src.lookahead(i++, out eof) != c) {
+			return false;
+		}
+	}
+	return !p.src.lookahead(i++, out eof).isAlpha();
+}
+
 //! Parse regular text until we find a tag, or run out of text.
 fn parseText(p: Parser, out text: ir.Node) Status
 {
@@ -201,7 +225,7 @@ fn parseText(p: Parser, out text: ir.Node) Status
 		p.src.popFront();
 
 		// Keep consuming text until we find a '{'.
-		if (c != '{') {
+		if (c != '{' || (p.raw && !p.atEndRaw())) {
 			p.sink.sink(encode(c));
 			continue;
 		}
@@ -464,7 +488,9 @@ fn parseStatement(p: Parser, out node: ir.Node) Status
 		return parseIf(p:p, invert:true, node:out node);
 	case "for":
 		return p.parseFor(out node);
-	case "endif", "else", "endfor", "endunless":
+	case "raw":
+		return p.parseRaw(out node);
+	case "endif", "else", "endfor", "endunless", "endraw":
 		node = bClosingTagNode(name);
 		return p.parseCloseStatement();
 	default:
@@ -588,6 +614,31 @@ fn parseIf(p: Parser, invert: bool, out node: ir.Node) Status
 	}
 
 	node = bIf(invert, exp, thenNodes, elseNodes);
+	return Status.Ok;
+}
+
+fn parseRaw(p: Parser, out node: ir.Node) Status
+{
+	// Parse the %}
+	if (err := p.parseCloseStatement()) {
+		return err;
+	}
+
+	// Parse until we hit the endraw tag.
+	p.raw = true;
+	nameThatEnded: string;
+	nodes: ir.Node[];
+	if (err := p.parseNodesUntilTag(out nodes, out nameThatEnded, "endraw")) {
+		return err;
+	}
+	p.raw = false;
+
+	if (nodes.length != 1) {
+		p.errorMessage = "{% raw %} parsing failure";
+		return Status.Error;
+	}
+
+	node = nodes[0];
 	return Status.Ok;
 }
 
