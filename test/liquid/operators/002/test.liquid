@@ -1,0 +1,16 @@
+######
+{% assign a = "hello" -%}
+{% assign b = 3 -%}
+{% if a != "hello" -%}
+ha
+{% endif -%}
+{% if a != "hallo" -%}
+hb
+{% endif -%}
+{% if b != 1 | plus: 1 -%}
+hc
+{% endif -%}
+######
+hb
+hc
+######
