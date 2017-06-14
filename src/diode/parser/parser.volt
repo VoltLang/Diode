@@ -464,7 +464,7 @@ fn parseStatement(p: Parser, out node: ir.Node) Status
 		return parseIf(p:p, invert:true, node:out node);
 	case "for":
 		return p.parseFor(out node);
-	case "endif", "else", "endfor":
+	case "endif", "else", "endfor", "endunless":
 		node = bClosingTagNode(name);
 		return p.parseCloseStatement();
 	default:
