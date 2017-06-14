@@ -603,6 +603,39 @@ public:
 	 *
 	 */
 
+	override fn enter(p: ir.BinOp, sink: Sink) Status
+	{
+		l, r: Value;
+		p.l.accept(this, sink);
+		l = v;
+		lt := cast(Text)l;
+		ln := cast(Number)l;
+		p.r.accept(this, sink);
+		r = v;
+		rt := cast(Text)r;
+		rn := cast(Number)r;
+
+		switch (p.type) with (ir.BinOp.Type) {
+		case Equal:
+			if (lt !is null && rt !is null) {
+				v = new Bool(lt.text == rt.text);
+			} else if (ln !is null && rn !is null) {
+				v = new Bool(ln.value == rn.value);
+			} else {
+				v = new Nil();
+			}
+			break;
+		default:
+			assert(false);
+		}
+		return ContinueParent;
+	}
+
+	override fn leave(p: ir.BinOp, sink: Sink) Status
+	{
+		assert(false);
+	}
+
 	override fn leave(p: ir.Access, sink: Sink) Status
 	{
 		assert(v !is null);

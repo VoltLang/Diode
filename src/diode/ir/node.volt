@@ -192,6 +192,56 @@ public:
 	}
 }
 
+class BinOp : Exp
+{
+public:
+	enum Type
+	{
+		Equal,
+		NotEqual,
+		GreaterThan,
+		LessThan,
+		GreaterThanOrEqual,
+		LessThanOrEqual,
+		Or,
+		And
+	}
+
+public:
+	type: Type;
+	l: Exp;
+	r: Exp;
+
+public:
+	this(type: Type, l: Exp, r: Exp)
+	{
+		assert(l !is null && r !is null);
+		this.type = type;
+		this.l = l;
+		this.r = r;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		s1 := v.enter(this, sink);
+		if (s1 != Status.Continue) {
+			return filterParent(s1);
+		}
+
+		s2 := l.accept(v, sink);
+		if (s2 == Status.Stop) {
+			return s2;
+		}
+
+		s3 := r.accept(v, sink);
+		if (s3 == Status.Stop) {
+			return s3;
+		}
+
+		return filterParent(v.leave(this, sink));
+	}
+}
+
 /*!
  * Lookup symbol into child expression.
  */
@@ -497,6 +547,8 @@ abstract class Visitor
 	abstract fn leave(Access, Sink) Status;
 	abstract fn enter(Filter, Sink) Status;
 	abstract fn leave(Filter, Sink) Status;
+	abstract fn enter(BinOp, Sink) Status;
+	abstract fn leave(BinOp, Sink) Status;
 	abstract fn visit(Ident, Sink) Status;
 	abstract fn visit(StringLiteral, Sink) Status;
 	abstract fn visit(BoolLiteral, Sink) Status;

@@ -35,6 +35,11 @@ fn bFor(ident: string, exp: ir.Exp, nodes: ir.Node[]) ir.For
 	return new ir.For(ident, exp, nodes);
 }
 
+fn bBinOp(type: ir.BinOp.Type, l: ir.Exp, r: ir.Exp) ir.BinOp
+{
+	return new ir.BinOp(type, l, r);
+}
+
 fn bIf(invert: bool, exp: ir.Exp, nodes: ir.Node[], elseNodes: ir.Node[]) ir.If
 {
 	return new ir.If(invert, exp, nodes, elseNodes);

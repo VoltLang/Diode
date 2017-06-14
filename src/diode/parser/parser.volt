@@ -13,7 +13,7 @@ import watt.text.format;
 import ir = diode.ir;
 import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
 	bAccess, bIdent, bFilter, bStringLiteral, bBoolLiteral, bClosingTagNode,
-	bNumberLiteral;
+	bNumberLiteral, bBinOp;
 import diode.ir.sink : NodeSink;
 
 import diode.errors;
@@ -352,6 +352,20 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 			if (err := p.parseFilter(exp, out exp)) {
 				return err;
 			}
+			break;
+		case '=':
+			p.src.popFront();
+			if (p.src.front != '=') {
+				return p.errorExpected("=", encode(p.src.front));
+			}
+			p.src.popFront();
+			p.src.skipWhitespace();
+			r: ir.Exp;
+			if (err := p.parseExp(out r)) {
+				return err;
+			}
+			exp = bBinOp(ir.BinOp.Type.Equal, exp, r);
+			inExp = false;
 			break;
 		default:
 			inExp = false;
