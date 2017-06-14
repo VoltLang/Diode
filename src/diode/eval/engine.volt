@@ -613,10 +613,16 @@ public:
 
 		switch (p.type) with (ir.BinOp.Type) {
 		case Equal:
-			v = new Bool(l.opEquals(r));
+			v = new Bool(l == r);
 			break;
 		case NotEqual:
-			v = new Bool(!l.opEquals(r));
+			v = new Bool(l != r);
+			break;
+		case Or:
+			v = new Bool(l.toBool(null) || r.toBool(null));
+			break;
+		case And:
+			v = new Bool(l.toBool(null) && r.toBool(null));
 			break;
 		default:
 			assert(false);
