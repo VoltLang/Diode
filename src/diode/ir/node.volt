@@ -281,6 +281,45 @@ public:
 }
 
 /*!
+ * Array lookup.
+ */
+class Index : Exp
+{
+public:
+	child: Exp;
+	index: Exp;
+
+public:
+	this(child: Exp, index: Exp)
+	{
+		assert(child !is null);
+		assert(index !is null);
+		this.child = child;
+		this.index = index;
+	}
+
+	override fn accept(v: Visitor, sink: Sink) Status
+	{
+		s1 := v.enter(this, sink);
+		if (s1 != Status.Continue) {
+			return filterParent(s1);
+		}
+
+		s2 := child.accept(v, sink);
+		if (s2 == Status.Stop) {
+			return s2;
+		}
+
+		s3 := index.accept(v, sink);
+		if (s3 == Status.Stop) {
+			return s3;
+		}
+
+		return filterParent(v.leave(this, sink));
+	}
+}
+
+/*!
  * Filter expression.
  */
 class Filter : Exp
@@ -551,6 +590,8 @@ abstract class Visitor
 	abstract fn leave(Filter, Sink) Status;
 	abstract fn enter(BinOp, Sink) Status;
 	abstract fn leave(BinOp, Sink) Status;
+	abstract fn enter(Index, Sink) Status;
+	abstract fn leave(Index, Sink) Status;
 	abstract fn visit(Ident, Sink) Status;
 	abstract fn visit(StringLiteral, Sink) Status;
 	abstract fn visit(BoolLiteral, Sink) Status;

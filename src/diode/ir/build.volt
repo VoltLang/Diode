@@ -40,6 +40,11 @@ fn bBinOp(type: ir.BinOp.Type, l: ir.Exp, r: ir.Exp) ir.BinOp
 	return new ir.BinOp(type, l, r);
 }
 
+fn bIndex(child: ir.Exp, index: ir.Exp) ir.Index
+{
+	return new ir.Index(child, index);
+}
+
 fn bIf(invert: bool, exp: ir.Exp, nodes: ir.Node[], elseNodes: ir.Node[]) ir.If
 {
 	return new ir.If(invert, exp, nodes, elseNodes);

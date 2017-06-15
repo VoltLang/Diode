@@ -648,6 +648,23 @@ public:
 		assert(false);
 	}
 
+	override fn enter(p: ir.Index, sink: Sink) Status
+	{
+		child, index: Value;
+		p.child.accept(this, sink);
+		child = v;
+		p.index.accept(this, sink);
+		index = v;
+
+		v = child[index];
+		return ContinueParent;
+	}
+
+	override fn leave(p: ir.Index, sink: Sink) Status
+	{
+		assert(false);
+	}
+
 	override fn leave(p: ir.Access, sink: Sink) Status
 	{
 		assert(v !is null);

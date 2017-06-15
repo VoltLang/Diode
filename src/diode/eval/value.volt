@@ -49,6 +49,11 @@ public:
 		return false;
 	}
 
+	fn opIndex(other: Value) Value
+	{
+		return new Nil();
+	}
+
 	fn contains(other: Value) bool
 	{
 		return false;
@@ -266,6 +271,19 @@ public:
 			}
 		}
 		return false;
+	}
+
+	override fn opIndex(index: Value) Value
+	{
+		num := cast(Number)index;
+		if (num is null || !num.integer) {
+			return new Nil();
+		}
+		i := cast(size_t)num.value;
+		if (i >= vals.length) {
+			return new Nil();
+		}
+		return vals[i];
 	}
 }
 
