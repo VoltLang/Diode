@@ -1,0 +1,16 @@
+######
+{% assign a = "helloworldthis " -%}
+{% assign b = "its, the, end, of, the" | split: ", " -%}
+{% if a contains "world" -%}
+ha
+{% endif -%}
+{% if a contains "othello" -%}
+hb
+{% endif -%}
+{% if b contains "the" -%}
+hc
+{% endif -%}
+######
+ha
+hc
+######
