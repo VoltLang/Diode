@@ -215,7 +215,8 @@ public:
 public:
 	this(type: Type, l: Exp, r: Exp)
 	{
-		assert(l !is null && r !is null);
+		assert(l !is null);
+		assert(r !is null);
 		this.type = type;
 		this.l = l;
 		this.r = r;

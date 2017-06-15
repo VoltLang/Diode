@@ -81,11 +81,10 @@ public:
 	}
 
 	/*!
-	 * If the parser is at the given word,
-	 * parse it into the sink, and return true.
-	 * Otherwise, no characters are consumed.
+	 * If the parser is at the given word, return true.
+	 * No characters are consumed.
 	 */
-	fn eatIfWord(s: string) bool
+	fn atWord(s: string) bool
 	{
 		eof: bool;
 		size_t i;
@@ -96,12 +95,6 @@ public:
 			if (src.lookahead(i++, out eof) != c) {
 				return false;
 			}
-		}
-		src.skipWhitespace();
-		foreach (j, c: dchar; s) {
-			assert(c == src.front);
-			src.popFront();
-			sink.sink(encode(c));
 		}
 		return true;
 	}
@@ -330,111 +323,129 @@ fn parsePrint(p: Parser, out print: ir.Node) Status
  */
 
 //! Parse an entire Exp expression.
-fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
+fn parseExp(p: Parser, out exp: ir.Exp, justOneExpression: bool = false) Status
 {
-	p.src.skipWhitespace();
-
-	if (p.src.front == '"' || p.src.front == '\'') {
-		if (err := p.parseStringLiteral(out exp)) {
-			return err;
-		}
-	} else if (p.src.front == '-' || p.src.front == '.' || isDigit(p.src.front)) {
-		if (err := p.parseNumberLiteral(out exp)) {
-			return err;
-		}
-	} else {
-		p.eatIdent();
-		word := p.getSink();
-		if (word.length == 0) {
-			return p.errorExpectedIdentifier();
-		}
-
-		// This is a ident or a BoolLiteral.
-		exp = word.makeIdentOrBool();
-	}
-
 	// Advance to the next character.
 	p.src.skipWhitespace();
 
-	inExp := true;
-	while (inExp && !p.src.eof) {
-		switch (p.src.front) {
-		case '.':
-			// Eat the character and parse a expression.
-			p.src.popFront();
-			if (err := p.parseAccess(exp, out exp)) {
-				return err;
-			}
-			break;
-		case '|':
-			// Filter matches to outer most expression.
-			if (doNotParseFilters) {
-				inExp = false;
-				break;
-			}
+	fn atExpEnd() bool
+	{
+		return p.atWord("%}") || p.atWord("-%}") || p.atWord("}}") || p.atWord("-}}");
+	}
 
-			// Eat the character and parse a expression.
-			p.src.popFront();
-			if (err := p.parseFilter(exp, out exp)) {
-				return err;
-			}
-			break;
-		case '=', '!':
-			firstChar := p.src.front;
-			p.src.popFront();
-			if (p.src.front != '=') {
-				return p.errorExpected("=", encode(p.src.front));
-			}
-			p.src.popFront();
-			p.src.skipWhitespace();
-			r: ir.Exp;
-			if (err := p.parseExp(out r)) {
-				return err;
-			}
-			exp = bBinOp(firstChar == '=' ? ir.BinOp.Type.Equal : ir.BinOp.Type.NotEqual,
-				exp, r);
-			inExp = false;
-			break;
-		case '<', '>':
-			firstChar := p.src.front;
-			p.src.popFront();
-			equals := p.src.front == '=';
-			type: ir.BinOp.Type;
-			if (firstChar == '<') {
-				type = equals ? ir.BinOp.Type.LessThanOrEqual :
-					ir.BinOp.Type.LessThan;
-			} else {
-				type = equals ? ir.BinOp.Type.GreaterThanOrEqual :
-					ir.BinOp.Type.GreaterThan;
-			}
-			if (equals) {
+	first := true;
+	do {
+		p.src.skipWhitespace();
+		if (first) {
+			first = false;
+		} else {
+			switch (p.src.front) {
+			case '.':
+				// Eat the character and parse a expression.
 				p.src.popFront();
-			}
-			r: ir.Exp;
-			if (err := p.parseExp(out r)) {
-				return err;
-			}
-			exp = bBinOp(type, exp, r);
-			inExp = false;
-			break;
-		default:
-			if (p.eatIfWord("or") || p.eatIfWord("and")) {
-				word := p.getSink();
-				r: ir.Exp;
-				if (err := p.parseExp(out r)) {
+				if (err := p.parseAccess(exp, out exp)) {
 					return err;
 				}
-				exp = bBinOp(word == "or" ? ir.BinOp.Type.Or : ir.BinOp.Type.And,
+				continue;
+			case '|':
+				// Filter matches to outer most expression.
+				if (justOneExpression) {
+					break;
+				}
+
+				// Eat the character and parse a expression.
+				p.src.popFront();
+				if (err := p.parseFilter(exp, out exp)) {
+					return err;
+				}
+				continue;
+			case '=', '!':
+				if (justOneExpression) {
+					break;
+				}
+
+				firstChar := p.src.front;
+				p.src.popFront();
+				if (p.src.front != '=') {
+					return p.errorExpected("=", encode(p.src.front));
+				}
+				p.src.popFront();
+				p.src.skipWhitespace();
+				r: ir.Exp;
+				if (err := p.parseExp(out r, true)) {
+					return err;
+				}
+				assert(r !is null);
+				exp = bBinOp(firstChar == '=' ? ir.BinOp.Type.Equal : ir.BinOp.Type.NotEqual,
 					exp, r);
+				continue;
+			case '<', '>':
+				if (justOneExpression) {
+					break;
+				}
+
+				firstChar := p.src.front;
+				p.src.popFront();
+				equals := p.src.front == '=';
+				type: ir.BinOp.Type;
+				if (firstChar == '<') {
+					type = equals ? ir.BinOp.Type.LessThanOrEqual :
+						ir.BinOp.Type.LessThan;
+				} else {
+					type = equals ? ir.BinOp.Type.GreaterThanOrEqual :
+						ir.BinOp.Type.GreaterThan;
+				}
+				if (equals) {
+					p.src.popFront();
+				}
+				r: ir.Exp;
+				if (err := p.parseExp(out r, true)) {
+					return err;
+				}
+				exp = bBinOp(type, exp, r);
+				break;
+			default:
+				break;
 			}
-			inExp = false;
+		}
+
+		if (atExpEnd()) {
 			break;
+		}
+
+		word: string;
+		if (p.src.front == '"' || p.src.front == '\'') {
+			if (err := p.parseStringLiteral(out exp)) {
+				return err;
+			}
+		} else if (p.src.front == '-' || p.src.front == '.' || isDigit(p.src.front)) {
+			if (err := p.parseNumberLiteral(out exp)) {
+				return err;
+			}
+			p.src.skipWhitespace();
+		} else {
+			p.eatIdent();
+			word = p.getSink();
+			if (word.length == 0) {
+				return p.errorExpectedIdentifier();
+			}
+		}
+
+		if ((word == "or" || word == "and") && !justOneExpression) {
+			r: ir.Exp;
+			if (err := p.parseExp(out r, false)) {
+				return err;
+			}
+			exp = bBinOp(word == "or" ? ir.BinOp.Type.Or : ir.BinOp.Type.And,
+				exp, r);
+		} else if (word.length > 0) {
+			// This is a ident or a BoolLiteral.
+			exp = word.makeIdentOrBool();
 		}
 
 		// Advance to the next character for the while loop.
 		p.src.skipWhitespace();
-	}
-
+	} while (!p.src.eof && !justOneExpression && !atExpEnd());
 	return Status.Ok;
 }
 
@@ -520,7 +531,7 @@ fn parseFilterArgs(p: Parser, out args: ir.Exp[]) Status
 
 	do {
 		exp: ir.Exp;
-		if (err := parseExp(p:p, exp:out exp, doNotParseFilters:true)) {
+		if (err := parseExp(p:p, exp:out exp, justOneExpression:true)) {
 			return err;
 		}
 		args ~= exp;
