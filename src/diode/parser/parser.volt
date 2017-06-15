@@ -80,6 +80,32 @@ public:
 		}
 	}
 
+	/*!
+	 * If the parser is at the given word,
+	 * parse it into the sink, and return true.
+	 * Otherwise, no characters are consumed.
+	 */
+	fn eatIfWord(s: string) bool
+	{
+		eof: bool;
+		size_t i;
+		while (src.lookahead(i, out eof).isWhite()) {
+			i++;
+		}
+		foreach (j, c: dchar; s) {
+			if (src.lookahead(i++, out eof) != c) {
+				return false;
+			}
+		}
+		src.skipWhitespace();
+		foreach (j, c: dchar; s) {
+			assert(c == src.front);
+			src.popFront();
+			sink.sink(encode(c));
+		}
+		return true;
+	}
+
 	//! Parse a include name into sink.
 	fn eatIncludeName()
 	{
@@ -392,6 +418,15 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 			inExp = false;
 			break;
 		default:
+			if (p.eatIfWord("or") || p.eatIfWord("and")) {
+				word := p.getSink();
+				r: ir.Exp;
+				if (err := p.parseExp(out r)) {
+					return err;
+				}
+				exp = bBinOp(word == "or" ? ir.BinOp.Type.Or : ir.BinOp.Type.And,
+					exp, r);
+			}
 			inExp = false;
 			break;
 		}
