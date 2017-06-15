@@ -611,12 +611,24 @@ public:
 		p.r.accept(this, sink);
 		r = v;
 
-		switch (p.type) with (ir.BinOp.Type) {
+		final switch (p.type) with (ir.BinOp.Type) {
 		case Equal:
 			v = new Bool(l == r);
 			break;
 		case NotEqual:
 			v = new Bool(l != r);
+			break;
+		case GreaterThan:
+			v = new Bool(l > r);
+			break;
+		case LessThan:
+			v = new Bool(l < r);
+			break;
+		case GreaterThanOrEqual:
+			v = new Bool(l >= r);
+			break;
+		case LessThanOrEqual:
+			v = new Bool(l <= r);
 			break;
 		case Or:
 			v = new Bool(l.toBool(null) || r.toBool(null));
@@ -624,8 +636,6 @@ public:
 		case And:
 			v = new Bool(l.toBool(null) && r.toBool(null));
 			break;
-		default:
-			assert(false);
 		}
 		return ContinueParent;
 	}

@@ -48,6 +48,11 @@ public:
 	{
 		return false;
 	}
+
+	fn opCmp(other: Value) i32
+	{
+		return 0;
+	}
 }
 
 class Nil: Value
@@ -116,6 +121,21 @@ public:
 			return cast(size_t)value == cast(size_t)otherNum.value;
 		}
 		return value == otherNum.value;
+	}
+
+	override fn opCmp(otherVal: Value) i32
+	{
+		other := cast(Number)otherVal;
+		if (other is null) {
+			return 0;
+		}
+		if (value > other.value) {
+			return 1;
+		} else if (value < other.value) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 }
 

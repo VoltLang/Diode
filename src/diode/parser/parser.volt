@@ -369,6 +369,28 @@ fn parseExp(p: Parser, out exp: ir.Exp, doNotParseFilters: bool = false) Status
 				exp, r);
 			inExp = false;
 			break;
+		case '<', '>':
+			firstChar := p.src.front;
+			p.src.popFront();
+			equals := p.src.front == '=';
+			type: ir.BinOp.Type;
+			if (firstChar == '<') {
+				type = equals ? ir.BinOp.Type.LessThanOrEqual :
+					ir.BinOp.Type.LessThan;
+			} else {
+				type = equals ? ir.BinOp.Type.GreaterThanOrEqual :
+					ir.BinOp.Type.GreaterThan;
+			}
+			if (equals) {
+				p.src.popFront();
+			}
+			r: ir.Exp;
+			if (err := p.parseExp(out r)) {
+				return err;
+			}
+			exp = bBinOp(type, exp, r);
+			inExp = false;
+			break;
 		default:
 			inExp = false;
 			break;
