@@ -636,6 +636,9 @@ public:
 		case And:
 			v = new Bool(l.toBool(null) && r.toBool(null));
 			break;
+		case Contains:
+			v = new Bool(l.contains(r));
+			break;
 		}
 		return ContinueParent;
 	}

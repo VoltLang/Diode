@@ -431,13 +431,19 @@ fn parseExp(p: Parser, out exp: ir.Exp, justOneExpression: bool = false) Status
 			}
 		}
 
-		if ((word == "or" || word == "and") && !justOneExpression) {
+		if ((word == "or" || word == "and" || word == "contains") && !justOneExpression) {
 			r: ir.Exp;
 			if (err := p.parseExp(out r, false)) {
 				return err;
 			}
-			exp = bBinOp(word == "or" ? ir.BinOp.Type.Or : ir.BinOp.Type.And,
-				exp, r);
+			t: ir.BinOp.Type;
+			switch (word) {
+			case "or": t = ir.BinOp.Type.Or; break;
+			case "and": t = ir.BinOp.Type.And; break;
+			case "contains": t = ir.BinOp.Type.Contains; break;
+			default: assert(false);
+			}
+			exp = bBinOp(t, exp, r);
 		} else if (word.length > 0) {
 			// This is a ident or a BoolLiteral.
 			exp = word.makeIdentOrBool();

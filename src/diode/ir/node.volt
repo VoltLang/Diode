@@ -204,7 +204,8 @@ public:
 		GreaterThanOrEqual,
 		LessThanOrEqual,
 		Or,
-		And
+		And,
+		Contains
 	}
 
 public:

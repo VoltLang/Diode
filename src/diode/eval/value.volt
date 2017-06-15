@@ -49,6 +49,11 @@ public:
 		return false;
 	}
 
+	fn contains(other: Value) bool
+	{
+		return false;
+	}
+
 	fn opCmp(other: Value) i32
 	{
 		return 0;
@@ -206,6 +211,15 @@ public:
 		}
 		return text == otherText.text;
 	}
+
+	override fn contains(otherVal: Value) bool
+	{
+		other := cast(Text)otherVal;
+		if (other is null) {
+			return false;
+		}
+		return text.indexOf(other.text) >= 0;
+	}
 }
 
 class Array: Value
@@ -242,6 +256,16 @@ public:
 		} else {
 			return super.ident(n, key);
 		}
+	}
+
+	override fn contains(other: Value) bool
+	{
+		foreach (val; vals) {
+			if (val.contains(other)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
