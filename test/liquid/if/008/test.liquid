@@ -1,0 +1,44 @@
+######
+{% assign a = "hello" -%}
+{% if a == "hi" -%}
+wrong
+{% elsif a == "hello" -%}
+right
+{% endif -%}
+{% if a == "hi" -%}
+wrong
+{% elsif a == "gutentag" -%}
+also wrong
+{% else -%}
+fine
+{% endif -%}
+{% if a == "hi" -%}
+wrong
+{% elsif a == "gutentag" -%}
+also wrong
+{% elsif a == "hello" -%}
+there we go
+{% else -%}
+wrongo
+{% endif -%}
+{% if a == "hi" -%}
+wrong
+{% elsif a == "gutentag" -%}
+also wrong
+{% elsif a == "hello" -%}
+{% if a == "oh god nested ifs" -%}
+wrong wrong wrong
+{% elsif a == "nnnnnnn" -%}
+ダメ
+{% elsif a == "hello" -%}
+CORRECT
+{% endif -%}
+{% else -%}
+wrongo
+{% endif -%}
+######
+right
+fine
+there we go
+CORRECT
+######
