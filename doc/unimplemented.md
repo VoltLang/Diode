@@ -1,3 +1,7 @@
+---
+layout: page
+---
+
 # Things that are not implemented
 
 ## Filters
