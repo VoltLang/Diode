@@ -6,15 +6,15 @@ layout: page
 
 ## Filters
 
-parts of date ("well formatted date string" is in an unknown format)
-strip_html
+ *  parts of date ("well formatted date string" is in an unknown format)
+ *  strip_html
 
 ## Statements
 
-case/when
-break
-continue
-for limits offsets etc
-cycle
-tablerow
-capture
+ *  case/when
+ *  break
+ *  continue
+ *  for limits offsets etc
+ *  cycle
+ *  tablerow
+ *  capture
