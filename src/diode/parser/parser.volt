@@ -147,10 +147,21 @@ fn parseFile(p: Parser, out file: ir.File) Status
 	return p.parseNodesUntilTag(out file.nodes, out dummy, null);
 }
 
-//! Parse nodes until we hit a {% <name> %}.
+/*!
+ * Parse nodes until we hit a {% <name> %}.
+ * If name is 'elsif', the If node will be placed at the end of nodes.
+ */
 fn parseNodesUntilTag(p: Parser, out nodes: ir.Node[], out nameThatEnded: string, names: string[]...) Status
 {
 	ns: NodeSink;
+
+	lookingForElsif := false;
+	foreach (name; names) {
+		if (name == "elsif") {
+			lookingForElsif = true;
+			break;
+		}
+	}
 
 	while (!p.src.eof) {
 		// Try to parse a node.
@@ -162,6 +173,16 @@ fn parseNodesUntilTag(p: Parser, out nodes: ir.Node[], out nameThatEnded: string
 		// Text might return null on empty text.
 		if (node is null) {
 			continue;
+		}
+
+		if (lookingForElsif) {
+			ifn := cast(ir.If)node;
+			if (ifn !is null && ifn.elsif) {
+				ns.push(node);
+				nameThatEnded = "elsif";
+				nodes = ns.takeArray();
+				return Status.Ok;
+			}
 		}
 
 		// Is this a closing tag.
@@ -587,6 +608,8 @@ fn parseStatement(p: Parser, out node: ir.Node) Status
 		return parseComment(p);
 	case "if":
 		return parseIf(p:p, invert:false, node:out node);
+	case "elsif":
+		return parseElsIf(p:p, node:out node);
 	case "unless":
 		return parseIf(p:p, invert:true, node:out node);
 	case "for":
@@ -680,6 +703,14 @@ fn parseInclude(p: Parser, out node: ir.Node) Status
 	return Status.Ok;
 }
 
+fn parseElsIf(p: Parser, out node: ir.Node) Status
+{
+	parseIf(p, false, out node);
+	ifn := cast(ir.If)node;
+	ifn.elsif = true;
+	return Status.Ok;
+}
+
 fn parseIf(p: Parser, invert: bool, out node: ir.Node) Status
 {
 	// This is a if.
@@ -701,8 +732,13 @@ fn parseIf(p: Parser, invert: bool, out node: ir.Node) Status
 
 	// Parse the nodes in the else body.
 	nameThatEnded: string;
-	if (err := p.parseNodesUntilTag(out thenNodes, out nameThatEnded, endingTag, "else")) {
+	if (err := p.parseNodesUntilTag(out thenNodes, out nameThatEnded, endingTag, "else", "elsif")) {
 		return err;
+	}
+
+	if (nameThatEnded == "elsif") {
+		node = bIf(invert, exp, thenNodes[0 .. $-1], thenNodes[$-1 .. $]);
+		return Status.Ok;
 	}
 
 	// If endif, we are done.

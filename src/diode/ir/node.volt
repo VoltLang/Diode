@@ -374,6 +374,7 @@ public:
 	elseNodes: Node[];
 	exp: Exp;
 	invert: bool;
+	elsif: bool;
 
 
 public:
