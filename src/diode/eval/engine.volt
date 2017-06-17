@@ -610,6 +610,9 @@ public:
 		l = v;
 		p.r.accept(this, sink);
 		r = v;
+		lnil := cast(Nil)l;
+		rnil := cast(Nil)r;
+		nilinvolved := lnil !is null || rnil !is null;
 
 		final switch (p.type) with (ir.BinOp.Type) {
 		case Equal:
@@ -625,10 +628,10 @@ public:
 			v = new Bool(l < r);
 			break;
 		case GreaterThanOrEqual:
-			v = new Bool(l >= r);
+			v = new Bool(l >= r && !nilinvolved);
 			break;
 		case LessThanOrEqual:
-			v = new Bool(l <= r);
+			v = new Bool(l <= r && !nilinvolved);
 			break;
 		case Or:
 			v = new Bool(l.toBool(null) || r.toBool(null));
