@@ -1,0 +1,9 @@
+######
+{% assign arr1 = "1, 2, 3, 4" | split: ", " %}{%for item in arr1%} yo {%endfor%}
+{% assign arr2 = "1, 2" | split: ", " %}{%for item in arr2%}yo{%endfor%}
+{% assign arr3 = "a, b, c, d" | split: ", " %}{%for item in arr3%}{{item}}{%endfor%}
+######
+ yo  yo  yo  yo 
+yoyo
+abcd
+######
