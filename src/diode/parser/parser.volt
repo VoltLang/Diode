@@ -254,7 +254,16 @@ fn atEndRaw(p: Parser) bool
 			return false;
 		}
 	}
-	return !p.src.lookahead(i++, out eof).isAlpha();
+	while (p.src.lookahead(i, out eof).isWhite()) {
+		i++;
+	}
+	if (p.src.lookahead(i, out eof) == '-') {
+		i++;
+	}
+	if (p.src.lookahead(i++, out eof) != '%') {
+		return false;
+	}
+	return p.src.lookahead(i++, out eof) == '}';
 }
 
 //! Parse regular text until we find a tag, or run out of text.
