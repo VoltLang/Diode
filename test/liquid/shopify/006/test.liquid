@@ -1,0 +1,91 @@
+######
+ {% if false %} this text should not go into the output {% endif %} 
+ {% if true %} this text should go into the output {% endif %} 
+{% if false %} you suck {% endif %} {% if true %} you rock {% endif %}?
+{% assign v = false %}{% if v %} YES {% else %} NO {% endif %}
+{% assign v2 = nil %}{% if v2 == nil %} YES {% else %} NO {% endif %}
+{% if false %} NO {% else %} YES {% endif %}
+{% if true %} YES {% else %} NO {% endif %}
+{% if "foo" %} YES {% else %} NO {% endif %}
+{% assign v3 = true %}{% if v3 %} YES {% endif %}
+{% assign a1 = true %}{% assign b1 = true %}{% if a1 or b1 %} YES {% endif %}
+{% assign a2 = true %}{% assign b2 = false %}{% if a2 or b2 %} YES {% endif %}
+{% assign a3 = false %}{% assign b3 = true %}{% if a3 or b3 %} YES {% endif %}
+{% assign a4 = false %}{% assign b4 = false %}{% if a4 or b4 %} YES {% endif %}
+{% assign a5 = false %}{% assign b5 = false %}{% assign c5 = true %}{% if a5 or b5 or c5 %} YES {% endif %}
+{% assign a6 = false %}{% assign b6 = false %}{% assign c6 = false %}{% if a6 or b6 or c6 %} YES {% endif %}
+{% assign a7 = "and" %}{% assign b7 = "or" %}{% assign c7 = "foo and bar" %}{% assign d7 = "bar or baz" -%}
+{% assign e7 = "foo" %}{% assign foo = true %}{% assign bar = true -%}
+{% if a7 == "and" and b7 == "or" and c7 == "foo and bar" and d7 == "bar or baz" and e7 == "foo" and foo and bar %} YES {% endif %}
+{% if true and true %} YES {% endif %}
+{% if false and true %} YES {% endif %}
+{% if true and false %} YES {% endif %}
+{% assign v3 = false %}{% if v3 %} NO {% endif %}
+{% assign v4 = nil %}{% if v4 %} NO {% endif %}
+{% assign v5 = true %}{% if v5 %} YES {% endif %}
+{% assign v6 = "text" %}{% if v6 %} YES {% endif %}
+{% assign v7 = 1 %}{% if v7 %} YES {% endif %}
+{% if false %}{% if false %} NO {% endif %}{% endif %}
+{% if false %}{% if true %} NO {% endif %}{% endif %}
+{% if true %}{% if false %} NO {% endif %}{% endif %}
+{% if true %}{% if true %} YES {% endif %}{% endif %}
+{% if true %}{% if true %} YES {% else %} NO {% endif %}{% else %} NO {% endif %}
+{% if true %}{% if false %} NO {% else %} YES {% endif %}{% else %} NO {% endif %}
+{% if false %}{% if true %} NO {% else %} NONO {% endif %}{% else %} YES {% endif %}
+{% if null < 10 %} NO {% endif %}
+{% if null <= 10 %} NO {% endif %}
+{% if null >= 10 %} NO {% endif %}
+{% if null > 10 %} NO {% endif %}
+{% if 10 < null %} NO {% endif %}
+{% if 10 <= null %} NO {% endif %}
+{% if 10 >= null %} NO {% endif %}
+{% if 10 > null %} NO {% endif %}
+{% if 0 == 0 %}0{% elsif 1 == 1%}1{% else %}2{% endif %}
+{% if 0 != 0 %}0{% elsif 1 == 1%}1{% else %}2{% endif %}
+{% if 0 != 0 %}0{% elsif 1 != 1%}1{% else %}2{% endif %}
+{% if false %}if{% elsif true %}elsif{% endif %}
+######
+  
+  this text should go into the output  
+  you rock ?
+ NO 
+ YES 
+ YES 
+ YES 
+ YES 
+ YES 
+ YES 
+ YES 
+ YES 
+
+ YES 
+
+ YES 
+ YES 
+
+
+
+
+ YES 
+ YES 
+ YES 
+
+
+
+ YES 
+ YES 
+ YES 
+ YES 
+
+
+
+
+
+
+
+
+0
+1
+2
+elsif
+######
