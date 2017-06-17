@@ -1,0 +1,23 @@
+######
+{% raw %}{% comment %} test {% endcomment %}{% endraw %}
+{% raw %}{{ test }}{% endraw %}
+{% raw %} Foobar {% invalid {% endraw %}
+{% raw %} Foobar invalid %} {% endraw %}
+{% raw %} Foobar {{ invalid {% endraw %}
+{% raw %} Foobar invalid }} {% endraw %}
+{% raw %} Foobar {% invalid {% {% endraw {% endraw %}
+{% raw %} Foobar {% {% {% {% endraw %}
+{% raw %} test {% raw %} {% {% endraw %}endraw %}
+{% raw %} Foobar {{ invalid {% endraw %}{{ 1 }}
+######
+{% comment %} test {% endcomment %}
+{{ test }}
+ Foobar {% invalid 
+ Foobar invalid %} 
+ Foobar {{ invalid 
+ Foobar invalid }} 
+ Foobar {% invalid {% {% endraw 
+ Foobar {% {% {% 
+ test {% raw %} {% endraw %}
+ Foobar {{ invalid 1
+######
