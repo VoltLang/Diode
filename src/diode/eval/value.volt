@@ -72,6 +72,11 @@ public:
 	{
 		return false;
 	}
+
+	override fn opEquals(other: Value) bool
+	{
+		return (cast(Nil)other) !is null;
+	}
 }
 
 class Number: Value
