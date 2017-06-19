@@ -142,7 +142,7 @@ public:
 			return;
 		}
 
-		mods := mVdoc.getModules();
+		mods := mVdoc.modules;
 		foreach (mod; mods) {
 			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
 		}

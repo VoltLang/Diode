@@ -64,12 +64,17 @@ enum Storage
 class VdocRoot : Value
 {
 public:
-	//! All loaded modules.
-	modules: Value[];
 	//! Current thing that a vdoc template is rendering.
 	current: Value;
 	//! Set holding config data.
 	set: Set;
+
+
+private:
+	//! All loaded modules accessable by name.
+	mModules: Parent[string];
+	//! All children as a array.
+	mChildren: Value[];
 
 
 public:
@@ -78,9 +83,14 @@ public:
 		set = new Set();
 	}
 
+	@property fn modules() Parent[]
+	{
+		return mModules.values;
+	}
+
 	override fn ident(n: ir.Node, key: string) Value
 	{
-		c := Collection.make(modules, key);
+		c := Collection.make(mChildren, key);
 		if (c !is null) {
 			return c;
 		}
@@ -92,23 +102,36 @@ public:
 		}
 	}
 
-	fn getModules() Parent[]
+	//! Return a named object of the given name.
+	fn findNamed(name: string) Named
 	{
-		num := 0u;
-		ret := new Parent[](modules.length);
-		foreach (v; modules) {
+		// TODO this should be a lot smarter,
+		// as it needs to search for children of modules.
+		// pkg.mod.Class must work.
+		if (r := name in mModules) {
+			return *r;
+		}
+
+		return null;
+	}
+
+	/*!
+	 * Sets the children and does any upfront processing needed.
+	 *
+	 * Any old children are removed.
+	 */
+	fn setChildren(children: Value[])
+	{
+		mChildren = children;
+		mModules = [];
+
+		foreach (v; children) {
 			p := cast(Parent)v;
 			if (p is null || p.kind != Kind.Module) {
 				continue;
 			}
 
-			ret[num++] = p;
-		}
-
-		if (num > 0) {
-			return ret[0 .. num];
-		} else {
-			return null;
+			mModules[p.name] = p;
 		}
 	}
 }

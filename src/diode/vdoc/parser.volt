@@ -270,6 +270,7 @@ fn parse(vdocRoot: VdocRoot, data: string)
 {
 	root := json.parse(data);
 	moduleRoot := root.lookupObjectKey("modules");
-
-	fromArray(ref vdocRoot.modules, ref moduleRoot);
+	children: Value[];
+	fromArray(ref children, ref moduleRoot);
+	vdocRoot.setChildren(children);
 }
