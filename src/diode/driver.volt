@@ -450,6 +450,32 @@ public:
 		} while (true);
 	}
 
+	override fn handleFilter(n: ir.Node, ident: string,
+		child: Value, args: Value[], sink: Sink)
+	{
+		fn vdocGet() Value {
+			s: StringSink;
+			child.toText(n, s.sink);
+			ret := mDrv.mVdoc.findNamed(s.toString());
+			if (ret is null) {
+				return new Nil();
+			}
+			return ret;
+		}
+
+		switch (ident) {
+		case "vdoc_get":
+			v = vdocGet();
+			break;
+		case "vdoc_get_url":
+			v = vdocGet().ident(n, "url");
+			break;
+		default:
+			super.handleFilter(n, ident, child, args, sink);
+			break;
+		}
+	}
+
 	override fn handleInclude(p: ir.Include, e: Set, sink: Sink)
 	{
 		ret := p.filename in mIncludes;
