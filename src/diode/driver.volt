@@ -464,10 +464,10 @@ public:
 		}
 
 		switch (ident) {
-		case "vdoc_get":
+		case "vdoc_find":
 			v = vdocGet();
 			break;
-		case "vdoc_get_url":
+		case "vdoc_find_url":
 			v = vdocGet().ident(n, "url");
 			break;
 		default:
