@@ -39,7 +39,7 @@ import io = watt.io;
 import watt.io.streams;
 import watt.io.file : read, exists, searchDir, isDir, isFile;
 import watt.path : dirSeparator;
-import watt.text.string : endsWith;
+import watt.text.string : endsWith, startsWith, join;
 import watt.text.sink;
 import watt.text.format;
 
@@ -178,6 +178,11 @@ fn renderFiles(d: Driver)
 			return;
 		}
 
+		// Skip files starting with '.' and '_'.
+		if (file[0] == '.' || file[0] == '_') {
+			return;
+		}
+
 		if (endsWith(outPath, ".md")) {
 			outPath = outPath[0 .. $ - 3] ~ ".html";
 		} else if (!endsWith(outPath, ".html")) {
@@ -196,35 +201,35 @@ fn addLayouts(d: Driver)
 {
 	dir := d.settings.layoutDir;
 	if (!isDir(dir)) {
-		d.warning("dir not found '%s'", dir);
 		return;
 	}
 
 	fn hit(file: string) {
-		if (isDir(file)) {
+		fullpath := dir ~ dirSeparator ~ file;
+		if (!checkFileWarn(d, file, fullpath, ".html")) {
 			return;
 		}
-		fullpath := dir ~ dirSeparator ~ file;
+
 		str := cast(string)read(fullpath);
 		d.addLayout(str, fullpath);
 	}
 
-	searchDir(dir, "*.html", hit);
+	searchDir(dir, "*", hit);
 }
 
 fn addIncludes(d: Driver)
 {
 	dir := d.settings.includeDir;
 	if (!isDir(dir)) {
-		d.warning("dir not found '%s'", dir);
 		return;
 	}
 
 	fn hit(file: string) {
-		if (isDir(file)) {
+		fullpath := dir ~ dirSeparator ~ file;
+		if (!checkFileWarn(d, file, fullpath)) {
 			return;
 		}
-		fullpath := dir ~ dirSeparator ~ file;
+
 		str := cast(string)read(fullpath);
 		d.addInclude(str, fullpath);
 	}
@@ -237,19 +242,47 @@ fn addVdocTemplates(d: Driver)
 {
 	dir := d.settings.vdocDir;
 	if (!isDir(dir)) {
-		d.warning("dir not found '%s'", dir);
 		return;
 	}
 
 	fn hit(file: string) {
-		if (isDir(file)) {
+		fullpath := dir ~ dirSeparator ~ file;
+		if (!checkFileWarn(d, file, fullpath, ".md", ".html")) {
 			return;
 		}
-		fullpath := dir ~ dirSeparator ~ file;
+
 		str := cast(string)read(fullpath);
 		d.addDocTemplate(str, fullpath);
 	}
 
-	searchDir(dir, "*.md", hit);
-	searchDir(dir, "*.html", hit);
+	searchDir(dir, "*", hit);
+}
+
+
+private:
+
+fn checkFileWarn(d: Driver, file: string, fullpath: string, endings: scope string[]...) bool
+{
+	switch (file) {
+	case ".", "..": return false;
+	default:
+	}
+
+	if (isDir(fullpath)) {
+		d.warning("skipping dir '%s'", fullpath);
+		return false;
+	}
+
+	if (!isFile(fullpath)) {
+		d.warning("'%s' is not a file", fullpath);
+		return false;
+	}
+
+	if (endings.length > 0 && !endsWith(fullpath, endings)) {
+		d.warning("file '%s' does not end with",
+		          fullpath, join(endings, " "));
+		return false;
+	}
+
+	return true;
 }
