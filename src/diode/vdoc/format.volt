@@ -21,7 +21,7 @@ import diode.vdoc.parser;
 fn formatBriefHTML(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
 {
 	dst: StringSink;
-	ret := formatBriefMD(d, e, mod, sink);
+	ret := formatBriefMD(d, e, mod, dst.sink);
 	filterMarkdown(sink, dst.toString());
 	return ret;
 }
@@ -154,7 +154,7 @@ fn drawBrief(ref s: State, n: Named, sink: Sink)
 	}
 
 	foreach (line; splitLines(b)) {
-		format(sink, "%s/// %s\n", s.tabs, line);
+		format(sink, "%s//! %s\n", s.tabs, line);
 	}
 }
 
