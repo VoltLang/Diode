@@ -6,5 +6,5 @@ title: Modules
 <p>
 <a href="{{ mod.url }}">{{ mod.name }}</a>
 <p>
-{% include vdoc_module_brief.md mod=mod -%}
+{{ mod | vdoc_brief_html -}}
 {%- endfor -%}

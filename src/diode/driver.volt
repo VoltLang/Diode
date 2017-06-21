@@ -453,22 +453,49 @@ public:
 	override fn handleFilter(n: ir.Node, ident: string,
 		child: Value, args: Value[], sink: Sink)
 	{
-		fn vdocGet() Value {
+		fn vdocFindOrNil() Value {
 			s: StringSink;
 			child.toText(n, s.sink);
-			ret := mDrv.mVdoc.findNamed(s.toString());
-			if (ret is null) {
-				return new Nil();
+			if (ret := mDrv.mVdoc.findNamed(s.toString())) {
+				return ret;
 			}
-			return ret;
+			return new Nil();
+		}
+
+		fn vdocFindOrError() Value {
+			s: StringSink;
+			child.toText(n, s.sink);
+			name := s.toString();
+			if (ret := mDrv.mVdoc.findNamed(name)) {
+				return ret;
+			}
+			err := format("could not find vdoc object '%s'", name);
+			handleError(err);
+			return null;
 		}
 
 		switch (ident) {
 		case "vdoc_find":
-			v = vdocGet();
+			v = vdocFindOrNil();
 			break;
 		case "vdoc_find_url":
-			v = vdocGet().ident(n, "url");
+			v = vdocFindOrNil().ident(n, "url");
+			break;
+		case "vdoc_find_brief_md":
+			v = vdocFindOrError();
+			goto case;
+		case "vdoc_brief_md":
+			s: StringSink;
+			formatBriefMD(mDrv, this, v, s.sink);
+			v = new Text(s.toString());
+			break;
+		case "vdoc_find_brief_html":
+			v = vdocFindOrError();
+			goto case;
+		case "vdoc_brief_html":
+			s: StringSink;
+			formatBriefHTML(mDrv, this, v, s.sink);
+			v = new Text(s.toString());
 			break;
 		default:
 			super.handleFilter(n, ident, child, args, sink);

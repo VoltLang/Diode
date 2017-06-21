@@ -5,13 +5,16 @@ module diode.vdoc.format;
 import core.exception;
 
 import io = watt.io;
+import watt.text.sink : StringSink;
 import watt.text.vdoc;
 import watt.text.string;
 import watt.text.format;
+import watt.text.markdown : filterMarkdown;
 
 import diode.errors;
 import diode.eval;
 import diode.vdoc;
+import diode.interfaces;
 import diode.vdoc.parser;
 
 
@@ -28,37 +31,64 @@ class VodcModuleBrief : ir.File
 
 		mod := e.env.ident(this, "include").ident(this, "mod");
 
-		s: State;
-		s.mod = cast(Parent)mod;
-		s.parent = s.mod;
+		return formatBriefMD(null, e, mod, sink);
+	}
+}
 
-		if (s.mod is null) {
-			io.error.writefln("include set not given mod argument.");
-			io.error.flush();
-			return ir.Status.Continue;
-		}
+fn formatBriefHTML(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
+{
+	dst: StringSink;
+	ret := formatBriefMD(d, e, mod, sink);
+	filterMarkdown(sink, dst.toString());
+	return ret;
+}
 
+fn formatBriefModuleHTML(ref s: State, sink: Sink)
+{
+	dst: StringSink;
+	formatBriefModuleMD(ref s, dst.sink);
+	filterMarkdown(sink, dst.toString());
+}
 
-		sink("```volt\n");
+fn formatBriefMD(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
+{
+	s: State;
+	s.drv = d;
+	s.engine = e;
+	s.mod = cast(Parent)mod;
+	s.parent = s.mod;
 
-		s.drawBrief(s.mod, sink);
-		format(sink, "module %s;\n\n", s.mod.name);
-
-		s.drawImports(Access.Public, sink);
-
-		sink("\n");
-
-		s.drawChildren(sink);
-
-		format(sink, "```\n");
-
+	// TODO handle other briefs.
+	if (s.mod is null || s.mod.kind != Kind.Module) {
+		d.warning("argument was not a vdoc module");
 		return ir.Status.Continue;
 	}
+
+	formatBriefModuleMD(ref s, sink);
+
+	return ir.Status.Continue;
+}
+
+fn formatBriefModuleMD(ref s: State, sink: Sink)
+{
+	sink("```volt\n");
+
+	s.drawBrief(s.mod, sink);
+	format(sink, "module %s;\n\n", s.mod.name);
+
+	s.drawImports(Access.Public, sink);
+
+	sink("\n");
+
+	s.drawChildren(sink);
+
+	format(sink, "```\n");
 }
 
 struct State
 {
 public:
+	drv: Driver;
 	engine: Engine;
 	mod: Parent;
 	parent: Parent;
@@ -75,6 +105,8 @@ public:
 
 fn setup(ref newState: State, ref oldState: State, parent: Parent)
 {
+	newState.drv = oldState.drv;
+	newState.engine = oldState.engine;
 	newState.mod = oldState.mod;
 	newState.parent = parent;
 	newState.tabs ~= "\t";
