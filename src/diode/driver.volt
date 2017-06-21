@@ -91,11 +91,7 @@ public:
 
 	override fn addBuiltins()
 	{
-		file := new File();
-		file.file = new VodcModuleBrief();
-		file.ext = File.Ext.Markdown;
-		f := getName("_include", "vdoc_module_brief.md");
-		addInclude(file, f);
+		f: string;
 
 		// Add default includes.
 		f = getName("_include", "footer.html");
@@ -120,19 +116,6 @@ public:
 
 		f = getName("_vdoc", "modules.html");
 		addDocTemplate(import("_vdoc/modules.html"), f);
-
-		// Add temporary hack includes.
-		f = getName("_include", "vdoc_children_brief.md");
-		addInclude(import("_include/vdoc_children_brief.md"), f);
-
-		f = getName("_include", "vdoc_doc_brief.md");
-		addInclude(import("_include/vdoc_doc_brief.md"), f);
-
-		f = getName("_include", "vdoc_enumdecls.md");
-		addInclude(import("_include/vdoc_enumdecls.md"), f);
-
-		f = getName("_include", "vdoc_function_brief.md");
-		addInclude(import("_include/vdoc_function_brief.md"), f);
 	}
 
 	override fn processDoc()

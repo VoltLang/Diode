@@ -18,23 +18,6 @@ import diode.interfaces;
 import diode.vdoc.parser;
 
 
-class VodcModuleBrief : ir.File
-{
-	override fn accept(v: ir.Visitor, sink: Sink) ir.Status
-	{
-		e := cast(Engine)v;
-		if (e is null) {
-			io.error.writefln("internal error");
-			io.error.flush();
-			return ir.Status.Continue;
-		}
-
-		mod := e.env.ident(this, "include").ident(this, "mod");
-
-		return formatBriefMD(null, e, mod, sink);
-	}
-}
-
 fn formatBriefHTML(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
 {
 	dst: StringSink;
