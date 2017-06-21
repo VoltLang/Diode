@@ -18,22 +18,7 @@ import diode.interfaces;
 import diode.vdoc.parser;
 
 
-fn formatBriefHTML(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
-{
-	dst: StringSink;
-	ret := formatBriefMD(d, e, mod, dst.sink);
-	filterMarkdown(sink, dst.toString());
-	return ret;
-}
-
-fn formatBriefModuleHTML(ref s: State, sink: Sink)
-{
-	dst: StringSink;
-	formatBriefModuleMD(ref s, dst.sink);
-	filterMarkdown(sink, dst.toString());
-}
-
-fn formatBriefMD(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
+fn formatAsCode(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
 {
 	s: State;
 	s.drv = d;
@@ -47,15 +32,13 @@ fn formatBriefMD(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
 		return ir.Status.Continue;
 	}
 
-	formatBriefModuleMD(ref s, sink);
+	formatAsCodeModule(ref s, sink);
 
 	return ir.Status.Continue;
 }
 
-fn formatBriefModuleMD(ref s: State, sink: Sink)
+fn formatAsCodeModule(ref s: State, sink: Sink)
 {
-	sink("```volt\n");
-
 	s.drawBrief(s.mod, sink);
 	format(sink, "module %s;\n\n", s.mod.name);
 
@@ -64,8 +47,6 @@ fn formatBriefModuleMD(ref s: State, sink: Sink)
 	sink("\n");
 
 	s.drawChildren(sink);
-
-	format(sink, "```\n");
 }
 
 struct State

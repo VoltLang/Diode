@@ -3,8 +3,11 @@ layout: page
 title: Modules
 ---
 {% for mod in vdoc.modules -%}
-<p>
-<a href="{{ mod.url }}">{{ mod.name }}</a>
-<p>
-{{ mod | vdoc_brief_html -}}
+
+<h1><a href="{{ mod.url }}">{{ mod.name }}</a></h1>
+
+<pre><code class="language-volt">
+{{- mod | vdoc_as_code: 'brief' -}}
+</code></pre>
+
 {%- endfor -%}

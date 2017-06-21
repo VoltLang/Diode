@@ -2,4 +2,10 @@
 layout: page
 title: Module
 ---
-{{ vdoc.current | vdoc_brief_html }}
+{%- assign mod = vdoc.current -%}
+
+<h1>{{ mod.name }}</h1>
+
+<pre><code class="language-volt">
+{{- mod | vdoc_as_code: 'brief' -}}
+</code></pre>

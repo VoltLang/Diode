@@ -436,6 +436,15 @@ public:
 	override fn handleFilter(n: ir.Node, ident: string,
 		child: Value, args: Value[], sink: Sink)
 	{
+		fn getArg(i: size_t) string {
+			if (args.length <= i) {
+				handleError(format("expected at least %s argument to '%s' filter.", i+1, ident));
+			}
+			argsink: StringSink;
+			args[i].toText(n, argsink.sink);
+			return argsink.toString();
+		}
+
 		fn vdocFindOrNil() Value {
 			s: StringSink;
 			child.toText(n, s.sink);
@@ -464,20 +473,20 @@ public:
 		case "vdoc_find_url":
 			v = vdocFindOrNil().ident(n, "url");
 			break;
-		case "vdoc_find_brief_md":
-			v = vdocFindOrError();
-			goto case;
-		case "vdoc_brief_md":
+		case "vdoc_find_as_code":
+			child = vdocFindOrError();
+			goto case "vdoc_as_code";
+		case "vdoc_as_code":
 			s: StringSink;
-			formatBriefMD(mDrv, this, v, s.sink);
-			v = new Text(s.toString());
-			break;
-		case "vdoc_find_brief_html":
-			v = vdocFindOrError();
-			goto case;
-		case "vdoc_brief_html":
-			s: StringSink;
-			formatBriefHTML(mDrv, this, v, s.sink);
+			type := args.length > 0 ? getArg(0) : "brief";
+			switch (type) {
+			case "brief":
+				formatAsCode(mDrv, this, child, s.sink);
+				break;
+			default:
+				str := format("type '%s' not supported for %s.", type, ident);
+				handleError(str);
+			}
 			v = new Text(s.toString());
 			break;
 		default:
