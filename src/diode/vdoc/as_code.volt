@@ -110,8 +110,8 @@ fn flushProt(ref s: State, access: Access, kind: Kind, sink: Sink)
 fn drawName(ref s: State, named: Named, sink: Sink)
 {
 	if (named.url !is null) {
-		format(sink, `<a class=\"code\" href=\"%s\">%s</a>`,
-			named.url, named.name);
+		format(sink, `<a class="code" href="%s">%s</a>`,
+		       named.url, named.name);
 	} else {
 		sink(named.name);
 	}
