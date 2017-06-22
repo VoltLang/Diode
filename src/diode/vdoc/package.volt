@@ -169,7 +169,7 @@ public:
 		case "doc": return makeNilOrText(rawToFull(raw));
 		case "brief": return makeNilOrText(rawToBrief(raw));
 		case "access": return new Text(accessToString(access));
-		default: throw makeNoField(n, key);
+		default: return new Nil();
 		}
 	}
 }
