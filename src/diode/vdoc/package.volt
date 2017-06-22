@@ -354,6 +354,7 @@ public:
 	{
 		kind: Kind;
 		switch (key) with (Kind) {
+		case "children":
 		case "all":
 			if (vals.length > 0) {
 				return new Collection(vals);
