@@ -158,6 +158,8 @@ public:
 	raw: string;
 	//! Where to find the per thing documentation page, if any.
 	url: string;
+	//! A unique identifier for this object.
+	tag: string;
 
 
 public:
@@ -169,6 +171,7 @@ public:
 		case "doc": return makeNilOrText(rawToFull(raw));
 		case "brief": return makeNilOrText(rawToBrief(raw));
 		case "access": return new Text(accessToString(access));
+		case "tag": return new Text(tag);
 		default: return new Nil();
 		}
 	}

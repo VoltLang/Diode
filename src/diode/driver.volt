@@ -126,9 +126,10 @@ public:
 			return;
 		}
 
-		mods := mVdoc.modules;
+		mods: Parent[] = mVdoc.modules;
 		foreach (mod; mods) {
 			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
+			tag(mod);
 		}
 
 		s: StringSink;
@@ -265,6 +266,34 @@ public:
 
 
 protected:
+	mTagCounter: u64;
+
+	fn tag(mod: Parent)
+	{
+		mod.tag = getTag(mod.name);
+		foreach (child; mod.children) {
+			tag(child);
+		}
+	}
+
+	fn tag(val: Value)
+	{
+		named := cast(Named)val;
+		if (named is null) {
+			return;
+		}
+		named.tag = getTag(named.name);
+		parent := cast(Parent)val;
+		if (parent !is null) {
+			tag(parent);
+		}
+	}
+
+	fn getTag(base: string) string
+	{
+		return format("%s%s", base, mTagCounter++);
+	}
+
 	fn getName(dir: string, base: string) string
 	{
 		return format("<builtin>%s%s%s%s",

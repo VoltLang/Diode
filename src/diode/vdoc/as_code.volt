@@ -112,6 +112,9 @@ fn drawName(ref s: State, named: Named, sink: Sink)
 	if (named.url !is null) {
 		format(sink, `<a class="code" href="%s">%s</a>`,
 		       named.url, named.name);
+	} else if (named.tag !is null) {
+		format(sink, `<a class="code" href="#%s">%s</a>`,
+		       named.tag, named.name);
 	} else {
 		sink(named.name);
 	}
@@ -355,7 +358,9 @@ fn drawMembers(ref s: State, access: Access, sink: Sink)
 
 fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 {
-	format(sink, "%s%sfn %s(", s.tabs, prefix, f.name);
+	format(sink, "%s%sfn ", s.tabs, prefix, f.name);
+	drawName(ref s, f, sink);
+	format(sink, "(");
 
 	hasPrinted := false;
 	foreach (c; f.args) {
