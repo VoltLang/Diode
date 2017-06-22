@@ -107,10 +107,22 @@ fn flushProt(ref s: State, access: Access, kind: Kind, sink: Sink)
 	format(sink, "%s%s:\n", s.tabsProt, accessToString(access));
 }
 
+fn drawName(ref s: State, named: Named, sink: Sink)
+{
+	if (named.url !is null) {
+		format(sink, `<a class=\"code\" href=\"%s\">%s</a>`,
+			named.url, named.name);
+	} else {
+		sink(named.name);
+	}
+}
+
 fn drawModule(ref s: State, sink: Sink)
 {
 	s.drawBrief(s.mod, sink);
-	format(sink, "module %s;\n\n", s.mod.name);
+	sink("module ");
+	drawName(ref s, s.mod, sink);
+	sink(";\n\n");
 
 	s.drawImports(Access.Public, sink);
 
@@ -397,7 +409,9 @@ fn drawClasses(ref s: State, access: Access, sink: Sink)
 
 fn drawClass(ref s: State, c: Parent, sink: Sink)
 {
-	format(sink, "%sclass %s\n%s{\n", s.tabs, c.name, s.tabs);
+	format(sink, "%sclass ", s.tabs);
+	drawName(ref s, c, sink);
+	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;
 	newState.setup(ref s, c);
@@ -441,7 +455,9 @@ fn drawAggrs(ref s: State, access: Access, kind: Kind, prefix: string, sink: Sin
 
 fn drawAggr(ref s: State, c: Parent, prefix: string, sink: Sink)
 {
-	format(sink, "%s%s %s\n%s{\n", s.tabs, prefix, c.name, s.tabs);
+	format(sink, "%s%s ", s.tabs, prefix);
+	drawName(ref s, c, sink);
+	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;
 	newState.setup(ref s, c);
