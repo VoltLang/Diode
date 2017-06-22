@@ -9,3 +9,12 @@ title: Module
 <pre><code class="language-volt">
 {{- mod | vdoc_as_code: 'brief' -}}
 </code></pre>
+<br>
+{%- for child in mod.children -%}
+	{%- if child.tag and child.doc -%}
+		<a name="{{child.tag}}">
+		<h2>{{child.name}}</h2>
+		<p>{{child.doc}}</p>
+		</a>
+	{%- endif -%}
+{%- endfor -%}
