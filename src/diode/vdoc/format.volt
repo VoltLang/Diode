@@ -398,7 +398,7 @@ fn drawClass(ref s: State, c: Parent, sink: Sink)
 
 fn drawUnions(ref s: State, access: Access, sink: Sink)
 {
-	s.drawAggrs(access, Kind.Struct, "union", sink);
+	s.drawAggrs(access, Kind.Union, "union", sink);
 }
 
 fn drawStructs(ref s: State, access: Access, sink: Sink)
