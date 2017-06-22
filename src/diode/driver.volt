@@ -21,8 +21,9 @@ import diode.eval.json : jsonToValue = toValue, jsonToSet = toSet;
 import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;
-import diode.vdoc.format;
 import diode.vdoc.parser;
+import diode.vdoc.full;
+import diode.vdoc.as_code;
 
 
 /*!
