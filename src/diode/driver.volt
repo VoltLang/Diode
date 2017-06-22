@@ -110,6 +110,9 @@ public:
 		f = getName("_include", "header.html");
 		addInclude(import("_include/header.html"), f);
 
+		f = getName("_include", "vdoc_child.html");
+		addInclude(import("_include/vdoc_child.html"), f);
+
 		// Add default layouts.
 		f = getName("_layout", "page.html");
 		addLayout(import("_layout/page.html"), f);

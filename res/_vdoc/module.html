@@ -11,9 +11,5 @@ title: Module
 </code></pre>
 <br>
 {%- for child in mod.children -%}
-	{%- if child.url and child.tag -%}
-		<a name="{{ child.tag }}"></a>
-		<h2>{{ child.name }}</h2>
-		<p>{{ child | vdoc_full: 'html' }}</p>
-	{%- endif -%}
+	{%- include vdoc_child.html child=child -%}
 {%- endfor -%}
