@@ -42,6 +42,12 @@ protected:
 	mDocModules: File;
 	mVerbose: bool;
 	mSiteSettings: json.Value;
+	mPrintUndocumented: bool;
+
+
+private:
+	//! Counter for tagging of vdoc objects.
+	mTagCounter: u64;
 
 
 public:
@@ -129,7 +135,7 @@ public:
 		mods: Parent[] = mVdoc.modules;
 		foreach (mod; mods) {
 			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
-			tag(mod);
+			tag(mod, mod);
 		}
 
 		s: StringSink;
@@ -266,32 +272,55 @@ public:
 
 
 protected:
-	mTagCounter: u64;
-
-	fn tag(mod: Parent)
-	{
-		mod.tag = getTag(mod.name);
-		foreach (child; mod.children) {
-			tag(child);
-		}
-	}
-
-	fn tag(val: Value)
+	fn tag(val: Value, parentWithUrl: Parent)
 	{
 		named := cast(Named)val;
 		if (named is null) {
 			return;
 		}
+
+		// If the named has a url always process it and it's children.
+		// Skip objects without doccoment if mPrintUndocumented is not set.
+		if (named.url is null &&
+		    named.raw is null &&
+		    !mPrintUndocumented) {
+			return;
+		}
+
 		named.tag = getTag(named.name);
+
+		// Check if this value is a parent.
 		parent := cast(Parent)val;
-		if (parent !is null) {
-			tag(parent);
+		if (parent is null) {
+			// Set the url only after we know this is not a parent.
+			setUrl(named, parentWithUrl);
+			return;
+		}
+
+		parentToUse := parent.url !is null ? parent : parentWithUrl;
+		foreach (child; parent.children) {
+			tag(child, parentToUse);
+		}
+
+		// Set the url after we are done with children.
+		setUrl(named, parentWithUrl);
+	}
+
+	fn setUrl(named: Named, parentWithUrl: Named)
+	{
+		if (named.url is null) {
+			named.url = getUrl(named, parentWithUrl);
 		}
 	}
 
 	fn getTag(base: string) string
 	{
 		return format("%s%s", base, mTagCounter++);
+	}
+
+	fn getUrl(named: Named, parentWithUrl: Named) string
+	{
+		return format("%s#%s", parentWithUrl.url, named.tag);
 	}
 
 	fn getName(dir: string, base: string) string
