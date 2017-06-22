@@ -482,6 +482,13 @@ public:
 		case "vdoc_find_url":
 			v = vdocFindOrNil().ident(n, "url");
 			break;
+		case "vdoc_find_full":
+			child = vdocFindOrError();
+			goto case "vdoc_full";
+		case "vdoc_full":
+			type := getArgOrDefault("html");
+			v = new FormatFull(mDrv, mDrv.mVdoc, child, type);
+			break;
 		case "vdoc_find_as_code":
 			child = vdocFindOrError();
 			goto case "vdoc_as_code";
