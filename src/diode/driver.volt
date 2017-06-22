@@ -445,6 +445,15 @@ public:
 			return argsink.toString();
 		}
 
+		fn getArgOrDefault(def: string) string {
+			if (args.length < 1) {
+				return def;
+			}
+			argsink: StringSink;
+			args[0].toText(n, argsink.sink);
+			return argsink.toString();
+		}
+
 		fn vdocFindOrNil() Value {
 			s: StringSink;
 			child.toText(n, s.sink);
@@ -477,17 +486,8 @@ public:
 			child = vdocFindOrError();
 			goto case "vdoc_as_code";
 		case "vdoc_as_code":
-			s: StringSink;
-			type := args.length > 0 ? getArg(0) : "brief";
-			switch (type) {
-			case "brief":
-				formatAsCode(mDrv, this, child, s.sink);
-				break;
-			default:
-				str := format("type '%s' not supported for %s.", type, ident);
-				handleError(str);
-			}
-			v = new Text(s.toString());
+			type := getArgOrDefault("brief");
+			v = new FormatAsCode(mDrv, this, child, type);
 			break;
 		default:
 			super.handleFilter(n, ident, child, args, sink);

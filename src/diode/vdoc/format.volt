@@ -18,35 +18,38 @@ import diode.interfaces;
 import diode.vdoc.parser;
 
 
-fn formatAsCode(d: Driver, e: Engine, mod: Value, sink: Sink) ir.Status
+class FormatAsCode : Value
 {
-	s: State;
-	s.drv = d;
-	s.engine = e;
-	s.mod = cast(Parent)mod;
-	s.parent = s.mod;
+private:
+	mState: State;
 
-	// TODO handle other briefs.
-	if (s.mod is null || s.mod.kind != Kind.Module) {
-		d.warning("argument was not a vdoc module");
-		return ir.Status.Continue;
+
+public:
+	this(d: Driver, e: Engine, v: Value, type: string)
+	{
+		mod := cast(Parent)v;
+
+		mState.drv = d;
+		mState.engine = e;
+		mState.mod = mod;
+		mState.parent = mState.mod;
+
+		// TODO handle other briefs.
+		if (mod is null || mod.kind != Kind.Module) {
+			d.warning("argument was not a vdoc module");
+		}
+
+		switch (type) {
+		case "brief": break;
+		default:
+			d.warning("type '%s' not supported for as_code.", type);
+		}
 	}
 
-	formatAsCodeModule(ref s, sink);
-
-	return ir.Status.Continue;
-}
-
-fn formatAsCodeModule(ref s: State, sink: Sink)
-{
-	s.drawBrief(s.mod, sink);
-	format(sink, "module %s;\n\n", s.mod.name);
-
-	s.drawImports(Access.Public, sink);
-
-	sink("\n");
-
-	s.drawChildren(sink);
+	override fn toText(n: ir.Node, sink: Sink)
+	{
+		drawModule(ref mState, sink);
+	}
 }
 
 struct State
@@ -100,6 +103,18 @@ fn flushProt(ref s: State, access: Access, kind: Kind, sink: Sink)
 	s.lastKind = kind;
 	s.lastAccess = access;
 	format(sink, "%s%s:\n", s.tabsProt, accessToString(access));
+}
+
+fn drawModule(ref s: State, sink: Sink)
+{
+	s.drawBrief(s.mod, sink);
+	format(sink, "module %s;\n\n", s.mod.name);
+
+	s.drawImports(Access.Public, sink);
+
+	sink("\n");
+
+	s.drawChildren(sink);
 }
 
 fn drawChildren(ref s: State, sink: Sink)
