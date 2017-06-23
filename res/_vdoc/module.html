@@ -11,5 +11,6 @@ title: Module
 </code></pre>
 <br>
 {%- for child in mod.children -%}
-	{%- include vdoc_child.html child=child -%}
+	{%- assign oldchild=forloop.prev -%}
+	{%- include vdoc_child.html child=child oldchild=oldchild -%}
 {%- endfor -%}

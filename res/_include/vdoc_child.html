@@ -1,8 +1,8 @@
 
 {%- assign obj = include.child -%}
+{%- assign oldobj = include.oldchild -%}
 
 {%- if obj.url and obj.tag -%}
-
 <div id="{{ obj.tag }}">
 <h2>{{ obj.name }}</h2>
 <p>{{ obj | vdoc_full: 'html' }}</p>
