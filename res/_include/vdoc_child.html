@@ -3,12 +3,12 @@
 
 {%- if obj.url and obj.tag -%}
 
-<a name="{{ obj.tag }}"></a>
+<div id="{{ obj.tag }}">
 <h2>{{ obj.name }}</h2>
 <p>{{ obj | vdoc_full: 'html' }}</p>
 
 	{%- for child in obj.children -%}
 		{%- include vdoc_child.html child=child -%}
 	{%- endfor -%}
-
+</div>
 {%- endif -%}
