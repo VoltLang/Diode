@@ -17,6 +17,7 @@ import diode.eval;
 import diode.vdoc;
 import diode.interfaces;
 import diode.vdoc.parser;
+import diode.vdoc.brief;
 
 
 //! Formats a vdoc module into code.
@@ -27,14 +28,10 @@ private:
 
 
 public:
-	this(d: Driver, e: Engine, v: Value, type: string)
+	this(d: Driver, e: Engine, root: VdocRoot, v: Value, type: string)
 	{
 		mod := cast(Parent)v;
-
-		mState.drv = d;
-		mState.engine = e;
-		mState.mod = mod;
-		mState.parent = mState.mod;
+		mState.setup(d, e, root, mod, mod);
 
 		// TODO handle other briefs.
 		if (mod is null || mod.kind != Kind.Module) {
@@ -58,9 +55,12 @@ struct State
 {
 public:
 	drv: Driver;
-	engine: Engine;
 	mod: Parent;
+	root: VdocRoot;
+	engine: Engine;
 	parent: Parent;
+	//! Cached object for generating brief doccomments.
+	brief: DocCommentBrief;
 
 	tabs: string;
 	tabsProt: string;
@@ -70,17 +70,42 @@ public:
 
 	hasProt: bool;
 	hasPrinted: bool;
-}
 
-fn setup(ref newState: State, ref oldState: State, parent: Parent)
-{
-	newState.drv = oldState.drv;
-	newState.engine = oldState.engine;
-	newState.mod = oldState.mod;
-	newState.parent = parent;
-	newState.tabs ~= "\t";
-	if (oldState.mod !is oldState.parent) {
-		newState.tabsProt ~= "\t";
+
+public:
+	fn setup(drv: Driver, engine: Engine, root: VdocRoot, mod: Parent, parent: Parent)
+	{
+		intSetup(drv, engine, root, mod, parent,
+		      new DocCommentBrief(drv, root, mod));
+	}
+
+	fn setup(ref oldState: State, parent: Parent)
+	{
+		intSetup(
+			oldState.drv,
+			oldState.engine,
+			oldState.root,
+			oldState.mod,
+			parent,
+			oldState.brief);
+
+		this.tabs ~= "\t";
+		if (oldState.mod !is oldState.parent) {
+			this.tabsProt ~= "\t";
+		}
+	}
+
+
+private:
+	fn intSetup(drv: Driver, engine: Engine, root: VdocRoot, mod: Parent,
+	            parent: Parent, brief: DocCommentBrief)
+	{
+		this.drv = drv;
+		this.root = root;
+		this.mod = mod;
+		this.parent = parent;
+		this.engine = engine;
+		this.brief = brief;
 	}
 }
 
@@ -167,7 +192,7 @@ fn drawChildren(ref s: State, sink: Sink)
 
 fn drawBrief(ref s: State, n: Named, sink: Sink)
 {
-	b := rawToBrief(n.raw);
+	b := s.brief.getString(n);
 	if (b.length == 0) {
 		return;
 	}

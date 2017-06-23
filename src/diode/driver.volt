@@ -22,7 +22,7 @@ import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;
 import diode.vdoc.parser;
-import diode.vdoc.full;
+import diode.vdoc.filter;
 import diode.vdoc.as_code;
 
 
@@ -549,14 +549,14 @@ public:
 			goto case "vdoc_full";
 		case "vdoc_full":
 			type := getArgOrDefault("html");
-			v = new FormatFull(mDrv, mDrv.mVdoc, child, type);
+			v = handleDocCommentFilter(mDrv, this, mDrv.mVdoc, child, ident, type);
 			break;
 		case "vdoc_find_as_code":
 			child = vdocFindOrError();
 			goto case "vdoc_as_code";
 		case "vdoc_as_code":
 			type := getArgOrDefault("brief");
-			v = new FormatAsCode(mDrv, this, child, type);
+			v = new FormatAsCode(mDrv, this, mDrv.mVdoc, child, type);
 			break;
 		default:
 			super.handleFilter(n, ident, child, args, sink);

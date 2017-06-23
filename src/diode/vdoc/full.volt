@@ -15,8 +15,8 @@ import diode.interfaces;
 import diode.vdoc.parser;
 
 
-//! Formats a vdoc named entity to a html string.
-class FormatFull : Value, DocSink
+//! Handles formating of DocComments into HTML.
+class DocCommentFull : Value, DocSink
 {
 public:
 	drv: Driver;
@@ -25,21 +25,11 @@ public:
 
 
 public:
-	this(d: Driver, root: VdocRoot, v: Value, type: string)
+	this(d: Driver, root: VdocRoot, named: Named)
 	{
 		this.drv = d;
 		this.root = root;
-		this.named = cast(Named)v;
-
-		if (named is null) {
-			d.warning("argument was not a vdoc named thing.");
-		}
-
-		switch (type) {
-		case "html": break;
-		default:
-			d.warning("type '%s' not supported for as_code.", type);
-		}
+		this.named = named;
 	}
 
 	override fn toText(n: ir.Node, sink: Sink)
@@ -48,6 +38,7 @@ public:
 			return;
 		}
 
+		// TODO use markdown instead.
 		parse(named.raw, this, sink);
 	}
 
