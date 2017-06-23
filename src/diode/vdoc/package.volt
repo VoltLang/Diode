@@ -168,8 +168,7 @@ public:
 		switch (key) {
 		case "name": return new Text(name);
 		case "url": return makeNilOrText(url);
-		case "doc": return makeNilOrText(rawToFull(raw));
-		case "brief": return makeNilOrText(rawToBrief(raw));
+		case "raw": return new Text(raw);
 		case "access": return new Text(accessToString(access));
 		case "tag": return new Text(tag);
 		default: return new Nil();
