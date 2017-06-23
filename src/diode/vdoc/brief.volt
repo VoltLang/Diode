@@ -5,6 +5,7 @@ module diode.vdoc.brief;
 
 import watt.text.vdoc;
 import watt.text.sink;
+import watt.text.string;
 
 import diode.interfaces;
 import diode.eval;
@@ -18,6 +19,7 @@ public:
 	//! Are we collecting input.
 	collecting: bool;
 	hasCollected: bool;
+	impliedbriefing: bool;
 
 
 public:
@@ -29,10 +31,11 @@ public:
 	fn getString(named: Named) string
 	{
 		hasCollected = false;
+		impliedbriefing = true;
 		this.named = named;
 		s: StringSink;
 		toText(null, s.sink);
-		return s.toString();
+		return strip(s.toString());
 	}
 
 	override fn toText(n: ir.Node, sink: Sink)
@@ -51,6 +54,7 @@ public:
 	override fn briefStart(sink: Sink)
 	{
 		collecting = true;
+		impliedbriefing = false;
 	}
 
 	override fn briefEnd(sink: Sink)
@@ -61,13 +65,25 @@ public:
 
 	override fn briefContent(d: string, sink: Sink) { if (collecting) { sink(d); } }
 	override fn p(d: string, sink: Sink) { if (collecting) { super.p(d, sink); } }
-	override fn link(link: string, sink: Sink) { if (collecting) { super.link(link, sink); } }
+	override fn link(link: string, sink: Sink) { if (collecting || impliedbriefing) { super.link(link, sink); } }
 
 	override fn paramStart(direction: string, arg: string, sink: Sink) { }
 	override fn paramContent(d: string, sink: Sink) { }
 	override fn paramEnd(sink: Sink) { }
 
 	override fn start(sink: Sink) { }
-	override fn content(d: string, sink: Sink) { }
+
+	override fn content(d: string, sink: Sink)
+	{
+		if (impliedbriefing && d.length >= 0) {
+			super.content(d, sink);
+			index := d.indexOf(".");
+			if (index >= 0) {
+				impliedbriefing = false;
+				hasCollected = true;
+			}
+		}
+	}
+
 	override fn end(sink: Sink) { }
 }
