@@ -136,9 +136,11 @@ public:
 		}
 
 		mods: Parent[] = mVdoc.modules;
+		prev: Value;
 		foreach (mod; mods) {
 			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
-			tag(mod, mod);
+			tag(mod, mod, prev);
+			prev = mod;
 		}
 
 		s: StringSink;
@@ -275,7 +277,7 @@ public:
 
 
 protected:
-	fn tag(val: Value, parentWithUrl: Parent)
+	fn tag(val: Value, parentWithUrl: Parent, prev: Value)
 	{
 		named := cast(Named)val;
 		if (named is null) {
@@ -290,7 +292,12 @@ protected:
 			return;
 		}
 
-		named.tag = getTag(named.name);
+		prevNamed := cast(Named)prev;
+		if (prevNamed !is null && prevNamed.name == named.name && prevNamed.raw == named.raw) {
+			named.tag = prevNamed.tag;
+		} else {
+			named.tag = getTag(named.name);
+		}
 
 		// Check if this value is a parent.
 		parent := cast(Parent)val;
@@ -301,8 +308,10 @@ protected:
 		}
 
 		parentToUse := parent.url !is null ? parent : parentWithUrl;
+		p: Value;
 		foreach (child; parent.children) {
-			tag(child, parentToUse);
+			tag(child, parentToUse, p);
+			p = child;
 		}
 
 		// Set the url after we are done with children.

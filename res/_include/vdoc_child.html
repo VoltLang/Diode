@@ -3,12 +3,15 @@
 {%- assign oldobj = include.oldchild -%}
 
 {%- if obj.url and obj.tag -%}
+{%- if obj.tag == oldobj.tag -%}
+{%- comment -%}Don't display the same documentation multiple times.{%- endcomment -%}
+{%- else -%}
 <div id="{{ obj.tag }}">
 <h2>{{ obj.name }}</h2>
 <p>{{ obj | vdoc_full: 'html' }}</p>
-
 	{%- for child in obj.children -%}
 		{%- include vdoc_child.html child=child -%}
 	{%- endfor -%}
 </div>
+{%- endif -%}
 {%- endif -%}
