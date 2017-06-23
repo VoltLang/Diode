@@ -3,77 +3,33 @@
 //! Code to format vdoc object doccomments in full.
 module diode.vdoc.full;
 
-import watt.text.sink : StringSink;
-import watt.text.vdoc;
-import watt.text.string;
-import watt.text.format;
+import watt.text.sink : Sink, StringSink;
+import watt.text.format : format;
 
-import diode.errors;
-import diode.eval;
-import diode.vdoc;
-import diode.interfaces;
-import diode.vdoc.parser;
+import ir = diode.ir;
+
+import diode.interfaces : Driver;
+import diode.vdoc : VdocRoot, Named;
+import diode.vdoc.filter : DocCommentValue;
 
 
 //! Handles formating of DocComments into HTML.
-class DocCommentFull : Value, DocSink
+class DocCommentFull : DocCommentValue
 {
-public:
-	drv: Driver;
-	root: VdocRoot;
-	named: Named;
-
-
 public:
 	this(d: Driver, root: VdocRoot, named: Named)
 	{
-		this.drv = d;
-		this.root = root;
-		this.named = named;
+		super(d, root, named);
 	}
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		if (named is null) {
-			return;
-		}
-
-		// TODO use markdown instead.
-		parse(named.raw, this, sink);
-	}
-
-	override fn briefStart(sink: Sink) { }
-	override fn briefContent(d: string, sink: Sink) { }
-	override fn briefEnd(sink: Sink) { }
-
-	override fn paramStart(direction: string, arg: string, sink: Sink)
-	{
-		// TODO
-	}
-
-	override fn paramContent(d: string, sink: Sink)
-	{
-		// TODO
-	}
-
-	override fn paramEnd(sink: Sink)
-	{
-		// TODO
-	}
-
-	override fn start(sink: Sink)
-	{
-		// TODO?
+		safeParse(sink);
 	}
 
 	override fn content(d: string, sink: Sink)
 	{
 		sink(d);
-	}
-
-	override fn end(sink: Sink)
-	{
-		// TODO?
 	}
 
 	override fn p(d: string, sink: Sink)

@@ -3,6 +3,8 @@
 //! Code handle vdoc filters.
 module diode.vdoc.filter;
 
+import watt.text.vdoc;
+
 import diode.errors;
 import diode.eval;
 import diode.vdoc;
@@ -52,4 +54,48 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	} else {
 		e.handleError("internal error");
 	}
+}
+
+//! Helper class for DocComments.
+abstract class DocCommentValue : Value, DocSink
+{
+public:
+	drv: Driver;
+	root: VdocRoot;
+	named: Named;
+
+
+public:
+	this(d: Driver, root: VdocRoot, named: Named)
+	{
+		this.drv = d;
+		this.root = root;
+		this.named = named;
+	}
+
+	final fn safeParse(sink: Sink) bool
+	{
+		if (named is null) {
+			return false;
+		}
+		if (named.raw is null) {
+			return false;
+		}
+
+		parse(named.raw, this, sink);
+
+		return true;
+	}
+
+	override fn briefStart(sink: Sink) { }
+	override fn briefEnd(sink: Sink) { }
+	override fn briefContent(d: string, sink: Sink) { }
+	override fn p(d: string, sink: Sink) { }
+	override fn link(link: string, sink: Sink) { }
+	override fn content(d: string, sink: Sink) { }
+	override fn paramStart(direction: string, arg: string, sink: Sink) { }
+	override fn paramContent(d: string, sink: Sink) { }
+	override fn paramEnd(sink: Sink) { }
+	override fn start(sink: Sink) { }
+	override fn end(sink: Sink) { }
 }
