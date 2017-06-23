@@ -544,9 +544,11 @@ public:
 		parent := env;
 		first := new Bool(true);
 		last := new Bool(false);
+
 		forloop := new Set();
 		forloop.ctx["first"] = first;
 		forloop.ctx["last"] = last;
+		forloop.ctx["prev"] = new Nil();
 
 		// Setup new env and loop over nodes.
 		foreach(i, elm; arr) {
@@ -562,6 +564,8 @@ public:
 			foreach(n; f.nodes) {
 				n.accept(this, sink);
 			}
+
+			forloop.ctx["prev"] = elm;
 		}
 		env = parent;
 
