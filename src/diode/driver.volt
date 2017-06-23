@@ -544,10 +544,10 @@ public:
 		case "vdoc_find_url":
 			v = vdocFindOrNil().ident(n, "url");
 			break;
-		case "vdoc_find_full":
+		case "vdoc_find_full", "vdoc_find_brief":
 			child = vdocFindOrError();
 			goto case "vdoc_full";
-		case "vdoc_full":
+		case "vdoc_full", "vdoc_brief":
 			type := getArgOrDefault("html");
 			v = handleDocCommentFilter(mDrv, this, mDrv.mVdoc, child, ident, type);
 			break;
