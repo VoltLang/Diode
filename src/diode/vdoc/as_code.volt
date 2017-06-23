@@ -109,12 +109,17 @@ fn flushProt(ref s: State, access: Access, kind: Kind, sink: Sink)
 
 fn drawName(ref s: State, named: Named, sink: Sink)
 {
+	drawName(ref s, named, named.name, sink);
+}
+
+fn drawName(ref s: State, named: Named, name: string, sink: Sink)
+{
 	if (named.url !is null) {
 		format(sink, `<a class="code" href="%s">%s</a>`,
-		       named.url, named.name);
+		       named.url, name);
 	} else if (named.tag !is null) {
 		format(sink, `<a class="code" href="#%s">%s</a>`,
-		       named.tag, named.name);
+		       named.tag, name);
 	} else {
 		sink(named.name);
 	}
@@ -146,6 +151,7 @@ fn drawChildren(ref s: State, sink: Sink)
 	s.drawGlobals(Access.Public, sink);
 	s.drawMembers(Access.Public, sink);
 	s.drawFns(Access.Public, sink);
+	s.drawCtors(Access.Public, sink);
 
 	s.drawEnumDecls(Access.Protected, sink);
 	s.drawEnums(Access.Protected, sink);
@@ -335,6 +341,25 @@ fn drawFns(ref s: State, access: Access, sink: Sink)
 	}
 }
 
+fn drawCtors(ref s: State, access: Access, sink: Sink)
+{
+	hasPrinted: bool;
+
+	foreach (child; s.parent.children) {
+		c := cast(Function)child;
+		if (c is null || c.kind != Kind.Constructor ||
+		    c.access != access) {
+			continue;
+		}
+		s.drawCtor(c, sink);
+		hasPrinted = true;
+	}
+
+	if (hasPrinted) {
+		s.hasPrinted = true;
+	}
+}
+
 fn drawMembers(ref s: State, access: Access, sink: Sink)
 {
 	hasPrinted: bool;
@@ -356,11 +381,35 @@ fn drawMembers(ref s: State, access: Access, sink: Sink)
 	}
 }
 
+fn drawCtor(ref s: State, f: Function, sink: Sink)
+{
+	format(sink, "%s", s.tabs);
+	drawName(ref s, f, "this", sink);
+	sink("(");
+
+	hasPrinted := false;
+	foreach (c; f.args) {
+		arg := cast(Arg)c;
+		if (hasPrinted) {
+			sink(", ");
+		}
+
+		if (arg.name is null) {
+			format(sink, "%s", arg.type);
+		} else {
+			format(sink, "%s: %s", arg.name, arg.type);
+		}
+		hasPrinted = true;
+	}
+
+	sink(") { }\n");
+}
+
 fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 {
 	format(sink, "%s%sfn ", s.tabs, prefix, f.name);
 	drawName(ref s, f, sink);
-	format(sink, "(");
+	sink("(");
 
 	hasPrinted := false;
 	foreach (c; f.args) {
