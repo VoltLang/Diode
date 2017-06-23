@@ -5,6 +5,7 @@ module diode.vdoc.full;
 
 import watt.text.sink : Sink, StringSink;
 import watt.text.format : format;
+import watt.text.markdown : filterMarkdown;
 
 import ir = diode.ir;
 
@@ -24,7 +25,17 @@ public:
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		safeParse(sink);
+		s: StringSink;
+		if (!safeParse(s.sink)) {
+			return;
+		}
+
+		md := s.toString();
+		if (md.length <= 0) {
+			return;
+		}
+
+		filterMarkdown(sink, md);
 	}
 
 	override fn content(d: string, sink: Sink)
