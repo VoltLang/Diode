@@ -693,7 +693,7 @@ fn parseInclude(p: Parser, out node: ir.Node) Status
 		}
 
 		// assign ident = 'exp'
-		if (err := p.parseExp(out exp)) {
+		if (err := p.parseExp(out exp, true)) {
 			return err;
 		}
 
