@@ -494,7 +494,7 @@ fn parseExp(p: Parser, out exp: ir.Exp, justOneExpression: bool = false) Status
 
 		// Advance to the next character for the while loop.
 		p.src.skipWhitespace();
-	} while (!p.src.eof && !justOneExpression && !atExpEnd());
+	} while (!p.src.eof && (!justOneExpression || p.src.front == '.') && !atExpEnd());
 	return Status.Ok;
 }
 
