@@ -96,4 +96,6 @@ public:
 	override fn paramEnd(sink: Sink) { }
 	override fn start(sink: Sink) { }
 	override fn end(sink: Sink) { }
+	override fn defgroup(sink: Sink, group: string, text: string) { }
+	override fn ingroup(sink: Sink, group: string) { }
 }
