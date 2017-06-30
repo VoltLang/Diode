@@ -3,6 +3,7 @@
 //! Code to format vdoc object doccomments in full.
 module diode.vdoc.full;
 
+import watt.text.vdoc : DocState;
 import watt.text.sink : Sink, StringSink;
 import watt.text.format : format;
 import watt.text.markdown : filterMarkdown;
@@ -38,20 +39,32 @@ public:
 		filterMarkdown(sink, md);
 	}
 
-	override fn content(d: string, sink: Sink)
+	override fn content(state: DocState, d: string, sink: Sink)
 	{
+		if (state != DocState.Content) {
+			return;
+		}
+
 		sink(d);
 	}
 
-	override fn p(d: string, sink: Sink)
+	override fn p(state: DocState, d: string, sink: Sink)
 	{
+		if (state != DocState.Content) {
+			return;
+		}
+
 		sink("<code class=\"highlighter-rouge\">");
 		sink(d);
 		sink("</code>");
 	}
 
-	override fn link(link: string, sink: Sink)
+	override fn link(state: DocState, link: string, sink: Sink)
 	{
+		if (state != DocState.Content) {
+			return;
+		}
+
 		// TODO use find and what not.
 		format(sink, `<a href="%s">%s</a>`, link, link);
 	}

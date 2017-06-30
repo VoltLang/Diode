@@ -3,6 +3,7 @@
 //! Code to format vdoc object doccomments in full.
 module diode.vdoc.brief;
 
+import watt.text.vdoc : DocState;
 import watt.text.sink : Sink, StringSink;
 import watt.text.string : strip, indexOf;
 
@@ -62,42 +63,41 @@ public:
 	{
 		isAuto = false;
 		isBrief = true;
+		hasBrief = true;
 	}
 
 	override fn briefEnd(sink: Sink)
 	{
 		isBrief = false;
-		hasBrief = true;
 	}
 
-	override fn briefContent(d: string, sink: Sink)
+	override fn p(state: DocState, d: string, sink: Sink)
 	{
-		if (isBrief) {
-			sink(d);
+		if (state == DocState.Brief) {
+			return sink(d);
 		}
-	}
 
-	override fn p(d: string, sink: Sink)
-	{
-		if (isBrief) {
-			sink(d);
-		} else if (isAuto) {
+		if (isAuto) {
 			autoBrief.sink(d);
 		}
 	}
 
-	override fn link(link: string, sink: Sink)
+	override fn link(state: DocState, link: string, sink: Sink)
 	{
-		if (isBrief) {
-			sink(link);
-		} else if (isAuto) {
-			autoBrief.sink(link);
+		if (state == DocState.Brief) {
+			return sink(link);
+		} else {
+			content(state, link, sink);
 		}
 	}
 
-	override fn content(d: string, sink: Sink)
+	override fn content(state: DocState, d: string, sink: Sink)
 	{
-		if (!isAuto && d.length <= 0) {
+		if (state == DocState.Brief) {
+			return sink(d);
+		}
+
+		if (!isAuto || d.length <= 0 || state != DocState.Content) {
 			return;
 		}
 
