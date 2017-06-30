@@ -39,7 +39,7 @@ public:
 		filterMarkdown(sink, md);
 	}
 
-	override fn content(state: DocState, d: string, sink: Sink)
+	override fn content(sink: Sink, state: DocState, d: string)
 	{
 		if (state != DocState.Content) {
 			return;
@@ -48,7 +48,7 @@ public:
 		sink(d);
 	}
 
-	override fn p(state: DocState, d: string, sink: Sink)
+	override fn p(sink: Sink, state: DocState, d: string)
 	{
 		if (state != DocState.Content) {
 			return;
@@ -59,13 +59,13 @@ public:
 		sink("</code>");
 	}
 
-	override fn link(state: DocState, link: string, sink: Sink)
+	override fn link(sink: Sink, state: DocState, target: string, text: string)
 	{
 		if (state != DocState.Content) {
 			return;
 		}
 
 		// TODO use find and what not.
-		format(sink, `<a href="%s">%s</a>`, link, link);
+		format(sink, `<a href="%s">%s</a>`, target, text);
 	}
 }

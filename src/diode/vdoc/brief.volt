@@ -71,7 +71,7 @@ public:
 		isBrief = false;
 	}
 
-	override fn p(state: DocState, d: string, sink: Sink)
+	override fn p(sink: Sink, state: DocState, d: string)
 	{
 		if (state == DocState.Brief) {
 			return sink(d);
@@ -82,16 +82,16 @@ public:
 		}
 	}
 
-	override fn link(state: DocState, link: string, sink: Sink)
+	override fn link(sink: Sink, state: DocState, target: string, text: string)
 	{
 		if (state == DocState.Brief) {
-			return sink(link);
+			sink(text);
 		} else {
-			content(state, link, sink);
+			content(sink, state, text);
 		}
 	}
 
-	override fn content(state: DocState, d: string, sink: Sink)
+	override fn content(sink: Sink, state: DocState, d: string)
 	{
 		if (state == DocState.Brief) {
 			return sink(d);

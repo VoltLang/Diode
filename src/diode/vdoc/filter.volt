@@ -89,10 +89,10 @@ public:
 
 	override fn briefStart(sink: Sink) { }
 	override fn briefEnd(sink: Sink) { }
-	override fn p(state: DocState, d: string, sink: Sink) { }
-	override fn link(state: DocState, link: string, sink: Sink) { }
-	override fn content(state: DocState, cnt: string, sink: Sink) { }
-	override fn paramStart(direction: string, arg: string, sink: Sink) { }
+	override fn p(sink: Sink, state: DocState, d: string) { }
+	override fn link(sink: Sink, state: DocState, target: string, text: string) { }
+	override fn content(sink: Sink, state: DocState, cnt: string) { }
+	override fn paramStart(sink: Sink, direction: string, arg: string) { }
 	override fn paramEnd(sink: Sink) { }
 	override fn start(sink: Sink) { }
 	override fn end(sink: Sink) { }
