@@ -5,6 +5,7 @@ module diode.vdoc.full;
 
 import watt.text.vdoc : DocState;
 import watt.text.sink : Sink, StringSink;
+import watt.text.string : strip;
 import watt.text.format : format;
 import watt.text.markdown : filterMarkdown;
 
@@ -65,7 +66,23 @@ public:
 			return;
 		}
 
-		// TODO use find and what not.
-		format(sink, `<a href="%s">%s</a>`, target, text);
+		text = strip(text);
+		url: string;
+
+		n := root.findNamed(target);
+		if (n !is null) {
+			if (text is null) {
+				text = n.name;
+			}
+			url = n.url;
+		} else if (text is null) {
+			text = target;
+		}
+
+		if (url !is null) {
+			format(sink, `[%s](%s)`, text, url);
+		} else {
+			sink(text);
+		}
 	}
 }
