@@ -6,7 +6,7 @@
 {%- if obj.tag == oldobj.tag -%}
 {%- comment -%}Don't display the same documentation multiple times.{%- endcomment -%}
 {%- else -%}
-<div id="{{ obj.tag }}">
+<div class="doc" id="{{ obj.tag }}">
 <h2>{{ obj.name }}</h2>
 <p>{{ obj | vdoc_full: 'html' }}</p>
 	{%- for child in obj.children -%}
