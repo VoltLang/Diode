@@ -146,7 +146,7 @@ fn drawName(ref s: State, named: Named, name: string, sink: Sink)
 		format(sink, `<a class="code" href="#%s">%s</a>`,
 		       named.tag, name);
 	} else {
-		sink(named.name);
+		sink(name);
 	}
 }
 
@@ -154,7 +154,7 @@ fn drawModule(ref s: State, sink: Sink)
 {
 	s.drawBrief(s.mod, sink);
 	sink("module ");
-	drawName(ref s, s.mod, sink);
+	s.drawName(s.mod, sink);
 	sink(";\n\n");
 
 	s.drawImports(Access.Public, sink);
@@ -217,10 +217,16 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 		    c.access != access) {
 			continue;
 		}
+
+		s.drawBrief(c, sink);
+		sink(prefix);
+		sink("import ");
 		if (c.bind !is null) {
-			format(sink, "%simport %s = %s;\n", prefix, c.bind, c.name);
+			s.drawName(c, c.bind, sink);
+			format(sink, " = %s;\n", c.name);
 		} else {
-			format(sink, "%simport %s;\n", prefix, c.name);
+			s.drawName(c, sink);
+			sink(";\n");
 		}
 		s.hasPrinted = true;
 	}
@@ -250,14 +256,21 @@ fn drawEnums(ref s: State, access: Access, sink: Sink)
 
 fn drawEnum(ref s: State, c: Parent, sink: Sink)
 {
-	format(sink, "%senum %s\n%s{\n", s.tabs, c.name, s.tabs);
-	tabs := s.tabs ~ "\t";
+	format(sink, "%senum ", s.tabs);
+	s.drawName(c, sink);
+	format(sink, "\n%s{\n", s.tabs);
+	old := s.tabs;
+	s.tabs ~= "\t";
 
 	foreach (child; c.children) {
 		ed := cast(EnumDecl)child;
-		format(sink, "%s%s,\n", tabs, ed.name);
+		s.drawBrief(ed, sink);
+		sink(s.tabs);
+		s.drawName(ed, sink);
+		sink(",\n");
 	}
 
+	s.tabs = old;
 	format(sink, "%s}\n", s.tabs);
 }
 
@@ -284,7 +297,9 @@ fn drawEnumDecls(ref s: State, access: Access, sink: Sink)
 fn drawEnumDecl(ref s: State, c: EnumDecl, sink: Sink)
 {
 	s.drawBrief(c, sink);
-	format(sink, "%senum %s;\n", s.tabs, c.name);
+	format(sink, "%senum ", s.tabs);
+	s.drawName(c, sink);
+	format(sink, ";\n");
 }
 
 
@@ -329,7 +344,9 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 
 		s.flushProt(access, Kind.EnumDecl, sink);
 		s.drawBrief(c, sink);
-		format(sink, "%s%s%s: %s;\n", s.tabs, prefix, c.name, c.type);
+		format(sink, "%s%s", s.tabs, prefix);
+		s.drawName(c, sink);
+		format(sink, ": %s;\n", c.type);
 		hasPrinted = true;
 	}
 
@@ -357,6 +374,7 @@ fn drawFns(ref s: State, access: Access, sink: Sink)
 			continue;
 		}
 		s.flushProt(access, Kind.Function, sink);
+		s.drawBrief(c, sink);
 		s.drawFn(c, prefix, sink);
 		hasPrinted = true;
 	}
@@ -433,7 +451,7 @@ fn drawCtor(ref s: State, f: Function, sink: Sink)
 fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 {
 	format(sink, "%s%sfn ", s.tabs, prefix, f.name);
-	drawName(ref s, f, sink);
+	s.drawName(f, sink);
 	sink("(");
 
 	hasPrinted := false;
@@ -489,7 +507,7 @@ fn drawClasses(ref s: State, access: Access, sink: Sink)
 fn drawClass(ref s: State, c: Parent, sink: Sink)
 {
 	format(sink, "%sclass ", s.tabs);
-	drawName(ref s, c, sink);
+	s.drawName(c, sink);
 	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;
@@ -535,7 +553,7 @@ fn drawAggrs(ref s: State, access: Access, kind: Kind, prefix: string, sink: Sin
 fn drawAggr(ref s: State, c: Parent, prefix: string, sink: Sink)
 {
 	format(sink, "%s%s ", s.tabs, prefix);
-	drawName(ref s, c, sink);
+	s.drawName(c, sink);
 	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;
