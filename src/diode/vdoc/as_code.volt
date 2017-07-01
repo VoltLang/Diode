@@ -17,7 +17,6 @@ import diode.eval;
 import diode.vdoc;
 import diode.interfaces;
 import diode.vdoc.parser;
-import diode.vdoc.brief;
 
 
 //! Formats a vdoc module into code.
@@ -59,8 +58,6 @@ public:
 	root: VdocRoot;
 	engine: Engine;
 	parent: Parent;
-	//! Cached object for generating brief doccomments.
-	brief: DocCommentBrief;
 
 	tabs: string;
 	tabsProt: string;
@@ -75,8 +72,7 @@ public:
 public:
 	fn setup(drv: Driver, engine: Engine, root: VdocRoot, mod: Parent, parent: Parent)
 	{
-		intSetup(drv, engine, root, mod, parent,
-		      new DocCommentBrief(drv, root, mod));
+		intSetup(drv, engine, root, mod, parent);
 	}
 
 	fn setup(ref oldState: State, parent: Parent)
@@ -86,8 +82,7 @@ public:
 			oldState.engine,
 			oldState.root,
 			oldState.mod,
-			parent,
-			oldState.brief);
+			parent);
 
 		this.tabs ~= "\t";
 		if (oldState.mod !is oldState.parent) {
@@ -98,14 +93,13 @@ public:
 
 private:
 	fn intSetup(drv: Driver, engine: Engine, root: VdocRoot, mod: Parent,
-	            parent: Parent, brief: DocCommentBrief)
+	            parent: Parent)
 	{
 		this.drv = drv;
 		this.root = root;
 		this.mod = mod;
 		this.parent = parent;
 		this.engine = engine;
-		this.brief = brief;
 	}
 }
 
@@ -192,7 +186,7 @@ fn drawChildren(ref s: State, sink: Sink)
 
 fn drawBrief(ref s: State, n: Named, sink: Sink)
 {
-	b := s.brief.getString(n);
+	b := n.brief;
 	if (b.length == 0) {
 		return;
 	}

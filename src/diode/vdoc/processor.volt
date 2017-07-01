@@ -273,8 +273,8 @@ private fn processNamed(p: Processor, n: Named)
 
 	p.parseRaw(n.raw);
 
-	//n.mdFull = p.results.full;
-	//n.brief = p.results.brief;
+	n.mdFull = p.results.full;
+	n.brief = p.results.brief;
 
 	foreach (ident; p.results.ingroups) {
 		group := p.groups.get(ident, null);

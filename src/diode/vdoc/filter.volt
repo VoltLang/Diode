@@ -3,14 +3,13 @@
 //! Code handle vdoc filters.
 module diode.vdoc.filter;
 
+import watt.text.markdown;
 import watt.text.vdoc;
 
 import diode.errors;
 import diode.eval;
 import diode.vdoc;
 import diode.interfaces;
-import diode.vdoc.full;
-import diode.vdoc.brief;
 
 
 fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter: string, type: string) Value
@@ -48,54 +47,52 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	}
 
 	if (isFull) {
-		return new DocCommentFull(d, root, named);
+		return new FilterFull(named);
 	} else if (isBrief) {
-		return new DocCommentBrief(d, root, named);
+		return new FilterBrief(named);
 	} else {
 		e.handleError("internal error");
 	}
 }
 
-//! Helper class for DocComments.
-abstract class DocCommentValue : Value, DocSink
+//! Helper class for Filters.
+abstract class FilterValue : Value
 {
 public:
-	drv: Driver;
-	root: VdocRoot;
 	named: Named;
 
 
 public:
-	this(d: Driver, root: VdocRoot, named: Named)
+	this(named: Named)
 	{
-		this.drv = d;
-		this.root = root;
 		this.named = named;
 	}
+}
 
-	final fn safeParse(sink: Sink) bool
+//! Filter for brief.
+class FilterBrief : FilterValue
+{
+public:
+	this(named: Named) { super(named); }
+
+	override fn toText(n: ir.Node, sink: Sink)
 	{
-		if (named is null) {
-			return false;
+		if (named !is null) {
+			sink(named.brief);
 		}
-		if (named.raw is null) {
-			return false;
-		}
-
-		parse(named.raw, this, sink);
-
-		return true;
 	}
+}
 
-	override fn briefStart(sink: Sink) { }
-	override fn briefEnd(sink: Sink) { }
-	override fn p(sink: Sink, state: DocState, d: string) { }
-	override fn link(sink: Sink, state: DocState, target: string, text: string) { }
-	override fn content(sink: Sink, state: DocState, cnt: string) { }
-	override fn paramStart(sink: Sink, direction: string, arg: string) { }
-	override fn paramEnd(sink: Sink) { }
-	override fn start(sink: Sink) { }
-	override fn end(sink: Sink) { }
-	override fn defgroup(sink: Sink, group: string, text: string) { }
-	override fn ingroup(sink: Sink, group: string) { }
+//! Filter for formating of full DocComments into HTML.
+class FilterFull : FilterValue
+{
+public:
+	this(named: Named) { super(named); }
+
+	override fn toText(n: ir.Node, sink: Sink)
+	{
+		if (named !is null) {
+			filterMarkdown(sink, named.mdFull);
+		}
+	}
 }

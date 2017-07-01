@@ -179,6 +179,10 @@ public:
 	url: string;
 	//! A unique identifier for this object.
 	tag: string;
+	//! The full comment as markdown.
+	mdFull: string;
+	//! The brief in text form.
+	brief: string;
 
 
 public:
