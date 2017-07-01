@@ -4,10 +4,54 @@ module diode.vdoc.parser;
 
 import io = watt.io;
 import json = watt.text.json;
+import vdoc = watt.text.vdoc;
 
 import diode.eval;
 import diode.vdoc;
 
+
+//! Parse the given @p data and add the @p vdocRoot.
+fn parse(vdocRoot: VdocRoot, data: string)
+{
+	root := json.parse(data);
+	moduleRoot := root.lookupObjectKey("modules");
+	globalsRoot := root.lookupObjectKey("globalDocComments");
+
+	children: Value[];
+
+	fromArray(ref children, ref moduleRoot);
+	parseGlobals(ref children, ref globalsRoot);
+
+	vdocRoot.setChildren(children);
+}
+
+
+private:
+
+//! Parse the global doccomments.
+fn parseGlobals(ref arr: Value[], ref v: json.Value)
+{
+	name, title: string;
+	def := new DocCommentDefGroup();
+
+	foreach (ref e; v.array()) {
+		raw := e.str();
+
+		def.parseRaw(raw, out name, out title);
+
+		if (name is null) {
+			continue;
+		}
+
+		g := new Named();
+		g.kind = Kind.Group;
+		g.raw = raw;
+		g.name = title;
+		g.search = name;
+
+		arr ~= g;
+	}
+}
 
 /*!
  * Used to collect information during parsing.
@@ -198,6 +242,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case Arg: arr ~= info.toArg(); break;
 		case Enum: arr ~= info.toEnum(); break;
 		case Alias: break; // TODO Add alias
+		case Group: break; // Handled somewhere else.
 		case EnumDecl: arr ~= info.toEnumDecl(); break;
 		case Class: arr ~= info.toParent(); break;
 		case Union: arr ~= info.toParent(); break;
@@ -266,11 +311,42 @@ fn getStorageFromString(str: string) Storage
 	}
 }
 
-fn parse(vdocRoot: VdocRoot, data: string)
+//! Parser for getting defgroup name and title.
+public class DocCommentDefGroup : vdoc.DocSink
 {
-	root := json.parse(data);
-	moduleRoot := root.lookupObjectKey("modules");
-	children: Value[];
-	fromArray(ref children, ref moduleRoot);
-	vdocRoot.setChildren(children);
+public:
+	groupName: string;
+	groupTitle: string;
+
+
+public:
+	final fn parseRaw(raw: string, out defgroup: string, out title: string)
+	{
+		groupName = null;
+		groupTitle = null;
+
+		vdoc.parse(raw, this, null);
+
+		defgroup = this.groupName;
+		title = this.groupTitle;
+	}
+
+	override fn defgroup(sink: Sink, group: string, text: string)
+	{
+		groupName = group;
+		groupTitle = strip(text);
+	}
+
+	override fn start(sink: Sink) { }
+	override fn end(sink: Sink) { }
+	override fn briefStart(sink: Sink) { }
+	override fn briefEnd(sink: Sink) { }
+	override fn paramStart(sink: Sink, direction: string, arg: string) { }
+	override fn paramEnd(sink: Sink) { }
+
+	override fn p(sink: Sink, state: vdoc.DocState, d: string) { }
+	override fn link(sink: Sink, state: vdoc.DocState, target: string, text: string) { }
+	override fn content(sink: Sink, state: vdoc.DocState, cnt: string) { }
+
+	override fn ingroup(sink: Sink, group: string) { }
 }

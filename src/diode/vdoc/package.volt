@@ -21,6 +21,7 @@ enum Kind
 	Alias,
 	Class,
 	Union,
+	Group,
 	Import,
 	Return,
 	Struct,
@@ -71,8 +72,12 @@ public:
 
 
 private:
-	//! All loaded modules accessable by name.
-	mModules: Parent[string];
+	//! All loaded Named objects.
+	mNamed: Named[string];
+	//! All loaded modules.
+	mModules: Parent[];
+	//! All loaded groups.
+	mGroups: Named[];
 	//! All children as a array.
 	mChildren: Value[];
 
@@ -85,7 +90,12 @@ public:
 
 	@property fn modules() Parent[]
 	{
-		return mModules.values;
+		return mModules;
+	}
+
+	@property fn groups() Named[]
+	{
+		return mGroups;
 	}
 
 	override fn ident(n: ir.Node, key: string) Value
@@ -108,7 +118,7 @@ public:
 		// TODO this should be a lot smarter,
 		// as it needs to search for children of modules.
 		// pkg.mod.Class must work.
-		if (r := name in mModules) {
+		if (r := name in mNamed) {
 			return *r;
 		}
 
@@ -126,12 +136,19 @@ public:
 		mModules = [];
 
 		foreach (v; children) {
-			p := cast(Parent)v;
-			if (p is null || p.kind != Kind.Module) {
+			n := cast(Named)v;
+			if (n is null) {
 				continue;
 			}
 
-			mModules[p.name] = p;
+			switch (n.kind) with (Kind) {
+			case Module: mModules ~= cast(Parent)n; break;
+			case Group: mGroups ~= n; break;
+			default:
+			}
+
+			ident := n.search !is null ? n.search : n.name;
+			mNamed[ident] = n;
 		}
 	}
 }
@@ -150,8 +167,10 @@ class Base : Value
 class Named : Base
 {
 public:
-	//! Name of this object.
+	//! Printable name of this object.
 	name: string;
+	//! Ident for looking up this Named thing.
+	search: string;
 	//! Access of this named object.
 	access: Access;
 	//! Raw doccomment string.
@@ -364,6 +383,7 @@ public:
 				return new Nil();
 			}
 		case "enums": kind = Enum; break;
+		case "groups": kind = Group; break;
 		case "classes": kind = Class; break;
 		case "imports": kind = Import; break;
 		case "unions": kind = Union; break;
