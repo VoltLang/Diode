@@ -55,9 +55,9 @@ public:
 			return;
 		}
 
-		sink("<code class=\"highlighter-rouge\">");
+		sink("`");
 		sink(d);
-		sink("</code>");
+		sink("`");
 	}
 
 	override fn link(sink: Sink, state: DocState, target: string, text: string)
