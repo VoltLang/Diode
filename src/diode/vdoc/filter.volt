@@ -47,7 +47,7 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 		return new Text(null);
 	}
 
-	if (isHtml) {
+	if (isFull) {
 		return new DocCommentFull(d, root, named);
 	} else if (isBrief) {
 		return new DocCommentBrief(d, root, named);
