@@ -1,0 +1,13 @@
+
+{%- assign array = include.array -%}
+{%- assign header = include.header -%}
+
+{%- if array -%}
+<h2>{{ header }}</h2>
+<table>
+	{% for named in array -%}<tr>
+		<td><a href="{{ named.url }}">{{ named.name }}</a></td>
+		<td>{{ named | vdoc_brief: 'html' }}</td>
+	</tr>{%- endfor %}
+</table>
+{%- endif -%}

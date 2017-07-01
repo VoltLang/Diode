@@ -1,0 +1,16 @@
+---
+layout: page
+title: Page
+---
+{%- assign group = vdoc.current -%}
+
+<h1>{{ group.name }}</h1>
+
+{{- group | vdoc_full: 'html' -}}
+
+{%- include vdoc_table.html array=group.groups header="Pages" -%}
+{%- include vdoc_table.html array=group.classes header="Classes" -%}
+{%- include vdoc_table.html array=group.structs header="Structs" -%}
+{%- include vdoc_table.html array=group.unions header="Unions" -%}
+{%- include vdoc_table.html array=group.enums header="Enums" -%}
+{%- include vdoc_table.html array=group.fns header="Functions" -%}

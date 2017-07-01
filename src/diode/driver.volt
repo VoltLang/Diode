@@ -24,6 +24,7 @@ import diode.vdoc;
 import diode.vdoc.parser;
 import diode.vdoc.filter;
 import diode.vdoc.as_code;
+import diode.vdoc.processor;
 
 
 /*!
@@ -38,6 +39,7 @@ protected:
 	mVdoc: VdocRoot;
 	mModules: Array;
 	mEngine: DriverEngine;
+	mDocGroup: File;
 	mDocModule: File;
 	mDocModules: File;
 	mVerbose: bool;
@@ -113,6 +115,9 @@ public:
 		f = getName("_include", "vdoc_child.html");
 		addInclude(import("_include/vdoc_child.html"), f);
 
+		f = getName("_include", "vdoc_table.html");
+		addInclude(import("_include/vdoc_table.html"), f);
+
 		// Add default layouts.
 		f = getName("_layout", "page.html");
 		addLayout(import("_layout/page.html"), f);
@@ -121,6 +126,9 @@ public:
 		addLayout(import("_layout/default.html"), f);
 
 		// Add default vdoc templates.
+		f = getName("_vdoc", "group.html");
+		addDocTemplate(import("_vdoc/group.html"), f);
+
 		f = getName("_vdoc", "module.html");
 		addDocTemplate(import("_vdoc/module.html"), f);
 
@@ -135,7 +143,7 @@ public:
 			return;
 		}
 
-		mods: Parent[] = mVdoc.modules;
+		mods := mVdoc.modules;
 		prev: Value;
 		foreach (mod; mods) {
 			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
@@ -143,7 +151,13 @@ public:
 			prev = mod;
 		}
 
-		s: StringSink;
+		groups := mVdoc.groups;
+		foreach (group; groups) {
+			group.url = format("%s/vdoc/%s.html", settings.baseurl, group.search);
+		}
+
+		// Process all of the raw comments.
+		process(mVdoc);
 
 		dir := format("%s%svdoc%s", settings.outputDir,
 			dirSeparator, dirSeparator);
@@ -165,6 +179,12 @@ public:
 			filename := format("%smod_%s.html", dir, mod.name);
 			mVdoc.current = mod;
 			renderFileTo(mDocModule, filename);
+		}
+
+		foreach (group; groups) {
+			filename := format("%s%s.html", dir, group.search);
+			mVdoc.current = group;
+			renderFileTo(mDocGroup, filename);
 		}
 
 		mVdoc.current = null;
@@ -259,6 +279,7 @@ public:
 		verbose("adding vdoc template '%s'", filename);
 
 		switch (file.filename) {
+		case "group": mDocGroup = file; break;
 		case "module": mDocModule = file; break;
 		case "modules": mDocModules = file; break;
 		default: warning("unknown vdoc template '%s' from file '%s'", file.filename, filename);
