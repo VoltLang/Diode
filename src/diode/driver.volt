@@ -293,7 +293,9 @@ protected:
 		}
 
 		prevNamed := cast(Named)prev;
-		if (prevNamed !is null && prevNamed.name == named.name && prevNamed.raw == named.raw) {
+		if (prevNamed !is null &&
+		    prevNamed.name == named.name &&
+		    prevNamed.raw == named.raw) {
 			named.tag = prevNamed.tag;
 		} else {
 			named.tag = getTag(named.name);
