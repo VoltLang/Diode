@@ -450,7 +450,7 @@ fn drawCtor(ref s: State, f: Function, sink: Sink)
 
 fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 {
-	format(sink, "%s%sfn ", s.tabs, prefix, f.name);
+	format(sink, "%s%sfn ", s.tabs, prefix);
 	s.drawName(f, sink);
 	sink("(");
 
