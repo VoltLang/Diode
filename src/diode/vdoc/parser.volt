@@ -43,7 +43,7 @@ fn parseGlobals(ref arr: Value[], ref v: json.Value)
 			continue;
 		}
 
-		g := new Named();
+		g := new Parent();
 		g.kind = Kind.Group;
 		g.raw = raw;
 		g.name = title;

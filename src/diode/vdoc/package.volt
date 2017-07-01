@@ -77,7 +77,7 @@ private:
 	//! All loaded modules.
 	mModules: Parent[];
 	//! All loaded groups.
-	mGroups: Named[];
+	mGroups: Parent[];
 	//! All children as a array.
 	mChildren: Value[];
 
@@ -93,7 +93,7 @@ public:
 		return mModules;
 	}
 
-	@property fn groups() Named[]
+	@property fn groups() Parent[]
 	{
 		return mGroups;
 	}
@@ -136,19 +136,19 @@ public:
 		mModules = [];
 
 		foreach (v; children) {
-			n := cast(Named)v;
-			if (n is null) {
+			p := cast(Parent)v;
+			if (p is null) {
 				continue;
 			}
 
-			switch (n.kind) with (Kind) {
-			case Module: mModules ~= cast(Parent)n; break;
-			case Group: mGroups ~= n; break;
+			switch (p.kind) with (Kind) {
+			case Module: mModules ~= p; break;
+			case Group: mGroups ~= p; break;
 			default:
 			}
 
-			ident := n.search !is null ? n.search : n.name;
-			mNamed[ident] = n;
+			ident := p.search !is null ? p.search : p.name;
+			mNamed[ident] = p;
 		}
 	}
 }
