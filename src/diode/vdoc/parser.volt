@@ -343,6 +343,8 @@ public:
 	override fn briefEnd(sink: Sink) { }
 	override fn paramStart(sink: Sink, direction: string, arg: string) { }
 	override fn paramEnd(sink: Sink) { }
+	override fn returnStart(sink: Sink) { }
+	override fn returnEnd(sink: Sink) { }
 
 	override fn p(sink: Sink, state: vdoc.DocState, d: string) { }
 	override fn link(sink: Sink, state: vdoc.DocState, target: string, text: string) { }

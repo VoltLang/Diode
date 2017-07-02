@@ -59,6 +59,9 @@ struct DocCommentResult
 	//! The groups this comment is in.
 	ingroups: string[];
 
+	//! Return documentation.
+	ret: string;
+
 	//! Params for functions.
 	params: DocCommentParam[];
 }
@@ -105,6 +108,36 @@ public:
 		isAuto = false;
 
 		parse(raw, this, null);
+
+		// Post process params.
+		if (results.params !is null) {
+			full.sink("\n### Parameters\n\n<table>\n");
+
+			foreach (param; results.params) {
+				format(full.sink, "<td><strong>%s</strong></td>", param.arg);
+				format(full.sink, "<td>\n\n");
+				format(full.sink, "%s", param.doc);
+				format(full.sink, "\n\n</td></tr>\n");
+			}
+
+			full.sink("</table>\n\n");
+		}
+
+		// Post process return.
+		if (results.ret !is null) {
+			full.sink("\n### Return\n\n");
+			full.sink(results.ret);
+		}
+
+		// Set the full string.
+		results.full = full.toString();
+		full.reset();
+
+		// Handle auto brief if @brief command was not used.
+		if (!hasBrief) {
+			results.brief = strip(autoBrief.toString());
+			autoBrief.reset();
+		}
 	}
 
 	override fn ingroup(sink: Sink, group: string)
@@ -121,11 +154,27 @@ public:
 
 	override fn paramEnd(sink: Sink)
 	{
+		// Just in case.
+		if (param is null) {
+			return;
+		}
+
 		results.params ~= param;
 
 		param.doc = temp.toString();
 		param = null;
 
+		temp.reset();
+	}
+
+	override fn returnStart(sink: Sink)
+	{
+
+	}
+
+	override fn returnEnd(sink: Sink)
+	{
+		results.ret = temp.toString();
 		temp.reset();
 	}
 
@@ -138,16 +187,6 @@ public:
 	{
 		// Stop auto generating brief.
 		isAuto = false;
-
-		// Set the full string.
-		results.full = full.toString();
-		full.reset();
-
-		// Handle auto brief if @brief command was not used.
-		if (!hasBrief) {
-			results.brief = strip(autoBrief.toString());
-			autoBrief.reset();
-		}
 	}
 
 	override fn briefStart(sink: Sink)
@@ -177,10 +216,10 @@ public:
 			full.sink(d);
 			full.sink("`");
 			break;
-		case Param:
-			full.sink("`");
-			full.sink(d);
-			full.sink("`");
+		case Param, Return:
+			temp.sink("`");
+			temp.sink(d);
+			temp.sink("`");
 			break;
 		}
 	}
@@ -218,7 +257,7 @@ public:
 			}
 			full.sink(md);
 			break;
-		case Param:
+		case Param, Return:
 			temp.sink(md);
 			break;
 		}
@@ -227,7 +266,7 @@ public:
 	override fn content(sink: Sink, state: DocState, d: string)
 	{
 		final switch (state) with (DocState) {
-		case Param: temp.sink(d); return;
+		case Param, Return: temp.sink(d); return;
 		case Brief: brief.sink(d); return;
 		case Content: break;
 		}
