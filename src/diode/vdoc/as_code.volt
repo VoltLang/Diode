@@ -162,6 +162,7 @@ fn drawChildren(ref s: State, sink: Sink)
 {
 	s.drawEnumDecls(Access.Public, sink);
 	s.drawEnums(Access.Public, sink);
+	s.drawInterfaces(Access.Public, sink);
 	s.drawClasses(Access.Public, sink);
 	s.drawStructs(Access.Public, sink);
 	s.drawUnions(Access.Public, sink);
@@ -174,6 +175,7 @@ fn drawChildren(ref s: State, sink: Sink)
 
 	s.drawEnumDecls(Access.Protected, sink);
 	s.drawEnums(Access.Protected, sink);
+	s.drawInterfaces(Access.Protected, sink);
 	s.drawClasses(Access.Protected, sink);
 	s.drawStructs(Access.Protected, sink);
 	s.drawUnions(Access.Protected, sink);
@@ -474,6 +476,41 @@ fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 	} else {
 		sink(";\n");
 	}
+}
+
+
+/*
+ *
+ * Classes
+ *
+ */
+
+fn drawInterfaces(ref s: State, access: Access, sink: Sink)
+{
+	foreach (child; s.parent.children) {
+		c := cast(Parent)child;
+		if (c is null || c.kind != Kind.Interface ||
+		    c.access != access) {
+			continue;
+		}
+		s.flushProt(access, Kind.Interface, sink);
+		s.drawBrief(c, sink);
+		s.drawInterface(c, sink);
+		s.hasPrinted = true;
+	}
+}
+
+fn drawInterface(ref s: State, c: Parent, sink: Sink)
+{
+	format(sink, "%sinterface ", s.tabs);
+	s.drawName(c, sink);
+	format(sink, "\n%s{\n", s.tabs);
+
+	newState: State;
+	newState.setup(ref s, c);
+	newState.drawChildren(sink);
+
+	format(sink, "%s}\n", s.tabs);
 }
 
 

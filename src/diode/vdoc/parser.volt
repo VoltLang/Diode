@@ -253,7 +253,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case Member: arr ~= info.toFunction(); break;
 		case Variable: arr ~= info.toVariable(); break;
 		case Function: arr ~= info.toFunction(); break;
-		case Interface: break; // TODO Add interface
+		case Interface: arr ~= info.toParent(); break;
 		case Destructor: arr ~= info.toFunction(); break;
 		case Constructor: arr ~= info.toFunction(); break;
 		}

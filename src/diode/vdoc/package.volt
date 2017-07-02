@@ -396,6 +396,7 @@ public:
 		case "enumdecls": kind = EnumDecl; break;
 		case "functions": kind = Function; break;
 		case "variables": kind = Variable; break;
+		case "interfaces": kind = Interface; break;
 		case "destructors": kind = Destructor; break;
 		case "constructors": kind = Constructor; break;
 		case "members", "methods": kind = Member; break;
