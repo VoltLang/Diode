@@ -247,6 +247,7 @@ public:
 
 		} else if (text is null) {
 			text = target;
+			md = target;
 		}
 
 		final switch (state) with (DocState) {
