@@ -6,12 +6,18 @@
 {%- if obj.tag == oldobj.tag -%}
 {%- comment -%}Don't display the same documentation multiple times.{%- endcomment -%}
 {%- else -%}
-<div class="doc" id="{{ obj.tag }}">
-<h2>{{ obj.name }}</h2>
-<p>{{ obj | vdoc_full: 'html' }}</p>
-	{%- for child in obj.children -%}
-		{%- include vdoc_child.html child=child -%}
-	{%- endfor -%}
+<div class="doc-child" id="{{ obj.tag }}">
+
+<div class="doc-name">{{ obj.name }}</div>
+
+{%- include vdoc_ingroup.html obj=obj -%}
+
+{{ obj | vdoc_full: 'html' }}
+
+{%- for child in obj.children -%}
+	{%- include vdoc_child.html child=child -%}
+{%- endfor -%}
+
 </div>
 {%- endif -%}
 {%- endif -%}

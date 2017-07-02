@@ -118,6 +118,9 @@ public:
 		f = getName("_include", "vdoc_table.html");
 		addInclude(import("_include/vdoc_table.html"), f);
 
+		f = getName("_include", "vdoc_ingroup.html");
+		addInclude(import("_include/vdoc_ingroup.html"), f);
+
 		// Add default layouts.
 		f = getName("_layout", "page.html");
 		addLayout(import("_layout/page.html"), f);

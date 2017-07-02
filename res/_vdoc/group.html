@@ -4,7 +4,9 @@ title: Page
 ---
 {%- assign group = vdoc.current -%}
 
-<h1>{{ group.name }}</h1>
+<div class="doc-module">{{ group.name }}</div>
+
+{%- include vdoc_ingroup.html obj=group -%}
 
 {{- group | vdoc_full: 'html' -}}
 

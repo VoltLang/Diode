@@ -1,0 +1,10 @@
+{%- assign obj = include.obj -%}
+
+{%- if obj.ingroup -%}
+	<div class="doc-ingroup">
+	{%- for group in obj.ingroup -%}
+		<a href="{{ group.url }}">{{ group.name }}</a>
+		{%- unless forloop.last %} | {% endunless -%}
+	{%- endfor -%}
+	</div>
+{%- endif -%}
