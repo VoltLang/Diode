@@ -467,8 +467,8 @@ fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 
 	sink(")");
 
-	if (f.rets.length > 0 && (cast(Arg)f.rets[0]).type != "void") {
-		format(sink, " %s", (cast(Arg)f.rets[0]).type);
+	if (f.rets.length > 0 && (cast(Return)f.rets[0]).type != "void") {
+		format(sink, " %s", (cast(Return)f.rets[0]).type);
 	}
 
 	if (f.hasBody) {

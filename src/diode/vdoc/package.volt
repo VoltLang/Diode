@@ -194,8 +194,8 @@ public:
 	url: string;
 	//! A unique identifier for this object.
 	tag: string;
-	//! The full comment as markdown.
-	mdFull: string;
+	//! The content of the doccomment, in markdown form.
+	content: string;
 	//! The brief in text form.
 	brief: string;
 	//! The groups this named is in.
@@ -293,6 +293,8 @@ public:
 	name: string;
 	type: string;
 	typeFull: string;
+	//! The doccomment content for this argument.
+	content: string;
 
 
 public:
@@ -315,6 +317,8 @@ class Return : Base
 public:
 	type: string;
 	typeFull: string;
+	//! The doccomment content for this return.
+	content: string;
 
 
 public:

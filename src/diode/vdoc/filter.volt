@@ -91,8 +91,51 @@ public:
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		if (named !is null) {
-			filterMarkdown(sink, named.mdFull);
+		if (named is null) {
+			return;
+		}
+
+		filterMarkdown(sink, named.content);
+
+		func := cast(Function)named;
+		if (func is null) {
+			return;
+		}
+
+		argHasDoc: bool;
+		foreach (v; func.args) {
+			arg := cast(Arg)v;
+			if (arg.content !is null) {
+				argHasDoc = true;
+				break;
+			}
+		}
+
+		// Post process params.
+		if (argHasDoc) {
+			sink("<h3>Parameters</h3>\n");
+			sink("<table class=\"doc-param-table\">\n");
+
+			foreach (v; func.args) {
+				arg := cast(Arg)v;
+				format(sink, "<td><strong>%s</strong></td>", arg.name);
+				format(sink, "<td>\n");
+				filterMarkdown(sink, arg.content);
+				format(sink, "</td></tr>\n");
+			}
+
+			sink("</table>\n");
+		}
+
+		// Post process return.
+		if (func.rets !is null) {
+			ret := cast(Return)func.rets[0];
+			if (ret !is null && ret.content !is null) {
+				sink("<h3>Return</h3>\n");
+				sink("<div class=\"doc-param-table\">");
+				filterMarkdown(sink, ret.content);
+				sink("</div>\n");
+			}
 		}
 	}
 }

@@ -50,8 +50,8 @@ public:
 //! Results from a doccomment parsing.
 struct DocCommentResult
 {
-	//! Full doccomment.
-	full: string;
+	//! The main content for this doccomment.
+	content: string;
 
 	//! Brief doccomment.
 	brief: string;
@@ -64,6 +64,9 @@ struct DocCommentResult
 
 	//! Params for functions.
 	params: DocCommentParam[];
+
+	//! The doccomment content form the return command.
+	returnContent: string;
 }
 
 //! A single parameter result.
@@ -109,28 +112,8 @@ public:
 
 		parse(raw, this, null);
 
-		// Post process params.
-		if (results.params !is null) {
-			full.sink("\n### Parameters\n\n<table>\n");
-
-			foreach (param; results.params) {
-				format(full.sink, "<td><strong>%s</strong></td>", param.arg);
-				format(full.sink, "<td>\n\n");
-				format(full.sink, "%s", param.doc);
-				format(full.sink, "\n\n</td></tr>\n");
-			}
-
-			full.sink("</table>\n\n");
-		}
-
-		// Post process return.
-		if (results.ret !is null) {
-			full.sink("\n### Return\n\n");
-			full.sink(results.ret);
-		}
-
 		// Set the full string.
-		results.full = full.toString();
+		results.content = full.toString();
 		full.reset();
 
 		// Handle auto brief if @brief command was not used.
@@ -299,21 +282,52 @@ private fn processParent(p: Processor, n: Parent)
 	foreach (child; n.children) {
 		if (c := cast(Parent)child) {
 			p.processParent(c);
+		} else if (c := cast(Function)child) {
+			p.processFunction(c);
 		} else if (c := cast(Named)child) {
 			p.processNamed(c);
 		}
 	}
 }
 
-private fn processNamed(p: Processor, n: Named)
+private fn processFunction(p: Processor, n: Function)
+{
+	if (!p.processNamed(n)) {
+		return;
+	}
+
+	foreach (param; p.results.params) {
+		arg: Arg;
+
+		foreach (v; n.args) {
+			arg = cast(Arg)v;
+
+			if (param.arg == arg.name) {
+				arg.content = param.doc;
+				break;
+			} else {
+				arg = null;
+			}
+		}
+	}
+
+	if (n.rets !is null) {
+		ret := cast(Return)n.rets[0];
+		if (ret !is null) {
+			ret.content = p.results.ret;
+		}
+	}
+}
+
+private fn processNamed(p: Processor, n: Named) bool
 {
 	if (n.raw is null) {
-		return;
+		return false;
 	}
 
 	p.parseRaw(n.raw);
 
-	n.mdFull = p.results.full;
+	n.content = p.results.content;
 	n.brief = p.results.brief;
 
 	foreach (ident; p.results.ingroups) {
@@ -325,4 +339,6 @@ private fn processNamed(p: Processor, n: Named)
 		group.children ~= n;
 		n.ingroup ~= group;
 	}
+
+	return true;
 }
