@@ -14,9 +14,11 @@ import diode.interfaces;
 
 fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter: string, type: string) Value
 {
+	isMd: bool;
 	isHtml: bool;
 	isFull: bool;
 	isBrief: bool;
+	isContent: bool;
 
 	named := cast(Named)v;
 	if (named is null) {
@@ -27,6 +29,7 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	switch (filter) {
 	case "vdoc_find_full", "vdoc_full": isFull = true; break;
 	case "vdoc_find_brief", "vdoc_brief": isBrief = true; break;
+	case "vdoc_find_content", "vdoc_content": isContent = true; break;
 	default:
 		err := format("internal error filter '%s' not known", filter);
 		e.handleError(err);
@@ -35,7 +38,12 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 
 	switch (type) {
 	case "html": isHtml = true; break;
+	case "md": isMd = true; break;
 	default:
+	}
+
+	if (isFull && isMd ||
+	    !isHtml && !isMd) {
 		err := format("type '%s' not support for '%s'", type, filter);
 		e.handleError(err);
 		return null;
@@ -48,6 +56,8 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 
 	if (isFull) {
 		return new FilterFull(named);
+	} else if (isContent) {
+		return new FilterContent(named, isHtml);
 	} else if (isBrief) {
 		return new FilterBrief(named);
 	} else {
@@ -59,12 +69,14 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 abstract class FilterValue : Value
 {
 public:
+	html: bool;
 	named: Named;
 
 
 public:
-	this(named: Named)
+	this(named: Named, html: bool)
 	{
+		this.html = html;
 		this.named = named;
 	}
 }
@@ -73,7 +85,7 @@ public:
 class FilterBrief : FilterValue
 {
 public:
-	this(named: Named) { super(named); }
+	this(named: Named) { super(named, true); }
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
@@ -83,11 +95,31 @@ public:
 	}
 }
 
+//! Filter for formating of content of DocComments into HTML.
+class FilterContent : FilterValue
+{
+public:
+	this(named: Named, html: bool) { super(named, html); }
+
+	override fn toText(n: ir.Node, sink: Sink)
+	{
+		if (named is null) {
+			return;
+		}
+
+		if (html) {
+			filterMarkdown(sink, named.content);
+		} else {
+			sink(named.content);
+		}
+	}
+}
+
 //! Filter for formating of full DocComments into HTML.
 class FilterFull : FilterValue
 {
 public:
-	this(named: Named) { super(named); }
+	this(named: Named) { super(named, true); }
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
