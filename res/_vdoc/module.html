@@ -6,10 +6,11 @@ title: Module
 
 <h1>{{ mod.name }}</h1>
 
-<pre><code class="language-volt">
+{{- mod | vdoc_full: 'html' -}}
+
+<br /><pre><code class="language-volt">
 {{- mod | vdoc_as_code: 'brief' -}}
 </code></pre>
-<br>
 {%- for child in mod.children -%}
 	{%- assign oldchild=forloop.prev -%}
 	{%- include vdoc_child.html child=child oldchild=oldchild -%}
