@@ -198,6 +198,8 @@ public:
 	mdFull: string;
 	//! The brief in text form.
 	brief: string;
+	//! The groups this named is in.
+	ingroup: Value[];
 
 
 public:
@@ -209,6 +211,12 @@ public:
 		case "raw": return new Text(raw);
 		case "access": return new Text(accessToString(access));
 		case "tag": return new Text(tag);
+		case "ingroup":
+			if (ingroup is null) {
+				return new Nil();
+			} else {
+				return new Collection(ingroup);
+			}
 		default: return new Nil();
 		}
 	}

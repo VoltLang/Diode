@@ -323,5 +323,6 @@ private fn processNamed(p: Processor, n: Named)
 			p.groups[ident] = group;
 		}
 		group.children ~= n;
+		n.ingroup ~= group;
 	}
 }
