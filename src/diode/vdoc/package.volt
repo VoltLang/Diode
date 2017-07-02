@@ -125,6 +125,21 @@ public:
 		return null;
 	}
 
+	//! Add a group, mostly used to create groups implicitly.
+	fn addGroup(name: string, title: string, raw: string) Parent
+	{
+		g := new Parent();
+		g.kind = Kind.Group;
+		g.raw = raw;
+		g.name = title;
+		g.search = name;
+
+		mGroups ~= g;
+		mNamed[name] = g;
+
+		return g;
+	}
+
 	/*!
 	 * Sets the children and does any upfront processing needed.
 	 *

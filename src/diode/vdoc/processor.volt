@@ -318,7 +318,8 @@ private fn processNamed(p: Processor, n: Named)
 	foreach (ident; p.results.ingroups) {
 		group := p.groups.get(ident, null);
 		if (group is null) {
-			continue;
+			group = p.root.addGroup(ident, null, null);
+			p.groups[ident] = group;
 		}
 		group.children ~= n;
 	}
