@@ -65,6 +65,9 @@ struct DocCommentResult
 	//! Params for functions.
 	params: DocCommentParam[];
 
+	//! See also sections.
+	sa: string[];
+
 	//! The doccomment content form the return command.
 	returnContent: string;
 }
@@ -126,6 +129,16 @@ public:
 	override fn ingroup(sink: Sink, group: string)
 	{
 		results.ingroups ~= group;
+	}
+
+	override fn saStart(sink: Sink)
+	{
+	}
+
+	override fn saEnd(sink: Sink)
+	{
+		results.sa ~= temp.toString();
+		temp.reset();
 	}
 
 	override fn paramStart(sink: Sink, direction: string, arg: string)
@@ -199,7 +212,7 @@ public:
 			full.sink(d);
 			full.sink("`");
 			break;
-		case Param, Return:
+		case Param, Return, Sa:
 			temp.sink("`");
 			temp.sink(d);
 			temp.sink("`");
@@ -241,7 +254,7 @@ public:
 			}
 			full.sink(md);
 			break;
-		case Param, Return:
+		case Param, Return, Sa:
 			temp.sink(md);
 			break;
 		}
@@ -250,7 +263,7 @@ public:
 	override fn content(sink: Sink, state: DocState, d: string)
 	{
 		final switch (state) with (DocState) {
-		case Param, Return: temp.sink(d); return;
+		case Param, Return, Sa: temp.sink(d); return;
 		case Brief: brief.sink(d); return;
 		case Content: break;
 		}
@@ -329,6 +342,7 @@ private fn processNamed(p: Processor, n: Named) bool
 
 	n.content = p.results.content;
 	n.brief = p.results.brief;
+	n.sa = p.results.sa;
 
 	foreach (ident; p.results.ingroups) {
 		group := p.groups.get(ident, null);

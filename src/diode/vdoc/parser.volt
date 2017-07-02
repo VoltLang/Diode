@@ -341,6 +341,8 @@ public:
 	override fn end(sink: Sink) { }
 	override fn briefStart(sink: Sink) { }
 	override fn briefEnd(sink: Sink) { }
+	override fn saStart(sink: Sink) { }
+	override fn saEnd(sink: Sink) { }
 	override fn paramStart(sink: Sink, direction: string, arg: string) { }
 	override fn paramEnd(sink: Sink) { }
 	override fn returnStart(sink: Sink) { }

@@ -200,6 +200,8 @@ public:
 	brief: string;
 	//! The groups this named is in.
 	ingroup: Value[];
+	//! The sa commands for this Named thing.
+	sa: string[];
 
 
 public:

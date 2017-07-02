@@ -129,11 +129,27 @@ public:
 
 		filterMarkdown(sink, named.content);
 
-		func := cast(Function)named;
-		if (func is null) {
-			return;
+		if (func := cast(Function)named) {
+			printFunction(func, sink);
 		}
 
+		// Post process see also.
+		if (named.sa !is null) {
+			sink("<h3>See also</h3>\n");
+			sink("<ul>\n");
+
+			foreach (sa; named.sa) {
+				format(sink, "<li>\n");
+				filterMarkdown(sink, sa);
+				format(sink, "</li>\n");
+			}
+
+			sink("</ul>\n");
+		}
+	}
+
+	final fn printFunction(func: Function, sink: Sink)
+	{
 		argHasDoc: bool;
 		foreach (v; func.args) {
 			arg := cast(Arg)v;
@@ -150,7 +166,7 @@ public:
 
 			foreach (v; func.args) {
 				arg := cast(Arg)v;
-				format(sink, "<td><strong>%s</strong></td>", arg.name);
+				format(sink, "<tr><td><strong>%s</strong></td>", arg.name);
 				format(sink, "<td>\n");
 				filterMarkdown(sink, arg.content);
 				format(sink, "</td></tr>\n");
