@@ -5,7 +5,6 @@ module diode.vdoc.as_code;
 
 import core.exception;
 
-import io = watt.io;
 import watt.text.sink : StringSink;
 import watt.text.vdoc;
 import watt.text.string;
@@ -66,7 +65,6 @@ public:
 	lastAccess: Access;
 
 	hasProt: bool;
-	hasPrinted: bool;
 
 
 public:
@@ -103,21 +101,22 @@ private:
 	}
 }
 
-fn flushProt(ref s: State, access: Access, kind: Kind, sink: Sink)
+fn flushaProtAndNewLine(ref s: State, access: Access, kind: Kind, spacing: string, sink: Sink)
 {
-	if (s.hasPrinted) {
+	// Force one spacing on module level.
+	if (s.mod is s.parent && s.lastKind != kind) {
+		s.lastKind = kind;
 		sink("\n");
-		s.hasPrinted = false;
-	}
-
-	if ((s.lastKind == kind || s.mod is s.parent) &&
-	    s.lastAccess == access) {
 		return;
 	}
 
+	if (s.lastKind == kind && s.lastAccess == access) {
+		sink(spacing);
+		return;
+	}
 
 	if (s.hasProt) {
-		sink("\n");
+		sink("\n\n");
 	}
 
 	s.hasProt = true;
@@ -153,8 +152,6 @@ fn drawModule(ref s: State, sink: Sink)
 
 	s.drawImports(Access.Public, sink);
 
-	sink("\n");
-
 	s.drawChildren(sink);
 }
 
@@ -169,9 +166,9 @@ fn drawChildren(ref s: State, sink: Sink)
 	s.drawFields(Access.Public, sink);
 	s.drawLocals(Access.Public, sink);
 	s.drawGlobals(Access.Public, sink);
+	s.drawCtors(Access.Public, sink);
 	s.drawMembers(Access.Public, sink);
 	s.drawFns(Access.Public, sink);
-	s.drawCtors(Access.Public, sink);
 
 	s.drawEnumDecls(Access.Protected, sink);
 	s.drawEnums(Access.Protected, sink);
@@ -214,6 +211,7 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 			continue;
 		}
 
+		s.lastKind = Kind.Import;
 		s.drawBrief(c, sink);
 		sink(prefix);
 		sink("import ");
@@ -224,7 +222,11 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 			s.drawName(c, sink);
 			sink(";\n");
 		}
-		s.hasPrinted = true;
+	}
+
+	// Extra newline between imports and other elements.
+	if (s.lastKind == Kind.Import) {
+		sink("\n");
 	}
 }
 
@@ -243,10 +245,9 @@ fn drawEnums(ref s: State, access: Access, sink: Sink)
 		    c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.Enum, sink);
+		s.flushaProtAndNewLine(access, Kind.Enum, "\n", sink);
 		s.drawBrief(c, sink);
 		s.drawEnum(c, sink);
-		s.hasPrinted = true;
 	}
 }
 
@@ -272,21 +273,14 @@ fn drawEnum(ref s: State, c: Parent, sink: Sink)
 
 fn drawEnumDecls(ref s: State, access: Access, sink: Sink)
 {
-	hasPrinted: bool;
-
 	foreach (child; s.parent.children) {
 		c := cast(EnumDecl)child;
 		if (c is null || c.kind != Kind.EnumDecl ||
 		    c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.EnumDecl, sink);
+		s.flushaProtAndNewLine(access, Kind.EnumDecl, "", sink);
 		s.drawEnumDecl(c, sink);
-		hasPrinted = true;
-	}
-
-	if (hasPrinted) {
-		s.hasPrinted = true;
 	}
 }
 
@@ -323,7 +317,6 @@ fn drawGlobals(ref s: State, access: Access, sink: Sink)
 fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 {
 	prefix: string;
-	hasPrinted: bool;
 	final switch (storage) with (Storage) {
 	case Field: prefix = ""; break;
 	case Local: prefix = "local "; break;
@@ -338,16 +331,11 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 			continue;
 		}
 
-		s.flushProt(access, Kind.Variable, sink);
+		s.flushaProtAndNewLine(access, Kind.Variable, "", sink);
 		s.drawBrief(c, sink);
 		format(sink, "%s%s", s.tabs, prefix);
 		s.drawName(c, sink);
 		format(sink, ": %s;\n", c.type);
-		hasPrinted = true;
-	}
-
-	if (hasPrinted) {
-		s.hasPrinted = true;
 	}
 }
 
@@ -360,7 +348,6 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 
 fn drawFns(ref s: State, access: Access, sink: Sink)
 {
-	hasPrinted: bool;
 	prefix := s.mod is s.parent ? "" : "static ";
 
 	foreach (child; s.parent.children) {
@@ -369,54 +356,37 @@ fn drawFns(ref s: State, access: Access, sink: Sink)
 		    c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.Function, sink);
+		s.flushaProtAndNewLine(access, Kind.Function, "", sink);
 		s.drawBrief(c, sink);
 		s.drawFn(c, prefix, sink);
-		hasPrinted = true;
-	}
-
-	if (hasPrinted) {
-		s.hasPrinted = true;
 	}
 }
 
 fn drawCtors(ref s: State, access: Access, sink: Sink)
 {
-	hasPrinted: bool;
-
 	foreach (child; s.parent.children) {
 		c := cast(Function)child;
 		if (c is null || c.kind != Kind.Constructor ||
 		    c.access != access) {
 			continue;
 		}
+		s.flushaProtAndNewLine(access, Kind.Member, "", sink);
+		s.drawBrief(c, sink);
 		s.drawCtor(c, sink);
-		hasPrinted = true;
-	}
-
-	if (hasPrinted) {
-		s.hasPrinted = true;
 	}
 }
 
 fn drawMembers(ref s: State, access: Access, sink: Sink)
 {
-	hasPrinted: bool;
-
 	foreach (child; s.parent.children) {
 		c := cast(Function)child;
 		if (c is null || c.kind != Kind.Member ||
 		    c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.Member, sink);
+		s.flushaProtAndNewLine(access, Kind.Member, "", sink);
 		s.drawBrief(c, sink);
 		s.drawFn(c, "", sink);
-		hasPrinted = true;
-	}
-
-	if (hasPrinted) {
-		s.hasPrinted = true;
 	}
 }
 
@@ -493,10 +463,9 @@ fn drawInterfaces(ref s: State, access: Access, sink: Sink)
 		    c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.Interface, sink);
+		s.flushaProtAndNewLine(access, Kind.Interface, "\n", sink);
 		s.drawBrief(c, sink);
 		s.drawInterface(c, sink);
-		s.hasPrinted = true;
 	}
 }
 
@@ -528,10 +497,9 @@ fn drawClasses(ref s: State, access: Access, sink: Sink)
 		    c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.Class, sink);
+		s.flushaProtAndNewLine(access, Kind.Class, "\n", sink);
 		s.drawBrief(c, sink);
 		s.drawClass(c, sink);
-		s.hasPrinted = true;
 	}
 }
 
@@ -567,17 +535,14 @@ fn drawStructs(ref s: State, access: Access, sink: Sink)
 
 fn drawAggrs(ref s: State, access: Access, kind: Kind, prefix: string, sink: Sink)
 {
-	hasPrinted: bool;
-
 	foreach (child; s.parent.children) {
 		c := cast(Parent)child;
 		if (c is null || c.kind != kind || c.access != access) {
 			continue;
 		}
-		s.flushProt(access, Kind.Class, sink);
+		s.flushaProtAndNewLine(access, Kind.Class, "\n", sink);
 		s.drawBrief(c, sink);
 		s.drawAggr(c, prefix, sink);
-		s.hasPrinted = true;
 	}
 }
 
