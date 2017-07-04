@@ -65,6 +65,102 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	}
 }
 
+
+/*
+ *
+ * Drawing functions.
+ *
+ */
+
+//! Print the brief as regular text.
+fn drawBriefText(named: Named, sink: Sink)
+{
+	sink(named.brief);
+}
+
+//! Print the raw content as markdown.
+fn drawContentMD(named: Named, sink: Sink)
+{
+	sink(named.content);
+}
+
+//! Print the content as html as processed by markdown.
+fn drawContentHTML(named: Named, sink: Sink)
+{
+	filterMarkdown(sink, named.content);
+}
+
+//! Print the full content as HTML.
+fn drawFullHTML(named: Named, sink: Sink)
+{
+	filterMarkdown(sink, named.content);
+
+	if (func := cast(Function)named) {
+		drawFullFunctionHTML(func, sink);
+	}
+
+	// Post process see also.
+	if (named.sa !is null) {
+		sink("<h3>See also</h3>\n");
+		sink("<ul>\n");
+
+		foreach (sa; named.sa) {
+			format(sink, "<li>\n");
+			filterMarkdown(sink, sa);
+			format(sink, "</li>\n");
+		}
+
+		sink("</ul>\n");
+	}
+}
+
+//! Print extra function doccomments, like return and parameters.
+fn drawFullFunctionHTML(func: Function, sink: Sink)
+{
+	argHasDoc: bool;
+	foreach (v; func.args) {
+		arg := cast(Arg)v;
+		if (arg.content !is null) {
+			argHasDoc = true;
+			break;
+		}
+	}
+
+	// Post process params.
+	if (argHasDoc) {
+		sink("<h3>Parameters</h3>\n");
+		sink("<table class=\"doc-param-table\">\n");
+
+		foreach (v; func.args) {
+			arg := cast(Arg)v;
+			format(sink, "<tr><td><strong>%s</strong></td>", arg.name);
+			format(sink, "<td>\n");
+			filterMarkdown(sink, arg.content);
+			format(sink, "</td></tr>\n");
+		}
+
+		sink("</table>\n");
+	}
+
+	// Post process return.
+	if (func.rets !is null) {
+		ret := cast(Return)func.rets[0];
+		if (ret !is null && ret.content !is null) {
+			sink("<h3>Return</h3>\n");
+			sink("<div class=\"doc-param-table\">");
+			filterMarkdown(sink, ret.content);
+			sink("</div>\n");
+		}
+	}
+}
+
+
+/*
+ *
+ * Filter classes
+ *
+ */
+
 //! Helper class for Filters.
 abstract class FilterValue : Value
 {
@@ -78,6 +174,7 @@ public:
 	{
 		this.html = html;
 		this.named = named;
+		assert(named !is null);
 	}
 }
 
@@ -89,9 +186,7 @@ public:
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		if (named !is null) {
-			sink(named.brief);
-		}
+		drawBriefText(named, sink);
 	}
 }
 
@@ -103,14 +198,10 @@ public:
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		if (named is null) {
-			return;
-		}
-
 		if (html) {
-			filterMarkdown(sink, named.content);
+			drawContentHTML(named, sink);
 		} else {
-			sink(named.content);
+			drawContentMD(named, sink);
 		}
 	}
 }
@@ -123,67 +214,6 @@ public:
 
 	override fn toText(n: ir.Node, sink: Sink)
 	{
-		if (named is null) {
-			return;
-		}
-
-		filterMarkdown(sink, named.content);
-
-		if (func := cast(Function)named) {
-			printFunction(func, sink);
-		}
-
-		// Post process see also.
-		if (named.sa !is null) {
-			sink("<h3>See also</h3>\n");
-			sink("<ul>\n");
-
-			foreach (sa; named.sa) {
-				format(sink, "<li>\n");
-				filterMarkdown(sink, sa);
-				format(sink, "</li>\n");
-			}
-
-			sink("</ul>\n");
-		}
-	}
-
-	final fn printFunction(func: Function, sink: Sink)
-	{
-		argHasDoc: bool;
-		foreach (v; func.args) {
-			arg := cast(Arg)v;
-			if (arg.content !is null) {
-				argHasDoc = true;
-				break;
-			}
-		}
-
-		// Post process params.
-		if (argHasDoc) {
-			sink("<h3>Parameters</h3>\n");
-			sink("<table class=\"doc-param-table\">\n");
-
-			foreach (v; func.args) {
-				arg := cast(Arg)v;
-				format(sink, "<tr><td><strong>%s</strong></td>", arg.name);
-				format(sink, "<td>\n");
-				filterMarkdown(sink, arg.content);
-				format(sink, "</td></tr>\n");
-			}
-
-			sink("</table>\n");
-		}
-
-		// Post process return.
-		if (func.rets !is null) {
-			ret := cast(Return)func.rets[0];
-			if (ret !is null && ret.content !is null) {
-				sink("<h3>Return</h3>\n");
-				sink("<div class=\"doc-param-table\">");
-				filterMarkdown(sink, ret.content);
-				sink("</div>\n");
-			}
-		}
+		drawFullHTML(named, sink);
 	}
 }
