@@ -195,6 +195,22 @@ fn drawBrief(ref s: State, n: Named, sink: Sink)
 	}
 }
 
+fn drawParentList(sink: Sink, parents: scope string[])
+{
+	if (parents.length > 0) {
+		sink(" : ");
+
+		hasPrinted: bool;
+		foreach (p; parents) {
+			if (hasPrinted) {
+				sink(", ");
+			}
+			sink(p);
+			hasPrinted = true;
+		}
+	}
+}
+
 fn drawImports(ref s: State, access: Access, sink: Sink)
 {
 	prefix: string;
@@ -473,6 +489,9 @@ fn drawInterface(ref s: State, c: Parent, sink: Sink)
 {
 	format(sink, "%sinterface ", s.tabs);
 	s.drawName(c, sink);
+
+	drawParentList(sink, c.interfacesStr);
+
 	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;
@@ -507,6 +526,13 @@ fn drawClass(ref s: State, c: Parent, sink: Sink)
 {
 	format(sink, "%sclass ", s.tabs);
 	s.drawName(c, sink);
+
+	if (c.parentStr !is null) {
+		drawParentList(sink, [c.parentStr] ~ c.interfacesStr);
+	} else {
+		drawParentList(sink, c.interfacesStr);
+	}
+
 	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;

@@ -200,9 +200,9 @@ fn drawProtoHTML(named: Named, sink: Sink)
 	final switch (named.kind) with (Kind) {
 	case Module: sink.drawProtoPrefixAndNameHTML("module", named.name); break;
 	case Union: sink.drawProtoPrefixAndNameHTML("union", named.name); break;
-	case Class: sink.drawProtoPrefixAndNameHTML("class", named.name); break;
+	case Class: drawProtoAggr(named, sink, "class"); break;
 	case Struct: sink.drawProtoPrefixAndNameHTML("struct", named.name); break;
-	case Interface: sink.drawProtoPrefixAndNameHTML("interface", named.name); break;
+	case Interface: drawProtoAggr(named, sink, "interface"); break;
 	case Enum: sink.drawProtoPrefixAndNameHTML("enum", named.name); break;
 	case EnumDecl: sink.drawProtoPrefixAndNameHTML("enum", named.name); break;
 	case Alias: sink.drawProtoPrefixAndNameHTML("alias", named.name); break;
@@ -232,6 +232,34 @@ fn drawProtoPrefixAndNameHTML(sink: Sink, prefix: string, name: string)
 	sink("</span> <span class=\"vdoc-proto-name\">");
 	sink(name);
 	sink("</span>");
+}
+
+fn drawProtoAggr(named: Named, sink: Sink, prefix: string)
+{
+	sink.drawProtoPrefixAndNameHTML(prefix, named.name);
+
+	// Remove automatically added Object references.
+	parent := named.parentStr != "core.object.Object" ? named.parentStr : null;
+
+	parents: string[];
+	if (parent !is null) {
+		parents = [parent] ~ named.interfacesStr;
+	} else {
+		parents = named.interfacesStr;
+	}
+
+	if (parents.length > 0) {
+		sink(" : ");
+		hasPrinted: bool;
+
+		foreach (p; parents) {
+			if (hasPrinted) {
+				sink(", ");
+			}
+			sink(p);
+			hasPrinted = true;
+		}
+	}
 }
 
 fn drawProtoVar(named: Named, sink: Sink)

@@ -83,6 +83,11 @@ public:
 	isOverride: bool;
 	isStandalone: bool;
 
+	parent: string;
+	parentFull: string;
+	interfaces: string[];
+	interfacesFull: string[];
+
 
 public:
 	fn getFields(ref e: json.Value)
@@ -99,7 +104,7 @@ public:
 			case "kind": this.kind = getKindFromString(v.str()); break;
 			case "value": this.value = v.str(); break;
 			case "access": this.access = getAccessFromString(v.str()); break;
-			case "parent": break; // TODO
+			case "parent": this.parent = v.str(); break;
 			case "aliases": break; // TODO
 			case "storage": this.storage = getStorageFromString(v.str()); break;
 			case "isScope": this.isScope = v.boolean(); break;
@@ -112,13 +117,13 @@ public:
 			case "isStatic": this.isStatic = v.boolean(); break;
 			case "isProperty": this.isProperty = v.boolean(); break;
 			case "isAbstract": this.isAbstract = v.boolean(); break;
-			case "parentFull": break; // TODO
+			case "parentFull": this.parentFull = v.str(); break;
 			case "forceLabel": break; // TODO
-			case "interfaces": break; // TODO
+			case "interfaces": this.interfaces = v.getStringArray(); break;
 			case "isOverride": this.isOverride = v.boolean(); break;
 			case "mangledName": this.mangledName = v.str(); break;
 			case "isStandalone": this.isStandalone = v.boolean(); break;
-			case "interfacesFull": break; // TODO
+			case "interfacesFull": this.interfacesFull = v.getStringArray(); break;
 			default:
 				io.error.writefln("unknown key '" ~ k ~ "'");
 				io.error.flush();
@@ -172,6 +177,29 @@ public:
 		e := new Parent();
 		copyToParent(e);
 		return e;
+	}
+
+	fn toClass() Parent
+	{
+		c := new Parent();
+		copyToParent(c);
+		// Remove automatically added Object references.
+		if (parent != "core.object.Object") {
+			c.parentStr = parent;
+		}
+		c.parentFullStr = parentFull;
+		c.interfacesStr = interfaces;
+		c.interfacesFullStr = interfacesFull;
+		return c;
+	}
+
+	fn toInterface() Parent
+	{
+		i := new Parent();
+		copyToParent(i);
+		i.interfacesStr = interfaces;
+		i.interfacesFullStr = interfacesFull;
+		return i;
 	}
 
 	fn toEnumDecl() EnumDecl
@@ -244,7 +272,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case Alias: break; // TODO Add alias
 		case Group: break; // Handled somewhere else.
 		case EnumDecl: arr ~= info.toEnumDecl(); break;
-		case Class: arr ~= info.toParent(); break;
+		case Class: arr ~= info.toClass(); break;
 		case Union: arr ~= info.toParent(); break;
 		case Import: arr ~= info.toImport(); break;
 		case Return: arr ~= info.toReturn(); break;
@@ -253,7 +281,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 		case Member: arr ~= info.toFunction(); break;
 		case Variable: arr ~= info.toVariable(); break;
 		case Function: arr ~= info.toFunction(); break;
-		case Interface: arr ~= info.toParent(); break;
+		case Interface: arr ~= info.toInterface(); break;
 		case Destructor: arr ~= info.toFunction(); break;
 		case Constructor: arr ~= info.toFunction(); break;
 		}
@@ -309,6 +337,16 @@ fn getStorageFromString(str: string) Storage
 		io.error.flush();
 		return Global;
 	}
+}
+
+fn getStringArray(ref v: json.Value) string[]
+{
+	arr := v.array();
+	ret := new string[](arr.length);
+	foreach (i, ref e; arr) {
+		ret[i] = e.str();
+	}
+	return ret;
 }
 
 //! Parser for getting defgroup name and title.

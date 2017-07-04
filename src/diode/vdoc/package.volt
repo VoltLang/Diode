@@ -207,6 +207,15 @@ public:
 	//! The se commands for this Named thing.
 	se: string[];
 
+	//! The parsed name of parent class to the class.
+	parentStr: string;
+	//! The full name of parent class to the class.
+	parentFullStr: string;
+	//! The parsed name of the interface(s) to the class or interface.
+	interfacesStr: string[];
+	//! The full name of the interface(s) to the class or interface.
+	interfacesFullStr: string[];
+
 
 public:
 	override fn ident(n: ir.Node, key: string) Value
