@@ -17,6 +17,7 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	isMd: bool;
 	isHtml: bool;
 	isFull: bool;
+	isProto: bool;
 	isBrief: bool;
 	isContent: bool;
 
@@ -29,6 +30,7 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	switch (filter) {
 	case "vdoc_find_full", "vdoc_full": isFull = true; break;
 	case "vdoc_find_brief", "vdoc_brief": isBrief = true; break;
+	case "vdoc_find_proto", "vdoc_proto": isProto = true; break;
 	case "vdoc_find_content", "vdoc_content": isContent = true; break;
 	default:
 		err := format("internal error filter '%s' not known", filter);
@@ -42,7 +44,8 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 	default:
 	}
 
-	if (isFull && isMd ||
+	if (isFull && !isHtml ||
+	    isProto && !isHtml ||
 	    !isHtml && !isMd) {
 		err := format("type '%s' not support for '%s'", type, filter);
 		e.handleError(err);
@@ -56,6 +59,8 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 
 	if (isFull) {
 		return new FilterFull(named);
+	} else if (isProto) {
+		return new FilterProto(named);
 	} else if (isContent) {
 		return new FilterContent(named, isHtml);
 	} else if (isBrief) {
@@ -157,6 +162,104 @@ fn drawFullFunctionHTML(func: Function, sink: Sink)
 
 /*
  *
+ * Prototype drawing.
+ *
+ */
+
+//! Print the content as html as processed by markdown.
+fn drawProtoHTML(named: Named, sink: Sink)
+{
+	final switch (named.kind) with (Kind) {
+	case Module: sink.drawProtoPrefixAndNameHTML("module", named.name); break;
+	case Union: sink.drawProtoPrefixAndNameHTML("union", named.name); break;
+	case Class: sink.drawProtoPrefixAndNameHTML("class", named.name); break;
+	case Struct: sink.drawProtoPrefixAndNameHTML("struct", named.name); break;
+	case Interface: sink.drawProtoPrefixAndNameHTML("interface", named.name); break;
+	case Enum: sink.drawProtoPrefixAndNameHTML("enum", named.name); break;
+	case EnumDecl: sink.drawProtoPrefixAndNameHTML("enum", named.name); break;
+	case Alias: sink.drawProtoPrefixAndNameHTML("alias", named.name); break;
+	case Import: sink.drawProtoPrefixAndNameHTML("import", named.name); break;
+	case Variable:
+		drawProtoVar(named, sink);
+		break;
+	case Member, Function, Destructor, Constructor:
+		drawProtoFunc(named, sink);
+		break;
+	case Arg, Group, Return, Invalid:
+		assert(false);
+	}
+}
+
+fn drawProtoNameHTML(sink: Sink, name: string)
+{
+	sink("<span class=\"vdoc-proto-name\">");
+	sink(name);
+	sink("</span>");
+}
+
+fn drawProtoPrefixAndNameHTML(sink: Sink, prefix: string, name: string)
+{
+	sink("<span class=\"vdoc-proto-prefix\">");
+	sink(prefix);
+	sink("</span> <span class=\"vdoc-proto-name\">");
+	sink(name);
+	sink("</span>");
+}
+
+fn drawProtoVar(named: Named, sink: Sink)
+{
+	var := cast(Variable)named;
+
+	final switch (var.storage) with (Storage) {
+	case Field: sink.drawProtoNameHTML(var.name); break;
+	case Local: sink.drawProtoPrefixAndNameHTML("local", var.name); break;
+	case Global: sink.drawProtoPrefixAndNameHTML("global", var.name); break;
+	}
+
+	sink("<span class=\"vdoc-proto-params\">: ");
+	sink(var.type);
+	sink("</span>");
+}
+
+fn drawProtoFunc(named: Named, sink: Sink)
+{
+	func := cast(Function)named;
+
+	switch (func.kind) with (Kind) {
+	case Destructor: sink.drawProtoNameHTML("~this"); break;
+	case Constructor: sink.drawProtoNameHTML("this"); break;
+	default: sink.drawProtoPrefixAndNameHTML("fn", func.name);
+	}
+
+	sink("<span class=\"vdoc-proto-params\">(");
+
+	hasPrinted := false;
+	foreach (c; func.args) {
+		arg := cast(Arg)c;
+		if (hasPrinted) {
+			sink(", ");
+		}
+
+		if (arg.name is null) {
+			format(sink, "%s", arg.type);
+		} else {
+			format(sink, "%s: %s", arg.name, arg.type);
+		}
+		hasPrinted = true;
+	}
+
+	sink(")");
+
+	if (func.rets.length > 0 && (cast(Return)func.rets[0]).type != "void") {
+		format(sink, " %s", (cast(Return)func.rets[0]).type);
+	}
+
+	sink("</span>");
+}
+
+
+/*
+ *
  * Filter classes
  *
  */
@@ -187,6 +290,18 @@ public:
 	override fn toText(n: ir.Node, sink: Sink)
 	{
 		drawBriefText(named, sink);
+	}
+}
+
+//! Filter for brief.
+class FilterProto : FilterValue
+{
+public:
+	this(named: Named) { super(named, true); }
+
+	override fn toText(n: ir.Node, sink: Sink)
+	{
+		drawProtoHTML(named, sink);
 	}
 }
 

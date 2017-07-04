@@ -8,7 +8,7 @@
 {%- else -%}
 <div class="doc-child" id="{{ obj.tag }}">
 
-<div class="doc-name">{{ obj.name }}</div>
+<div class="vdoc-proto">{{ obj | vdoc_proto }}</div>
 
 {%- include vdoc_ingroup.html obj=obj -%}
 
