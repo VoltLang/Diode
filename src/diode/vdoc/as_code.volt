@@ -338,7 +338,7 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 			continue;
 		}
 
-		s.flushProt(access, Kind.EnumDecl, sink);
+		s.flushProt(access, Kind.Variable, sink);
 		s.drawBrief(c, sink);
 		format(sink, "%s%s", s.tabs, prefix);
 		s.drawName(c, sink);
