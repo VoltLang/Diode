@@ -68,6 +68,12 @@ struct DocCommentResult
 	//! See also sections.
 	sa: string[];
 
+	//! Throws sections.
+	_throw: string[];
+
+	//! Side-Effect sections.
+	se: string[];
+
 	//! The doccomment content form the return command.
 	returnContent: string;
 }
@@ -139,7 +145,9 @@ public:
 	{
 		final switch (sec) with (DocSection) {
 		case SeeAlso: results.sa ~= temp.toString(); break;
-		case Return: results.ret = temp.toString(); break;
+		case Return: results.ret ~= temp.toString(); break;
+		case Throw: results._throw ~= temp.toString(); break;
+		case SideEffect: results.se ~= temp.toString(); break;
 		}
 
 		temp.reset();
@@ -336,6 +344,8 @@ private fn processNamed(p: Processor, n: Named) bool
 	n.content = p.results.content;
 	n.brief = p.results.brief;
 	n.sa = p.results.sa;
+	n.se = p.results.se;
+	n._throw = p.results._throw;
 
 	foreach (ident; p.results.ingroups) {
 		group := p.groups.get(ident, null);

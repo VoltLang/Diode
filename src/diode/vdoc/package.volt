@@ -202,6 +202,10 @@ public:
 	ingroup: Value[];
 	//! The sa commands for this Named thing.
 	sa: string[];
+	//! The throw commands for this Named thing.
+	_throw: string[];
+	//! The se commands for this Named thing.
+	se: string[];
 
 
 public:

@@ -157,6 +157,34 @@ fn drawFullFunctionHTML(func: Function, sink: Sink)
 			sink("</div>\n");
 		}
 	}
+
+	// Post process throws.
+	if (func._throw !is null) {
+		sink("<h3>Throws</h3>\n");
+		sink("<ul>\n");
+
+		foreach (_throw; func._throw) {
+			format(sink, "<li>\n");
+			filterMarkdown(sink, _throw);
+			format(sink, "</li>\n");
+		}
+
+		sink("</ul>\n");
+	}
+
+	// Post process side effects.
+	if (func.se !is null) {
+		sink("<h3>Side-Effects</h3>\n");
+		sink("<ul>\n");
+
+		foreach (se; func.se) {
+			format(sink, "<li>\n");
+			filterMarkdown(sink, se);
+			format(sink, "</li>\n");
+		}
+
+		sink("</ul>\n");
+	}
 }
 
 
