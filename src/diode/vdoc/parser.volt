@@ -341,12 +341,10 @@ public:
 	override fn end(sink: Sink) { }
 	override fn briefStart(sink: Sink) { }
 	override fn briefEnd(sink: Sink) { }
-	override fn saStart(sink: Sink) { }
-	override fn saEnd(sink: Sink) { }
+	override fn sectionStart(sink: Sink, sec: vdoc.DocSection) { }
+	override fn sectionEnd(sink: Sink, sec: vdoc.DocSection) { }
 	override fn paramStart(sink: Sink, direction: string, arg: string) { }
 	override fn paramEnd(sink: Sink) { }
-	override fn returnStart(sink: Sink) { }
-	override fn returnEnd(sink: Sink) { }
 
 	override fn p(sink: Sink, state: vdoc.DocState, d: string) { }
 	override fn link(sink: Sink, state: vdoc.DocState, target: string, text: string) { }

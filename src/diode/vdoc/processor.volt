@@ -131,13 +131,17 @@ public:
 		results.ingroups ~= group;
 	}
 
-	override fn saStart(sink: Sink)
+	override fn sectionStart(sink: Sink, sec: DocSection)
 	{
 	}
 
-	override fn saEnd(sink: Sink)
+	override fn sectionEnd(sink: Sink, sec: DocSection)
 	{
-		results.sa ~= temp.toString();
+		final switch (sec) with (DocSection) {
+		case SeeAlso: results.sa ~= temp.toString(); break;
+		case Return: results.ret = temp.toString(); break;
+		}
+
 		temp.reset();
 	}
 
@@ -160,17 +164,6 @@ public:
 		param.doc = temp.toString();
 		param = null;
 
-		temp.reset();
-	}
-
-	override fn returnStart(sink: Sink)
-	{
-
-	}
-
-	override fn returnEnd(sink: Sink)
-	{
-		results.ret = temp.toString();
 		temp.reset();
 	}
 
@@ -212,7 +205,7 @@ public:
 			full.sink(d);
 			full.sink("`");
 			break;
-		case Param, Return, Sa:
+		case Param, Section:
 			temp.sink("`");
 			temp.sink(d);
 			temp.sink("`");
@@ -254,7 +247,7 @@ public:
 			}
 			full.sink(md);
 			break;
-		case Param, Return, Sa:
+		case Param, Section:
 			temp.sink(md);
 			break;
 		}
@@ -263,7 +256,7 @@ public:
 	override fn content(sink: Sink, state: DocState, d: string)
 	{
 		final switch (state) with (DocState) {
-		case Param, Return, Sa: temp.sink(d); return;
+		case Param, Section: temp.sink(d); return;
 		case Brief: brief.sink(d); return;
 		case Content: break;
 		}
