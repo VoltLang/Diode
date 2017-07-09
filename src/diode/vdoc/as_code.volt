@@ -231,11 +231,19 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 		s.drawBrief(c, sink);
 		sink(prefix);
 		sink("import ");
+
+		n := s.root.findNamed(c.name);
+		if (n is null) {
+			n = c;
+		}
+
 		if (c.bind !is null) {
 			s.drawName(c, c.bind, sink);
-			format(sink, " = %s;\n", c.name);
+			sink(" = ");
+			s.drawName(n, sink);
+			sink("\n");
 		} else {
-			s.drawName(c, sink);
+			s.drawName(n, sink);
 			sink(";\n");
 		}
 	}
