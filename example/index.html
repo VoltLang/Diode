@@ -28,12 +28,12 @@ title: Test
 	<span class='listname'>fn {{ mod.name }}.{{ func.name }}(
 {%- for arg in func.args -%}
 {{- arg.type -}}
-{%- unless forloop.last %}, {% endif -%}
+{%- unless forloop.last %}, {% endunless -%}
 {%- endfor %}) {% for r in func.rets -%}
 {{- r.type -}}
 {%- endfor -%}
 {%- if func.hasBody %} { }{% endif -%}
-{%- unless func.hasBody -%};{% endif -%}
+{%- unless func.hasBody -%};{% endunless -%}
 </span>
 	<span class='listsearch'>{{ mod.name }}.{{ func.name }}</span>
 </span>
