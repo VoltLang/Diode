@@ -4,7 +4,7 @@
 module test;
 
 import watt.io.file;
-import watt.text.json;
+import watt.json;
 
 struct S
 {

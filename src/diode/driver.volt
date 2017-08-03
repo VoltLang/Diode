@@ -8,10 +8,10 @@ import watt.path;
 import watt.conv;
 import watt.text.sink;
 import watt.text.source;
-import watt.text.markdown;
+import watt.markdown;
 import watt.text.format : format;
 
-import json = watt.text.json;
+import json = watt.json;
 import ir = diode.ir;
 
 import diode.errors;

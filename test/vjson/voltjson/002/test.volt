@@ -4,7 +4,7 @@
 module test;
 
 import watt.io.file;
-import watt.text.json : parse, bindTest = parse;
+import watt.json : parse, bindTest = parse;
 
 global a: i32;
 global private b: i32;

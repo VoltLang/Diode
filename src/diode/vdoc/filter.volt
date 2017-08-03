@@ -3,7 +3,7 @@
 //! Code handle vdoc filters.
 module diode.vdoc.filter;
 
-import watt.text.markdown;
+import watt.markdown;
 import watt.text.vdoc;
 
 import diode.errors;

@@ -3,7 +3,7 @@
 module diode.vdoc.parser;
 
 import io = watt.io;
-import json = watt.text.json;
+import json = watt.json;
 import vdoc = watt.text.vdoc;
 
 import diode.eval;

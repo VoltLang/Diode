@@ -7,7 +7,7 @@ module diode.eval.json;
 
 import watt.text.format;
 
-import json = watt.text.json;
+import json = watt.json;
 
 import diode.eval;
 

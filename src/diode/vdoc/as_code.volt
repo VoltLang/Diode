@@ -9,7 +9,7 @@ import watt.text.sink : StringSink;
 import watt.text.vdoc;
 import watt.text.string;
 import watt.text.format;
-import watt.text.markdown : filterMarkdown;
+import watt.markdown : filterMarkdown;
 
 import diode.errors;
 import diode.eval;

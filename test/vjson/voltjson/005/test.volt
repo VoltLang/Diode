@@ -4,7 +4,7 @@
 module test;
 
 import watt.io.file;
-import watt.text.json;
+import watt.json;
 
 @property fn a() i32 { return 0; }
 class b { override fn toString() string { return "hi"; } }

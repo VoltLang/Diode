@@ -6,7 +6,7 @@ module test;
 #nodoc
 
 public import watt.io.file;
-import json = watt.text.json : parse, VVValue = Value;
+import json = watt.json : parse, VVValue = Value;
 
 /*!
  * HIHIHIHI

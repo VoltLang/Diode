@@ -4,7 +4,7 @@
 module test;
 
 import watt.io.file;
-import watt.text.json;
+import watt.json;
 
 global a: i32;
 local b: i32;
