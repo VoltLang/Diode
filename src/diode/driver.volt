@@ -91,6 +91,9 @@ public:
 			     "data", "documents", "categories", "tags":
 				warning("key '%s' from '%s' is reserved, skipping.", k, filename);
 				continue;
+			case "guru_hack_suffix":
+				settings.guruHackSuffix = v.str();
+				continue;
 			case "vdoc":
 				if (v.type() == json.DomType.OBJECT) {
 					mVdoc.set = v.jsonToSet();
@@ -154,6 +157,10 @@ public:
 		}
 
 		fullUrl := settings.url ~ settings.baseurl;
+		if (settings.guruHackSuffix !is null) {
+			fullUrl ~= settings.guruHackSuffix;
+		}
+
 		mods := mVdoc.modules;
 		prev: Value;
 		foreach (mod; mods) {
@@ -169,6 +176,11 @@ public:
 
 		// Process all of the raw comments.
 		process(mVdoc);
+
+		// Do not generate any vdoc files.
+		if (settings.guruHackSuffix !is null) {
+			return;
+		}
 
 		dir := format("%s%svdoc%s", settings.outputDir,
 			dirSeparator, dirSeparator);

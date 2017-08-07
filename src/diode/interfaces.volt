@@ -50,6 +50,9 @@ public:
 	baseurlFromCommandLine: bool;
 	baseurl: string = "/mybase";
 
+	//! Temporary hack for guru untill we add vdoc cross-reference code.
+	guruHackSuffix: string;
+
 	// These depend on workDir and are set with fillInDefaults.
 	enum string vdocDirDefault = "_vdoc";
 	enum string outputDirDefault = "_site";
