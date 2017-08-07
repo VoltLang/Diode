@@ -38,15 +38,17 @@ public:
 	state: State;
 	src: Source;
 	sink: StringSink;
-	/*! A description of an error for the user's consumption.
-	 *  This should only be set if the function in question
-	 *  is actually encountering the error in question.
-	 *  That is to say, parseStatement should say if it sees
-	 *  'four' instead of 'for', but a function calling parseStatement
-	 *  should not set the error message if parseStatement fails.
+	/*!
+	 * A description of an error for the user's consumption.
 	 *
-	 *  Just a field for now, but in the future this could
-	 *  become a property that adds to a list of messages.
+	 * This should only be set if the function in question
+	 * is actually encountering the error in question.
+	 * That is to say, parseStatement should say if it sees
+	 * 'four' instead of 'for', but a function calling parseStatement
+	 * should not set the error message if parseStatement fails.
+	 *
+	 * Just a field for now, but in the future this could
+	 * become a property that adds to a list of messages.
 	 */
 	errorMessage: string;
 	raw: bool;
