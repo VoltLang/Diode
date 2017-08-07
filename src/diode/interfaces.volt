@@ -47,7 +47,8 @@ public:
 	includeDir: string;
 	urlFromCommandLine: bool;
 	url: string = "http://example.com";
-	baseurl: string = "http://example.com";
+	baseurlFromCommandLine: bool;
+	baseurl: string = "/mybase";
 
 	// These depend on workDir and are set with fillInDefaults.
 	enum string vdocDirDefault = "_vdoc";

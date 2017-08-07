@@ -8,6 +8,7 @@ import watt.path;
 import watt.conv;
 import watt.text.sink;
 import watt.text.source;
+import watt.text.string : startsWith;
 import watt.markdown;
 import watt.text.format : format;
 
@@ -70,13 +71,19 @@ public:
 			v := root.lookupObjectKey(k);
 
 			switch (k) {
-			case "url", "baseurl":
+			case "url":
 				// If this is already set from the command line.
 				if (settings.urlFromCommandLine) {
 					warning("key '%s' from '%s' overwritten from command line, skipping.", k, filename);
 					continue;
 				}
 				mSite.ctx["url"] = new Text(v.str());
+			case "baseurl":
+				// If this is already set from the command line.
+				if (settings.baseurlFromCommandLine) {
+					warning("key '%s' from '%s' overwritten from command line, skipping.", k, filename);
+					continue;
+				}
 				mSite.ctx["baseurl"] = new Text(v.str());
 				continue;
 			case "time", "pages", "posts", "related_posts",
@@ -146,17 +153,18 @@ public:
 			return;
 		}
 
+		fullUrl := settings.url ~ settings.baseurl;
 		mods := mVdoc.modules;
 		prev: Value;
 		foreach (mod; mods) {
-			mod.url = format("%s/vdoc/mod_%s.html", settings.baseurl, mod.name);
+			mod.url = format("%s/vdoc/mod_%s.html", fullUrl, mod.name);
 			tag(mod, mod, prev);
 			prev = mod;
 		}
 
 		groups := mVdoc.groups;
 		foreach (group; groups) {
-			group.url = format("%s/vdoc/%s.html", settings.baseurl, group.search);
+			group.url = format("%s/vdoc/%s.html", fullUrl, group.search);
 		}
 
 		// Process all of the raw comments.
@@ -469,6 +477,22 @@ protected:
 	}
 }
 
+//! Implementation of relative_url filter, appends baseurl.
+fn filterRelativeUrl(drv: Driver, str: string) string
+{
+	if (!str.startsWith("/")) {
+		return drv.settings.baseurl ~ "/" ~ str;
+	} else {
+		return drv.settings.baseurl ~ str;
+	}
+}
+
+//! Implementation of absolute_url filter, appends url and baseurl.
+fn filterAbsoluteUrl(drv: Driver, str: string) string
+{
+	return drv.settings.url ~ filterRelativeUrl(drv, str);
+}
+
 /*!
  *
  */
@@ -533,37 +557,36 @@ public:
 	override fn handleFilter(n: ir.Node, ident: string,
 		child: Value, args: Value[], sink: Sink)
 	{
+		fn valueToString(v: Value) string {
+			s: StringSink;
+			v.toText(n, s.sink);
+			return s.toString();
+		}
+
 		fn getArg(i: size_t) string {
 			if (args.length <= i) {
 				handleError(format("expected at least %s argument to '%s' filter.", i+1, ident));
 			}
-			argsink: StringSink;
-			args[i].toText(n, argsink.sink);
-			return argsink.toString();
+			return valueToString(args[i]);
 		}
 
 		fn getArgOrDefault(def: string) string {
 			if (args.length < 1) {
 				return def;
 			}
-			argsink: StringSink;
-			args[0].toText(n, argsink.sink);
-			return argsink.toString();
+			return valueToString(args[0]);
 		}
 
 		fn vdocFindOrNil() Value {
-			s: StringSink;
-			child.toText(n, s.sink);
-			if (ret := mDrv.mVdoc.findNamed(s.toString())) {
+			name := valueToString(child);
+			if (ret := mDrv.mVdoc.findNamed(name)) {
 				return ret;
 			}
 			return new Nil();
 		}
 
 		fn vdocFindOrError() Value {
-			s: StringSink;
-			child.toText(n, s.sink);
-			name := s.toString();
+			name := valueToString(child);
 			if (ret := mDrv.mVdoc.findNamed(name)) {
 				return ret;
 			}
@@ -573,6 +596,14 @@ public:
 		}
 
 		switch (ident) {
+		case "relative_url":
+			txt := valueToString(child);
+			v = new Text(filterRelativeUrl(mDrv, txt));
+			break;
+		case "absolute_url":
+			txt := valueToString(child);
+			v = new Text(filterAbsoluteUrl(mDrv, txt));
+			break;
 		case "vdoc_find":
 			v = vdocFindOrNil();
 			break;

@@ -18,6 +18,7 @@ fn main(args: string[]) i32
 		io.error.writefln("\t-s        <sourceDir>");
 		io.error.writefln("\t-d        <outputDir>");
 		io.error.writefln("\t--baseurl <URL>");
+		io.error.writefln("\t          http://example.com/mybase");
 		io.error.flush();
 		return 0;
 	}
@@ -39,7 +40,7 @@ import io = watt.io;
 import watt.io.streams;
 import watt.io.file : read, exists, searchDir, isDir, isFile;
 import watt.path : dirSeparator;
-import watt.text.string : endsWith, startsWith, join;
+import watt.text.string : endsWith, startsWith, join, indexOf;
 import watt.text.sink;
 import watt.text.format;
 
@@ -79,7 +80,7 @@ fn parseArgs(args: string[], s: Settings) string[]
 			     "--skip-initial-build", "--ssl-key", "--ssl-cert":
 				io.error.writefln("skipping jekyll arg '%s'",arg);
 				io.error.flush();
-			     	break;
+				break;
 			default:
 				if (arg.length > 0 && arg[0] == '-') {
 					io.error.writefln("skipping unknown arg '%s'",arg);
@@ -92,15 +93,55 @@ fn parseArgs(args: string[], s: Settings) string[]
 		case SourceDir: s.sourceDir = arg; break;
 		case OutputDir: s.outputDir = arg; break;
 		case Baseurl:
+			server, address: string;
+			if (!splitUrl(arg, out server, out address)) {
+				io.error.writefln("invalid --baseurl '%s'", arg);
+				io.error.flush();
+				break;
+			}
 			s.urlFromCommandLine = true;
-			s.url = arg;
-			s.baseurl = arg;
+			s.baseurlFromCommandLine = true;
+			s.url = server;
+			s.baseurl = address;
 			break;
 		}
 		state = ParseState.Normal;
 	}
 
 	return files;
+}
+
+fn splitUrl(str: string, out server: string, out address: string) bool
+{
+	offset: size_t;
+	// Special case file://.
+	if (str.startsWith("file://")) {
+		server = str[0 .. 7u];
+		address = str[7u .. $];
+		return true;
+	} else if (str.startsWith("http://")) {
+		offset = 7u;
+	} else if (str.startsWith("https://")) {
+		offset = 8u;
+	} else {
+		return false;
+	}
+
+	index := str[offset .. $].indexOf("/");
+	if (index >= 0) {
+		offset += cast(size_t)index;
+		server = str[0 .. offset];
+		address = str[offset .. $];
+
+		// The address is only one '/'
+		if (address.length == 1) {
+			address = null;
+		}
+	} else {
+		server = str;
+	}
+
+	return true;
 }
 
 fn test(args: string[]) i32
