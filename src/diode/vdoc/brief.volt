@@ -31,7 +31,7 @@ private:
 
 
 public:
-	override fn visit(n: Text, sink: Sink)
+	final fn writeText(str: string, sink: Sink)
 	{
 		if (mStopped) {
 			return;
@@ -42,7 +42,17 @@ public:
 			mSoftbreak = false;
 		}
 
-		sink(n.str);
+		sink(str);
+	}
+
+	override fn visit(n: Text, sink: Sink)
+	{
+		writeText(n.str, sink);
+	}
+
+	override fn visit(n: Code, sink: Sink)
+	{
+		writeText(n.str, sink);
 	}
 
 	override fn visit(n: Softbreak, sink: Sink)
@@ -59,6 +69,7 @@ public:
 		mSoftbreak = false;
 		sink("\n");
 	}
+
 
 	override fn enter(n: BlockQuote, sink: Sink) { mStopped = true; }
 	override fn enter(n: Item, sink: Sink) { mStopped = true; }
@@ -86,7 +97,5 @@ public:
 	override fn visit(n: HtmlBlock, sink: Sink) { }
 	override fn visit(n: CodeBlock, sink: Sink) { }
 	override fn visit(n: ThematicBreak, sink: Sink) { }
-	
-	override fn visit(n: Code, sink: Sink) { }
 	override fn visit(n: HtmlInline, sink: Sink) { }
 }
