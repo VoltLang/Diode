@@ -43,6 +43,7 @@ import watt.path : dirSeparator;
 import watt.text.string : endsWith, startsWith, join, indexOf;
 import watt.text.sink;
 import watt.text.format;
+import watt.path : mkdirP;
 
 import diode.driver;
 import diode.interfaces;
@@ -203,12 +204,16 @@ fn renderFiles(d: Driver)
 	outDir := d.settings.outputDir;
 
 	if (!isDir(srcDir)) {
-		d.warning("source dir not found '%s'", srcDir);
+		d.warning("wanring: source dir '%s' not found", srcDir);
 		return;
 	}
+
 	if (!isDir(outDir)) {
-		d.warning("output dir not found '%s'", outDir);
-		return;
+		if (exists(outDir)) {
+			d.info("warning: output dir '%s' is not a directory", outDir);
+			return;
+		}
+		mkdirP(outDir);
 	}
 
 	fn hit(file: string) {
