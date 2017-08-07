@@ -9,6 +9,7 @@ import watt.text.format : format;
 import watt.text.vdoc;
 
 import diode.vdoc;
+import diode.vdoc.brief;
 
 
 /*!
@@ -90,20 +91,17 @@ class DocCommentParam
 class DocCommentParser : DocSink
 {
 public:
+	//! For lookups.
 	root: VdocRoot;
-
-	brief: StringSink;
-	autoBrief: StringSink;
+	//! The full comment content.
 	full: StringSink;
-
+	//! String sink for params, briefs and more.
+	temp: StringSink;
 	//! Current param.
 	param: DocCommentParam;
-	//! String sink for params.
-	temp: StringSink;
-
+	//! The result of the processing.
 	results: DocCommentResult;
-
-	isAuto: bool;
+	//! Has a `@@brief` directive been processed.
 	hasBrief: bool;
 
 
@@ -117,7 +115,6 @@ public:
 	{
 		results = DocCommentResult.init;
 		hasBrief = false;
-		isAuto = false;
 
 		parse(raw, this, null);
 
@@ -127,8 +124,7 @@ public:
 
 		// Handle auto brief if @brief command was not used.
 		if (!hasBrief) {
-			results.brief = strip(autoBrief.toString());
-			autoBrief.reset();
+			results.brief = generateAutoBrief(results.content);
 		}
 	}
 
@@ -175,45 +171,28 @@ public:
 		temp.reset();
 	}
 
-	override fn start(sink: Sink)
-	{
-		isAuto = !hasBrief;
-	}
-
-	override fn end(sink: Sink)
-	{
-		// Stop auto generating brief.
-		isAuto = false;
-	}
-
 	override fn briefStart(sink: Sink)
 	{
-		// Stop auto generating brief.
-		isAuto = false;
-
 		hasBrief = true;
 	}
 
 	override fn briefEnd(sink: Sink)
 	{
 		// Set the brief string.
-		results.brief = brief.toString();
-		brief.reset();
+		str := temp.toString();
+		temp.reset();
+		results.brief = generateAutoBrief(str);
 	}
 
 	override fn p(sink: Sink, state: DocState, d: string)
 	{
 		final switch (state) with (DocState) {
-		case Brief: sink(d); break;
 		case Content:
-			if (isAuto) {
-				autoBrief.sink(d);
-			}
 			full.sink("`");
 			full.sink(d);
 			full.sink("`");
 			break;
-		case Param, Section:
+		case Param, Section, Brief:
 			temp.sink("`");
 			temp.sink(d);
 			temp.sink("`");
@@ -248,14 +227,10 @@ public:
 		}
 
 		final switch (state) with (DocState) {
-		case Brief: brief.sink(text); break;
 		case Content:
-			if (isAuto) {
-				autoBrief.sink(text);
-			}
 			full.sink(md);
 			break;
-		case Param, Section:
+		case Param, Brief, Section:
 			temp.sink(md);
 			break;
 		}
@@ -264,29 +239,15 @@ public:
 	override fn content(sink: Sink, state: DocState, d: string)
 	{
 		final switch (state) with (DocState) {
-		case Param, Section: temp.sink(d); return;
-		case Brief: brief.sink(d); return;
-		case Content: break;
-		}
-
+		case Brief, Param, Section: temp.sink(d); return;
 		// Content path, for full comment send as is.
-		full.sink(d);
-
-		// Handle auto brief.
-		if (!isAuto || d.length <= 0 || state != DocState.Content) {
-			return;
+		case Content: full.sink(d); break;
 		}
-
-		index := d.indexOf(".");
-		if (index < 0) {
-			return autoBrief.sink(d);
-		}
-
-		autoBrief.sink(d[0 .. index + 1]);
-		isAuto = false;
 	}
 
 	override fn defgroup(sink: Sink, group: string, text: string) { }
+	override fn start(sink: Sink) { }
+	override fn end(sink: Sink) { }
 }
 
 private fn processParent(p: Processor, n: Parent)
