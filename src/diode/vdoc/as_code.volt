@@ -159,6 +159,7 @@ fn drawChildren(ref s: State, sink: Sink)
 {
 	s.drawEnumDecls(Access.Public, sink);
 	s.drawEnums(Access.Public, sink);
+	s.drawAliases(Access.Public, sink);
 	s.drawInterfaces(Access.Public, sink);
 	s.drawClasses(Access.Public, sink);
 	s.drawStructs(Access.Public, sink);
@@ -172,6 +173,7 @@ fn drawChildren(ref s: State, sink: Sink)
 
 	s.drawEnumDecls(Access.Protected, sink);
 	s.drawEnums(Access.Protected, sink);
+	s.drawAliases(Access.Public, sink);
 	s.drawInterfaces(Access.Protected, sink);
 	s.drawClasses(Access.Protected, sink);
 	s.drawStructs(Access.Protected, sink);
@@ -293,6 +295,26 @@ fn drawEnum(ref s: State, c: Parent, sink: Sink)
 
 	s.tabs = old;
 	format(sink, "%s}\n", s.tabs);
+}
+
+fn drawAliases(ref s: State, access: Access, sink: Sink)
+{
+	foreach (child; s.parent.children) {
+		c := cast(Alias)child;
+		if (c is null || c.kind != Kind.Alias || c.access != access) {
+			continue;
+		}
+		s.flushaProtAndNewLine(access, Kind.Alias, "", sink);
+		s.drawAlias(c, sink);
+	}
+}
+
+fn drawAlias(ref s: State, c: Alias, sink: Sink)
+{
+	s.drawBrief(c, sink);
+	format(sink, "%salias ", s.tabs);
+	s.drawName(c, sink);
+	format(sink, " = %s;\n", c.type);
 }
 
 fn drawEnumDecls(ref s: State, access: Access, sink: Sink)

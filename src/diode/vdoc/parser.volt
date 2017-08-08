@@ -210,6 +210,15 @@ public:
 		return ed;
 	}
 
+	fn toAlias() Alias
+	{
+		a := new Alias();
+		copyToNamed(a);
+		a.type = type;
+		a.typeFull = typeFull;
+		return a;
+	}
+
 	fn toArg() Arg
 	{
 		b := new Arg();
@@ -269,7 +278,7 @@ fn fromArray(ref arr: Value[], ref v: json.Value, defKind: Kind = Kind.Invalid)
 			break;
 		case Arg: arr ~= info.toArg(); break;
 		case Enum: arr ~= info.toEnum(); break;
-		case Alias: break; // TODO Add alias
+		case Alias: arr ~= info.toAlias(); break;
 		case Group: break; // Handled somewhere else.
 		case EnumDecl: arr ~= info.toEnumDecl(); break;
 		case Class: arr ~= info.toClass(); break;

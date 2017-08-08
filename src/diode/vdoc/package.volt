@@ -370,6 +370,26 @@ public:
 }
 
 /*!
+ * An alias declaration.
+ */
+class Alias : Named
+{
+public:
+	type: string;
+	typeFull: string;
+
+public:
+	override fn ident(n: ir.Node,  key: string) Value
+	{
+		switch (key) {
+		case "type": return makeNilOrText(type);
+		case "typeFull": return makeNilOrText(typeFull);
+		default: return super.ident(n, key);
+		}
+	}
+}
+
+/*!
  * A function or constructor, destructor or method on a aggreegate.
  */
 class Function : Named
