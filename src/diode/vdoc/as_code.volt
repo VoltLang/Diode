@@ -173,7 +173,7 @@ fn drawChildren(ref s: State, sink: Sink)
 
 	s.drawEnumDecls(Access.Protected, sink);
 	s.drawEnums(Access.Protected, sink);
-	s.drawAliases(Access.Public, sink);
+	s.drawAliases(Access.Protected, sink);
 	s.drawInterfaces(Access.Protected, sink);
 	s.drawClasses(Access.Protected, sink);
 	s.drawStructs(Access.Protected, sink);
