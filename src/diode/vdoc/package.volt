@@ -455,6 +455,7 @@ public:
 		case "unions": kind = Union; break;
 		case "structs": kind = Struct; break;
 		case "modules": kind = Module; break;
+		case "aliases": kind = Alias; break;
 		case "enumdecls": kind = EnumDecl; break;
 		case "functions": kind = Function; break;
 		case "variables": kind = Variable; break;
