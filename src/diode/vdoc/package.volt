@@ -116,21 +116,49 @@ public:
 	//! Return a named object of the given name.
 	fn findNamed(name: string) Named
 	{
-		lastDotI := name.lastIndexOf('.');
-		if (lastDotI >= 0 && cast(size_t)lastDotI != name.length - 1) {
-			modn := name[0 .. cast(size_t)lastDotI];
-			namen := name[cast(size_t)lastDotI+1 .. $];
-			modp := modn in mNamed;
-			foreach (emod; mModules) {
-				if (emod.name == modn) {
-					foreach (child; emod.children) {
-						asNamed := cast(Named)child;
-						if (asNamed is null || asNamed.name != namen) {
-							continue;
-						}
-						return asNamed;
+		fn slowLookup(p: Parent, s: string) Named
+		{
+			foreach (c; p.children) {
+				named := cast(Named)c;
+				if (named is null || named.name != s) {
+					continue;
+				}
+				return named;
+			}
+			return null;
+		}
+
+		foreach (mod; mModules) {
+			if (mod.name == name) {
+				return mod;
+			}
+			if (!name.startsWith(mod.name)) {
+				continue;
+			}
+			remainder := name[mod.name.length .. $];
+			if (remainder.length > 0 && remainder[0] == '.') {
+				remainder = remainder[1 .. $];
+			}
+			components := remainder.split('.');
+			p: Parent = mod;
+			v: Named;
+			while (components.length > 0) {
+				v = slowLookup(p, components[0]);
+				if (v is null) {
+					components = null;
+					break;
+				}
+				components = components[1 .. $];
+				if (components.length != 0) {
+					p = cast(Parent)v;
+					if (p is null) {
+						components = null;
+						break;
 					}
 				}
+			}
+			if (v !is null) {
+				return v;
 			}
 		}
 		if (r := name in mNamed) {
