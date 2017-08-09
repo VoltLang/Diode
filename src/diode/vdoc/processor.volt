@@ -140,21 +140,21 @@ public:
 
 	override fn sectionEnd(sink: Sink, sec: DocSection)
 	{
+		val := temp.toString();
+		temp.reset();
+
 		final switch (sec) with (DocSection) {
 		case SeeAlso:
-			val := temp.toString();
-			temp.reset();
 			word := removeFirstWord(ref val);
-			link(sink, DocState.Section, strip(word), "");
+			link(sink, DocState.Section, word, "");
 			temp.sink(val);
 			results.sa ~= temp.toString();
+			temp.reset();
 			break;
-		case Return: results.ret ~= temp.toString(); break;
-		case Throw: results._throw ~= temp.toString(); break;
-		case SideEffect: results.se ~= temp.toString(); break;
+		case Return: results.ret ~= val; break;
+		case Throw: results._throw ~= val; break;
+		case SideEffect: results.se ~= val; break;
 		}
-
-		temp.reset();
 	}
 
 	override fn paramStart(sink: Sink, direction: string, arg: string)
@@ -311,7 +311,10 @@ private fn removeFirstWord(ref s: string) string
 		}
 		word = s[0 .. i];
 		s = s[i .. $];
+		return word;
 	}
+	// Everything is a word.
+	s = null;
 	return word;
 }
 
