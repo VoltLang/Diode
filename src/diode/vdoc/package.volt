@@ -4,6 +4,7 @@ module diode.vdoc;
 
 import io = watt.io;
 import watt.text.vdoc;
+import watt.text.string;
 
 import diode.errors;
 import diode.eval;
@@ -115,9 +116,23 @@ public:
 	//! Return a named object of the given name.
 	fn findNamed(name: string) Named
 	{
-		// TODO this should be a lot smarter,
-		// as it needs to search for children of modules.
-		// pkg.mod.Class must work.
+		lastDotI := name.lastIndexOf('.');
+		if (lastDotI >= 0 && cast(size_t)lastDotI != name.length - 1) {
+			modn := name[0 .. cast(size_t)lastDotI];
+			namen := name[cast(size_t)lastDotI+1 .. $];
+			modp := modn in mNamed;
+			foreach (emod; mModules) {
+				if (emod.name == modn) {
+					foreach (child; emod.children) {
+						asNamed := cast(Named)child;
+						if (asNamed is null || asNamed.name != namen) {
+							continue;
+						}
+						return asNamed;
+					}
+				}
+			}
+		}
 		if (r := name in mNamed) {
 			return *r;
 		}
