@@ -7,6 +7,7 @@ import watt.text.sink : Sink, StringSink;
 import watt.text.string : strip, indexOf;
 import watt.text.format : format;
 import watt.text.vdoc;
+import watt.text.ascii;
 
 import diode.vdoc;
 import diode.vdoc.brief;
@@ -143,7 +144,9 @@ public:
 		case SeeAlso:
 			val := temp.toString();
 			temp.reset();
-			link(sink, DocState.Section, strip(val), "");
+			word := removeFirstWord(ref val);
+			link(sink, DocState.Section, strip(word), "");
+			temp.sink(val);
 			results.sa ~= temp.toString();
 			break;
 		case Return: results.ret ~= temp.toString(); break;
@@ -297,6 +300,19 @@ private fn processFunction(p: Processor, n: Function)
 			ret.content = p.results.ret;
 		}
 	}
+}
+
+private fn removeFirstWord(ref s: string) string
+{
+	word := s;
+	foreach (i, c: dchar; s) {
+		if (!isWhite(c)) {
+			continue;
+		}
+		word = s[0 .. i];
+		s = s[i .. $];
+	}
+	return word;
 }
 
 private fn processNamed(p: Processor, n: Named) bool
