@@ -140,7 +140,12 @@ public:
 	override fn sectionEnd(sink: Sink, sec: DocSection)
 	{
 		final switch (sec) with (DocSection) {
-		case SeeAlso: results.sa ~= temp.toString(); break;
+		case SeeAlso:
+			val := temp.toString();
+			temp.reset();
+			link(sink, DocState.Section, strip(val), "");
+			results.sa ~= temp.toString();
+			break;
 		case Return: results.ret ~= temp.toString(); break;
 		case Throw: results._throw ~= temp.toString(); break;
 		case SideEffect: results.se ~= temp.toString(); break;
