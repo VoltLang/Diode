@@ -4,9 +4,8 @@ title: Module
 ---
 {%- assign mod = vdoc.current -%}
 
-<div class="doc-module">{{ mod.name }}</div>
-
-{%- include vdoc_ingroup.html obj=mod -%}
+<div class="v_modproto"><span class="v_modprefix">module </span><span class="v_modname">{{ mod.name }}</span></div>
+{% include vdoc_ingroup.html obj=mod %}
 
 {{- mod | vdoc_full: 'html' -}}
 

@@ -220,16 +220,16 @@ fn drawProtoHTML(named: Named, sink: Sink)
 
 fn drawProtoNameHTML(sink: Sink, name: string)
 {
-	sink("<span class=\"vdoc-proto-name\">");
+	sink("<span class=\"v_protoname\">");
 	sink(name);
 	sink("</span>");
 }
 
 fn drawProtoPrefixAndNameHTML(sink: Sink, prefix: string, name: string)
 {
-	sink("<span class=\"vdoc-proto-prefix\">");
+	sink("<span class=\"v_protoprefix\">");
 	sink(prefix);
-	sink("</span> <span class=\"vdoc-proto-name\">");
+	sink("</span> <span class=\"v_protoname\">");
 	sink(name);
 	sink("</span>");
 }
@@ -272,7 +272,7 @@ fn drawProtoVar(named: Named, sink: Sink)
 	case Global: sink.drawProtoPrefixAndNameHTML("global", var.name); break;
 	}
 
-	sink("<span class=\"vdoc-proto-params\">: ");
+	sink("<span class=\"v_protoparams\">: ");
 	sink(var.type);
 	sink("</span>");
 }
@@ -287,7 +287,7 @@ fn drawProtoFunc(named: Named, sink: Sink)
 	default: sink.drawProtoPrefixAndNameHTML("fn", func.name);
 	}
 
-	sink("<span class=\"vdoc-proto-params\">(");
+	sink("<span class=\"v_protoparams\">(");
 
 	hasPrinted := false;
 	foreach (c; func.args) {

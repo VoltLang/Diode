@@ -7,21 +7,20 @@
 {%- comment -%}Don't display the same documentation multiple times.{%- endcomment -%}
 {%- else -%}
 
-<div class="vdoc-child-frame" id="{{ obj.tag }}">
+<div class="v_child" id="{{ obj.tag }}">
 
-	<div class="vdoc-child-sidebar">
-		<div class="vdoc-child-header">
-			<div class="vdoc-proto">{{ obj | vdoc_proto }}</div>
+	<div class="v_childtab">
+		<div class="v_childheader">
+			<div class="v_proto">{{ obj | vdoc_proto }}</div>
 
 			{%- include vdoc_ingroup.html obj=obj -%}
 
 		</div>
 	</div>
 
-	<div class="vdoc-child-body">
+	<div class="v_childbody">
 
 		{{- obj | vdoc_full: 'html' -}}
-
 
 		{%- for child in obj.children -%}
 			{%- include vdoc_child.html child=child -%}

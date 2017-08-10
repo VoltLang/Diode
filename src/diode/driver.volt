@@ -119,6 +119,9 @@ public:
 		f = getName("_include", "head.html");
 		addInclude(import("_include/head.html"), f);
 
+		f = getName("_include", "head_css.html");
+		addInclude(import("_include/head_css.html"), f);
+
 		f = getName("_include", "header.html");
 		addInclude(import("_include/header.html"), f);
 
