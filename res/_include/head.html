@@ -1,8 +1,40 @@
 <head>
-  <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  {%- include head_css.html %}
-  <script src="http://www.volt-lang.org/js/jquery.js"></script>
-  <script src="http://www.volt-lang.org/js/polyfill/svg.js"></script>
+	<title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{%- include head_css.html %}
+	<script src="http://www.volt-lang.org/js/jquery.js"></script>
+	<script src="http://www.volt-lang.org/js/polyfill/svg.js"></script>
+	<style>
+		/* Sublime red: #e6265e; */
+		/* Sublime blue: #5bc9ea; */
+		/* Sublime green: #86c42c; */
+
+		/* Comments */
+		code > .c {
+			color: #676767;
+		}
+		/* Keyword for identifiers like 'fn' */
+		code > .ki {
+			color: #86c42c;
+		}
+		/* Regular keyword */
+		code > .kw {
+			color: #e6265e;
+		}
+		/* Name for modules, imports, aggregates, functions, enums and variables. */
+		code > .nm, .ni, .na, .nf, .ne, .nv {
+			color: #0098DB;
+		}
+		/* Common behavior for links */
+		code > a.code {
+			color: #0098DB;
+		}
+		code > a {
+			text-decoration: none;
+		}
+		code > a:hover {
+			text-decoration: underline;
+		}
+	</style>
 </head>

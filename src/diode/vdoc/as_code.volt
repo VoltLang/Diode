@@ -1,6 +1,7 @@
 // Copyright © 2016-2017, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 //! Code to format vdoc objects as code.
+//! Hmm ![Foo](http://i.imgur.com/UONEjuQ.png)
 module diode.vdoc.as_code;
 
 import core.exception;
@@ -122,22 +123,22 @@ fn flushaProtAndNewLine(ref s: State, access: Access, kind: Kind, spacing: strin
 	s.hasProt = true;
 	s.lastKind = kind;
 	s.lastAccess = access;
-	format(sink, "%s%s:\n", s.tabsProt, accessToString(access));
+	format(sink, "%s<span class=\"kw\">%s</span>:\n", s.tabsProt, accessToString(access));
 }
 
-fn drawName(ref s: State, named: Named, sink: Sink)
+fn drawName(ref s: State, named: Named, htmlClass: string, sink: Sink)
 {
-	drawName(ref s, named, named.name, sink);
+	drawName(ref s, named, named.name, htmlClass, sink);
 }
 
-fn drawName(ref s: State, named: Named, name: string, sink: Sink)
+fn drawName(ref s: State, named: Named, name: string, htmlClass: string, sink: Sink)
 {
 	if (named.url !is null) {
-		format(sink, `<a class="code" href="%s">%s</a>`,
-		       named.url, name);
+		format(sink, `<a class="%s" href="%s">%s</a>`,
+		       htmlClass, named.url, name);
 	} else if (named.tag !is null) {
-		format(sink, `<a class="code" href="#%s">%s</a>`,
-		       named.tag, name);
+		format(sink, `<a class="%s" href="#%s">%s</a>`,
+		       htmlClass, named.tag, name);
 	} else {
 		sink(name);
 	}
@@ -146,8 +147,8 @@ fn drawName(ref s: State, named: Named, name: string, sink: Sink)
 fn drawModule(ref s: State, sink: Sink)
 {
 	s.drawBrief(s.mod, sink);
-	sink("module ");
-	s.drawName(s.mod, sink);
+	sink("<span class=\"ki\">module</span> ");
+	s.drawName(s.mod, "na", sink);
 	sink(";\n\n");
 
 	s.drawImports(Access.Public, sink);
@@ -193,7 +194,7 @@ fn drawBrief(ref s: State, n: Named, sink: Sink)
 	}
 
 	foreach (line; splitLines(b)) {
-		format(sink, "%s//! %s\n", s.tabs, line);
+		format(sink, "%s<span class=\"c\">//! %s</span>\n", s.tabs, line);
 	}
 }
 
@@ -217,8 +218,8 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 {
 	prefix: string;
 	final switch(access) with (Access) {
-	case Public: prefix = "public "; break;
-	case Protected: prefix = "protected "; break;
+	case Public: prefix = "<span class=\"kw\">public</span> "; break;
+	case Protected: prefix = "<span class=\"kw\">protected</span> "; break;
 	case Private: prefix = ""; break;
 	}
 
@@ -232,7 +233,7 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 		s.lastKind = Kind.Import;
 		s.drawBrief(c, sink);
 		sink(prefix);
-		sink("import ");
+		sink("<span class=\"ki\">import</span> ");
 
 		n := s.root.findNamed(c.name);
 		if (n is null) {
@@ -242,10 +243,10 @@ fn drawImports(ref s: State, access: Access, sink: Sink)
 		if (c.bind !is null) {
 			s.drawName(c, c.bind, sink);
 			sink(" = ");
-			s.drawName(n, sink);
+			s.drawName(n, "ni", sink);
 			sink("\n");
 		} else {
-			s.drawName(n, sink);
+			s.drawName(n, "ni", sink);
 			sink(";\n");
 		}
 	}
@@ -279,8 +280,8 @@ fn drawEnums(ref s: State, access: Access, sink: Sink)
 
 fn drawEnum(ref s: State, c: Parent, sink: Sink)
 {
-	format(sink, "%senum ", s.tabs);
-	s.drawName(c, sink);
+	format(sink, "%s<span class=\"ki\">enum</span> ", s.tabs);
+	s.drawName(c, "ne", sink);
 	format(sink, "\n%s{\n", s.tabs);
 	old := s.tabs;
 	s.tabs ~= "\t";
@@ -289,7 +290,7 @@ fn drawEnum(ref s: State, c: Parent, sink: Sink)
 		ed := cast(EnumDecl)child;
 		s.drawBrief(ed, sink);
 		sink(s.tabs);
-		s.drawName(ed, sink);
+		s.drawName(ed, "ne", sink);
 		sink(",\n");
 	}
 
@@ -312,8 +313,8 @@ fn drawAliases(ref s: State, access: Access, sink: Sink)
 fn drawAlias(ref s: State, c: Alias, sink: Sink)
 {
 	s.drawBrief(c, sink);
-	format(sink, "%salias ", s.tabs);
-	s.drawName(c, sink);
+	format(sink, "%s<span class=\"ki\">alias</span> ", s.tabs);
+	s.drawName(c, "na", sink);
 	format(sink, " = %s;\n", c.type);
 }
 
@@ -333,8 +334,8 @@ fn drawEnumDecls(ref s: State, access: Access, sink: Sink)
 fn drawEnumDecl(ref s: State, c: EnumDecl, sink: Sink)
 {
 	s.drawBrief(c, sink);
-	format(sink, "%senum ", s.tabs);
-	s.drawName(c, sink);
+	format(sink, "%s<span class=\"ki\">enum</span> ", s.tabs);
+	s.drawName(c, "ne", sink);
 	format(sink, ";\n");
 }
 
@@ -365,8 +366,8 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 	prefix: string;
 	final switch (storage) with (Storage) {
 	case Field: prefix = ""; break;
-	case Local: prefix = "local "; break;
-	case Global: prefix = "global "; break;
+	case Local: prefix = "<span class=\"kw\">local</span> "; break;
+	case Global: prefix = "<span class=\"kw\">global</span> "; break;
 	}
 
 	foreach (child; s.parent.children) {
@@ -380,7 +381,7 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 		s.flushaProtAndNewLine(access, Kind.Variable, "", sink);
 		s.drawBrief(c, sink);
 		format(sink, "%s%s", s.tabs, prefix);
-		s.drawName(c, sink);
+		s.drawName(c, "nv", sink);
 		format(sink, ": %s;\n", c.type);
 	}
 }
@@ -394,7 +395,7 @@ fn drawVariables(ref s: State, access: Access, storage: Storage sink: Sink)
 
 fn drawFns(ref s: State, access: Access, sink: Sink)
 {
-	prefix := s.mod is s.parent ? "" : "static ";
+	prefix := s.mod is s.parent ? "" : "<span class=\"kw\">static</span> ";
 
 	foreach (child; s.parent.children) {
 		c := cast(Function)child;
@@ -439,7 +440,7 @@ fn drawMembers(ref s: State, access: Access, sink: Sink)
 fn drawCtor(ref s: State, f: Function, sink: Sink)
 {
 	format(sink, "%s", s.tabs);
-	drawName(ref s, f, "this", sink);
+	drawName(ref s, f, "this", "nf", sink);
 	sink("(");
 
 	hasPrinted := false;
@@ -462,8 +463,8 @@ fn drawCtor(ref s: State, f: Function, sink: Sink)
 
 fn drawFn(ref s: State, f: Function, prefix: string, sink: Sink)
 {
-	format(sink, "%s%sfn ", s.tabs, prefix);
-	s.drawName(f, sink);
+	format(sink, "%s%s<span class=\"ki\">fn</span> ", s.tabs, prefix);
+	s.drawName(f, "nf", sink);
 	sink("(");
 
 	hasPrinted := false;
@@ -517,8 +518,8 @@ fn drawInterfaces(ref s: State, access: Access, sink: Sink)
 
 fn drawInterface(ref s: State, c: Parent, sink: Sink)
 {
-	format(sink, "%sinterface ", s.tabs);
-	s.drawName(c, sink);
+	format(sink, "%s<span class=\"ki\">interface<span> ", s.tabs);
+	s.drawName(c, "na", sink);
 
 	drawParentList(sink, c.interfacesStr);
 
@@ -554,8 +555,8 @@ fn drawClasses(ref s: State, access: Access, sink: Sink)
 
 fn drawClass(ref s: State, c: Parent, sink: Sink)
 {
-	format(sink, "%sclass ", s.tabs);
-	s.drawName(c, sink);
+	format(sink, "%s<span class=\"ki\">class</span> ", s.tabs);
+	s.drawName(c, "na", sink);
 
 	if (c.parentStr !is null) {
 		drawParentList(sink, [c.parentStr] ~ c.interfacesStr);
@@ -581,12 +582,12 @@ fn drawClass(ref s: State, c: Parent, sink: Sink)
 
 fn drawUnions(ref s: State, access: Access, sink: Sink)
 {
-	s.drawAggrs(access, Kind.Union, "union", sink);
+	s.drawAggrs(access, Kind.Union, "<span class=\"ki\">union</span>", sink);
 }
 
 fn drawStructs(ref s: State, access: Access, sink: Sink)
 {
-	s.drawAggrs(access, Kind.Struct, "struct", sink);
+	s.drawAggrs(access, Kind.Struct, "<span class=\"ki\">struct</span>", sink);
 }
 
 fn drawAggrs(ref s: State, access: Access, kind: Kind, prefix: string, sink: Sink)
@@ -605,7 +606,7 @@ fn drawAggrs(ref s: State, access: Access, kind: Kind, prefix: string, sink: Sin
 fn drawAggr(ref s: State, c: Parent, prefix: string, sink: Sink)
 {
 	format(sink, "%s%s ", s.tabs, prefix);
-	s.drawName(c, sink);
+	s.drawName(c, "na", sink);
 	format(sink, "\n%s{\n", s.tabs);
 
 	newState: State;
