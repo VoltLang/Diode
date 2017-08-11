@@ -518,7 +518,7 @@ fn drawInterfaces(ref s: State, access: Access, sink: Sink)
 
 fn drawInterface(ref s: State, c: Parent, sink: Sink)
 {
-	format(sink, "%s<span class=\"ki\">interface<span> ", s.tabs);
+	format(sink, "%s<span class=\"ki\">interface</span> ", s.tabs);
 	s.drawName(c, "na", sink);
 
 	drawParentList(sink, c.interfacesStr);
