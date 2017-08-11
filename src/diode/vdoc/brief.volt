@@ -48,8 +48,6 @@ protected:
 
 public:
 	/*!
-	 * Default constructor.
-	 *
 	 * @Param lineLimit The number of characters that we should limit the
 	 *                  lines we write to the sink to.
 	 */
@@ -138,8 +136,9 @@ public:
 
 protected:
 	/*!
-	 * Write a string to the sink, will compact whitespace and
-	 * insert newlines when the line will break the @ref mLineLimit.
+	 * Write a string to the sink, will compact whitespace and insert
+	 * newlines when the line will break the
+	 * @ref diode.vdoc.brief.PlainText.mLineLimit.
 	 */
 	final fn writeText(str: string, sink: Sink)
 	{
