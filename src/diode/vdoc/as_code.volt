@@ -83,9 +83,9 @@ public:
 			oldState.mod,
 			parent);
 
-		this.tabs ~= "\t";
+		this.tabs = oldState.tabs ~ "\t";
 		if (oldState.mod !is oldState.parent) {
-			this.tabsProt ~= "\t";
+			this.tabsProt = oldState.tabsProt ~ "\t";
 		}
 	}
 
