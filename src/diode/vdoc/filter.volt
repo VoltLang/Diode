@@ -67,6 +67,7 @@ fn handleDocCommentFilter(d: Driver, e: Engine, root: VdocRoot, v: Value, filter
 		return new FilterBrief(named);
 	} else {
 		e.handleError("internal error");
+		assert(false);
 	}
 }
 
