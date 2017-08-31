@@ -1,4 +1,3 @@
-//T default:no
 //T run:volta -o %t -jo %t.json %s
 //T run:%t %t.json
 module test;
