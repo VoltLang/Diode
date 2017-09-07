@@ -191,7 +191,7 @@ public:
 	fn setChildren(children: Value[])
 	{
 		mChildren = children;
-		mModules = [];
+		mModules = null;
 
 		foreach (v; children) {
 			p := cast(Parent)v;
