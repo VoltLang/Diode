@@ -482,7 +482,7 @@ protected:
 		mVdoc = new VdocRoot();
 		mRoot = new Set();
 		mSite = new Set();
-		mModules = new Array(null);
+		mModules = new Array(cast(Value)null);
 
 		mRoot.ctx["doc"] = mVdoc;
 		mRoot.ctx["vdoc"] = mVdoc;

@@ -146,7 +146,7 @@ fn parseFile(p: Parser, out file: ir.File) Status
 {
 	dummy: string;
 	file = bFile();
-	return p.parseNodesUntilTag(out file.nodes, out dummy, null);
+	return p.parseNodesUntilTag(out file.nodes, out dummy, cast(string[])null);
 }
 
 /*!
