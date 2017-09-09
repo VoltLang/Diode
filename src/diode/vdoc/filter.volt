@@ -6,6 +6,8 @@ module diode.vdoc.filter;
 import watt.markdown;
 import watt.text.vdoc;
 
+import ir = diode.ir;
+
 import diode.errors;
 import diode.eval;
 import diode.vdoc;

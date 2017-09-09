@@ -6,6 +6,8 @@ import io = watt.io;
 import watt.text.vdoc;
 import watt.text.string;
 
+import ir = diode.ir;
+
 import diode.errors;
 import diode.eval;
 
