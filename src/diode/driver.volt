@@ -2,6 +2,8 @@
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.driver;
 
+import core.varargs;
+
 import watt.io;
 import watt.io.streams;
 import watt.path;

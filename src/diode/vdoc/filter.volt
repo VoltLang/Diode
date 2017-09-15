@@ -5,6 +5,7 @@ module diode.vdoc.filter;
 
 import watt.markdown;
 import watt.text.vdoc;
+import watt.text.format;
 
 import ir = diode.ir;
 

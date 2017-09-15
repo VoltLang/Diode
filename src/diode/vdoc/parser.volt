@@ -5,6 +5,7 @@ module diode.vdoc.parser;
 import io = watt.io;
 import json = watt.json;
 import vdoc = watt.text.vdoc;
+import watt.text.string : strip;
 
 import diode.eval;
 import diode.vdoc;
