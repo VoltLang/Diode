@@ -1,4 +1,4 @@
-// Copyright © 2015, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.eval.value;
 
@@ -7,7 +7,6 @@ import watt.text.string : indexOf;
 import watt.text.utf : count;
 
 import ir = liquid.ir;
-import diode.errors;
 
 
 //! Use the IR visitor Sink.
