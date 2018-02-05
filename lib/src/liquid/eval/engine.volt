@@ -1,6 +1,7 @@
-// Copyright © 2015, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2012-2018, Bernard Helyer.  All rights reserved.
+// Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.eval.engine;
+module liquid.eval.engine;
 
 import core.exception;
 
@@ -18,7 +19,7 @@ import watt.text.ascii : isASCII, asciiToUpper = toUpper;
 import watt.text.html : htmlEscape;
 
 import ir = liquid.ir;
-import diode.eval.value;
+import liquid.eval.value;
 
 
 class Engine : ir.Visitor

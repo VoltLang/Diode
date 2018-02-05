@@ -8,8 +8,9 @@ import watt.text.string;
 
 import ir = liquid.ir;
 
+import liquid.eval;
+
 import diode.errors;
-import diode.eval;
 
 
 /*!

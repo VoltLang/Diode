@@ -11,13 +11,14 @@ import watt.text.string : stripRight;
 import watt.text.format;
 
 import ir = liquid.ir;
+
 import liquid.util.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
 	bAccess, bIdent, bFilter, bStringLiteral, bBoolLiteral, bClosingTagNode,
 	bNumberLiteral, bBinOp, bIndex;
 import liquid.util.sink : NodeSink;
+import liquid.eval.engine;
 
 import diode.errors;
-import diode.eval.engine;
 import diode.parser.header;
 import diode.parser.errors;
 

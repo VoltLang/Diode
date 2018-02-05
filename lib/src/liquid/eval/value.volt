@@ -1,6 +1,6 @@
 // Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.eval.value;
+module liquid.eval.value;
 
 import watt.text.format : format;
 import watt.text.string : indexOf;

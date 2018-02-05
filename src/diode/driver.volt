@@ -17,10 +17,11 @@ import watt.text.format : format;
 import json = watt.json;
 import ir = liquid.ir;
 
+import liquid.eval;
+import liquid.eval.json : jsonToValue = toValue, jsonToSet = toSet;
+
 import diode.errors;
 import diode.interfaces;
-import diode.eval;
-import diode.eval.json : jsonToValue = toValue, jsonToSet = toSet;
 import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;

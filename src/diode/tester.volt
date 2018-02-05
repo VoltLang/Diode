@@ -15,7 +15,8 @@ import watt.text.string : indexOf;
 import watt.io.file : read, isFile;
 import io = watt.io;
 
-import diode.eval;
+import liquid.eval;
+
 import diode.parser : parse;
 
 

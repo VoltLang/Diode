@@ -1,15 +1,15 @@
-// Copyright © 2016-2017, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2016-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 /*!
  * This module holds code to parse json files into eval sets and values.
  */
-module diode.eval.json;
+module liquid.eval.json;
 
 import watt.text.format;
 
 import json = watt.json;
 
-import diode.eval;
+import liquid.eval;
 
 
 fn toValue(ref v: json.Value) Value

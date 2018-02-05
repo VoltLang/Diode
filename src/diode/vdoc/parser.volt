@@ -7,7 +7,8 @@ import json = watt.json;
 import vdoc = watt.text.vdoc;
 import watt.text.string : strip;
 
-import diode.eval;
+import liquid.eval;
+
 import diode.vdoc;
 
 

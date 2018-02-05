@@ -9,8 +9,9 @@ import watt.text.format;
 
 import ir = liquid.ir;
 
+import liquid.eval;
+
 import diode.errors;
-import diode.eval;
 import diode.vdoc;
 import diode.interfaces;
 
