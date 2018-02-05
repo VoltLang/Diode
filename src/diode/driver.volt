@@ -15,7 +15,7 @@ import watt.markdown;
 import watt.text.format : format;
 
 import json = watt.json;
-import ir = diode.ir;
+import ir = liquid.ir;
 
 import diode.errors;
 import diode.interfaces;

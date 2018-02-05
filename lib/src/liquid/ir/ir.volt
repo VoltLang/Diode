@@ -1,6 +1,6 @@
-// Copyright © 2015, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.ir.node;
+module liquid.ir.ir;
 
 // We are using the one true string sink from watt.
 public import watt.text.sink : Sink;

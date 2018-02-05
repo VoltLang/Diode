@@ -7,7 +7,7 @@ import watt.markdown;
 import watt.text.vdoc;
 import watt.text.format;
 
-import ir = diode.ir;
+import ir = liquid.ir;
 
 import diode.errors;
 import diode.eval;

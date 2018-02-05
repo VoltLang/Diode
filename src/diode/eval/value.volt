@@ -6,7 +6,7 @@ import watt.text.format : format;
 import watt.text.string : indexOf;
 import watt.text.utf : count;
 
-import ir = diode.ir;
+import ir = liquid.ir;
 import diode.errors;
 
 

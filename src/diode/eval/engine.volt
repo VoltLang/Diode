@@ -17,7 +17,7 @@ import watt.text.utf : encode, decode, count;
 import watt.text.ascii : isASCII, asciiToUpper = toUpper;
 import watt.text.html : htmlEscape;
 
-import ir = diode.ir;
+import ir = liquid.ir;
 import diode.eval.value;
 
 

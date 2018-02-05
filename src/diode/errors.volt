@@ -5,7 +5,7 @@ module diode.errors;
 import core.exception;
 import watt.text.source;
 import watt.text.format : format;
-import ir = diode.ir;
+import ir = liquid.ir;
 
 
 class DiodeException : Exception

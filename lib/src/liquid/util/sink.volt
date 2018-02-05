@@ -1,9 +1,9 @@
-// Copyright © 2012-2017, Bernard Helyer.  All rights reserved.
-// Copyright © 2012-2017, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2012-2018, Bernard Helyer.  All rights reserved.
+// Copyright © 2012-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/licence.volt (BOOST ver 1.0).
-module diode.ir.sink;
+module liquid.util.sink;
 
-import diode.ir.node;
+import ir = liquid.ir;
 
 
 /*!
@@ -12,13 +12,13 @@ import diode.ir.node;
 struct NodeSink
 {
 private:
-	Node[32] mInlineStorage;
-	Node[] mArray;
+	ir.Node[32] mInlineStorage;
+	ir.Node[] mArray;
 	size_t mNum;
 
 
 public:
-	fn push(n: Node) void
+	fn push(n: ir.Node) void
 	{
 		if (mArray.length == 0) {
 			mArray = mInlineStorage[..];
@@ -34,15 +34,15 @@ public:
 			allocSize += 32;
 		}
 
-		arr := new Node[](allocSize);
+		arr := new ir.Node[](allocSize);
 		arr[0 .. mNum] = mArray[0 .. mNum];
 		arr[mNum++] = n;
 		mArray = arr;
 	}
 
-	Node[] takeArray()
+	ir.Node[] takeArray()
 	{
-		ret: Node[];
+		ret: ir.Node[];
 
 		if (mArray.length <= mInlineStorage.length) {
 			ret = new mArray[0 .. mNum];

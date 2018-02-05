@@ -12,7 +12,7 @@ import watt.text.string;
 import watt.text.format;
 import watt.markdown : filterMarkdown;
 
-import ir = diode.ir;
+import ir = liquid.ir;
 
 import diode.errors;
 import diode.eval;

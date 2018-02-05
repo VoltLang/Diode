@@ -1,2 +1,2 @@
 name = "diode"
-dependencies = ["watt", "watt.json", "watt.markdown"]
+dependencies = ["diode.lib"]

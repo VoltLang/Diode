@@ -1,4 +1,4 @@
-// Copyright © 2015-2017, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
 module diode.parser.parser;
 
@@ -10,11 +10,11 @@ import watt.text.ascii : isAlpha, isAlphaNum, isWhite, isDigit;
 import watt.text.string : stripRight;
 import watt.text.format;
 
-import ir = diode.ir;
-import diode.ir.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
+import ir = liquid.ir;
+import liquid.util.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
 	bAccess, bIdent, bFilter, bStringLiteral, bBoolLiteral, bClosingTagNode,
 	bNumberLiteral, bBinOp, bIndex;
-import diode.ir.sink : NodeSink;
+import liquid.util.sink : NodeSink;
 
 import diode.errors;
 import diode.eval.engine;
