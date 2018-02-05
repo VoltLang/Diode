@@ -1,6 +1,6 @@
 // Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.parser.parser;
+module liquid.parser.parser;
 
 import watt.conv : toDouble;
 import watt.text.source : Source;
@@ -17,10 +17,7 @@ import liquid.util.build : bFile, bText, bPrint, bIf, bFor, bAssign, bInclude,
 	bNumberLiteral, bBinOp, bIndex;
 import liquid.util.sink : NodeSink;
 import liquid.eval.engine;
-
-import diode.errors;
-import diode.parser.header;
-import diode.parser.errors;
+import liquid.parser.errors;
 
 
 class Parser

@@ -19,10 +19,10 @@ import ir = liquid.ir;
 
 import liquid.eval;
 import liquid.eval.json : jsonToValue = toValue, jsonToSet = toSet;
+import liquid.parser : parseFile = parse;
 
 import diode.errors;
 import diode.interfaces;
-import diode.parser : parseFile = parse;
 import diode.parser.header : Header, parseHeader = parse;
 import diode.vdoc;
 import diode.vdoc.parser;

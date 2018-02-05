@@ -1,12 +1,12 @@
-// Copyright © 2015-2017, Jakob Bornecrantz.  All rights reserved.
-// Copyright © 2017, Bernard Helyer.  All rights reserved.
+// Copyright © 2017-2018, Bernard Helyer.  All rights reserved.
+// Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.parser.errors;
+module liquid.parser.errors;
 
 import watt.text.sink;
 import watt.text.format;
 
-import diode.parser.parser;
+import liquid.parser.parser;
 
 
 fn errorExpected(p: Parser, expected: dchar, found: dchar) Status

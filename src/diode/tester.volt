@@ -16,8 +16,7 @@ import watt.io.file : read, isFile;
 import io = watt.io;
 
 import liquid.eval;
-
-import diode.parser : parse;
+import liquid.parser : parse;
 
 
 //! Single test files are split with this marker.
