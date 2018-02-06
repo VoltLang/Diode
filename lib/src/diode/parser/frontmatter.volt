@@ -1,12 +1,12 @@
-// Copyright © 2015-2017, Jakob Bornecrantz.  All rights reserved.
+// Copyright © 2015-2018, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/diode/license.volt (BOOST ver. 1.0).
-module diode.parser.header;
+module diode.parser.frontmatter;
 
 import watt.text.ascii;
 import watt.text.string;
 import watt.text.source;
 
-import diode.errors;
+import diode.parser.errors;
 
 
 class Header
@@ -15,17 +15,16 @@ public:
 	map: string[string];
 }
 
-fn parse(src: Source) Header
+fn parse(src: Source, err: ErrorDg) Header
 {
 	if (!src.isTripleDash()) {
 		return null;
 	}
+
 	// Skip the dashes and the rest of the line.
 	src.skipEndOfLine();
 
 	header := new Header();
-
-	//writefln("DFD %s", src.mSrc.mLastIndex);
 
 	while (!src.eof && !src.isTripleDash()) {
 		// If it is a empty line, just skip it.
@@ -36,8 +35,8 @@ fn parse(src: Source) Header
 		// We now know that this is not a tripple dash line
 		// and the character that src is point on is not a
 		// whitespace character.
-		key := src.getIdent();
-		src.skipWhiteTillAfterColon();
+		key := src.getIdent(err);
+		src.skipWhiteTillAfterColon(err);
 		val := src.getRestOfLine().strip();
 
 		// Update the key in the header.
@@ -81,12 +80,12 @@ fn skipWhiteAndCheckIfEmptyLine(src: Source) bool
 	}
 }
 
-fn skipWhiteTillAfterColon(src: Source)
+fn skipWhiteTillAfterColon(src: Source, err: ErrorDg)
 {
 	d := src.front;
 	while (d != ':' && !src.eof) {
 		if (!src.front.isWhite()) {
-			throw makeBadHeader(ref src.loc);
+			makeBadHeader(ref src.loc, err);
 		}
 		src.popFront();
 		d = src.front;
@@ -96,11 +95,11 @@ fn skipWhiteTillAfterColon(src: Source)
 	}
 }
 
-fn getIdent(src: Source) string
+fn getIdent(src: Source, err: ErrorDg) string
 {
 	mark := src.save();
 	if (!src.front.isAlpha()) {
-		throw makeBadHeader(ref src.loc);
+		makeBadHeader(ref src.loc, err);
 	}
 
 	src.popFront();

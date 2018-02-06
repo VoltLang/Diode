@@ -3,7 +3,6 @@
 module diode.errors;
 
 import core.exception;
-import watt.text.source;
 import watt.text.format : format;
 import ir = liquid.ir;
 
@@ -46,11 +45,6 @@ fn makeConversionNotSupported(layout: string, contents: string) DiodeException
 	str := format("%s:1 error: can not convert '%s' -> '%s'",
 	                  contents, contents, layout);
 	return new DiodeException(str);
-}
-
-fn makeBadHeader(ref loc: Location) DiodeException
-{
-	return new DiodeException(loc.toString() ~ "error: invalid header");
 }
 
 

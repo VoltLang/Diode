@@ -23,7 +23,7 @@ import liquid.parser : parseFile = parse;
 
 import diode.errors;
 import diode.interfaces;
-import diode.parser.header : Header, parseHeader = parse;
+import diode.parser.frontmatter : Header, parseHeader = parse;
 import diode.vdoc;
 import diode.vdoc.parser;
 import diode.vdoc.filter;
@@ -403,7 +403,7 @@ protected:
 		f.fullName = filename;
 		f.ext = ext;
 		f.filename = base;
-		f.header = parseHeader(src);
+		f.header = parseHeader(src, mEngine.handleError);
 		f.file = parseFile(src, mEngine);
 		f.layout = f.getOption("layout");
 
