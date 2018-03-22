@@ -38,7 +38,7 @@ fn main(args: string[]) i32
 
 import io = watt.io;
 import watt.io.streams;
-import watt.io.file : read, exists, searchDir, isDir, isFile;
+import watt.io.file : read, exists, searchDir, isDir, isFile, SearchStatus;
 import watt.path : dirSeparator;
 import watt.text.string : endsWith, startsWith, join, indexOf;
 import watt.text.sink;
@@ -216,28 +216,29 @@ fn renderFiles(d: Driver)
 		mkdirP(outDir);
 	}
 
-	fn hit(file: string) {
+	fn hit(file: string) SearchStatus {
 		srcPath := srcDir ~ dirSeparator ~ file;
 		outPath := outDir ~ dirSeparator ~ file;
 
 		if (!isFile(srcPath)) {
-			return;
+			return SearchStatus.Continue;
 		}
 
 		// Skip files starting with '.' and '_'.
 		if (file[0] == '.' || file[0] == '_') {
-			return;
+			return SearchStatus.Continue;
 		}
 
 		if (endsWith(outPath, ".md")) {
 			outPath = outPath[0 .. $ - 3] ~ ".html";
 		} else if (!endsWith(outPath, ".html")) {
 			d.info("skipping file '%s'", srcPath);
-			return;
+			return SearchStatus.Continue;
 		}
 
 		str := cast(string)read(srcPath);
 		d.renderFile(str, srcPath, outPath);
+		return SearchStatus.Continue;
 	}
 
 	searchDir(srcDir, "*", hit);
@@ -250,14 +251,15 @@ fn addLayouts(d: Driver)
 		return;
 	}
 
-	fn hit(file: string) {
+	fn hit(file: string) SearchStatus {
 		fullpath := dir ~ dirSeparator ~ file;
 		if (!checkFileWarn(d, file, fullpath, ".html")) {
-			return;
+			return SearchStatus.Continue;
 		}
 
 		str := cast(string)read(fullpath);
 		d.addLayout(str, fullpath);
+		return SearchStatus.Continue;
 	}
 
 	searchDir(dir, "*", hit);
@@ -270,14 +272,15 @@ fn addIncludes(d: Driver)
 		return;
 	}
 
-	fn hit(file: string) {
+	fn hit(file: string) SearchStatus {
 		fullpath := dir ~ dirSeparator ~ file;
 		if (!checkFileWarn(d, file, fullpath)) {
-			return;
+			return SearchStatus.Continue;
 		}
 
 		str := cast(string)read(fullpath);
 		d.addInclude(str, fullpath);
+		return SearchStatus.Continue;
 	}
 
 	// Add user provided includes, these can overwite the builtin ones.
@@ -291,14 +294,15 @@ fn addVdocTemplates(d: Driver)
 		return;
 	}
 
-	fn hit(file: string) {
+	fn hit(file: string) SearchStatus {
 		fullpath := dir ~ dirSeparator ~ file;
 		if (!checkFileWarn(d, file, fullpath, ".md", ".html")) {
-			return;
+			return SearchStatus.Continue;
 		}
 
 		str := cast(string)read(fullpath);
 		d.addDocTemplate(str, fullpath);
+		return SearchStatus.Continue;
 	}
 
 	searchDir(dir, "*", hit);
