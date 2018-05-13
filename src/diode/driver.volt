@@ -98,7 +98,7 @@ public:
 				settings.guruHackSuffix = v.str();
 				continue;
 			case "vdoc":
-				if (v.type() == json.DomType.OBJECT) {
+				if (v.type() == json.DomType.Object) {
 					mVdoc.set = v.jsonToSet();
 					continue;
 				}
