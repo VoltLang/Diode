@@ -114,7 +114,7 @@ public:
 
 	final fn parseRaw(raw: string)
 	{
-		results = DocCommentResult.init;
+		results = DocCommentResult.default;
 		hasBrief = false;
 
 		parse(raw, this, null);
