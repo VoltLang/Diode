@@ -121,13 +121,22 @@ public:
 			case "isAbstract": this.isAbstract = v.boolean(); break;
 			case "parentFull": this.parentFull = v.str(); break;
 			case "forceLabel": break; // TODO
-			case "interfaces": this.interfaces = v.getStringArray(); break;
 			case "isOverride": this.isOverride = v.boolean(); break;
 			case "mangledName": this.mangledName = v.str(); break;
 			case "isStandalone": this.isStandalone = v.boolean(); break;
+			case "interfaces": this.interfaces = v.getStringArray(); break;
 			case "interfacesFull": this.interfacesFull = v.getStringArray(); break;
 			default:
-				io.error.writefln("unknown key '" ~ k ~ "'");
+				t := "unknown kind";
+				n := "<unknown>";
+				if (e.hasObjectKey("name")) {
+					n = e.lookupObjectKey("name").str();
+				}
+				if (e.hasObjectKey("kind")) {
+					t = e.lookupObjectKey("kind").str();
+				}
+
+				io.error.writefln("While parsing %s %s found unknown key '%s'", t, n, k);
 				io.error.flush();
 			}
 		}
